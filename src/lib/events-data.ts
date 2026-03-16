@@ -1,0 +1,138 @@
+export interface EventPackage {
+  id: string;
+  event: string;
+  location: string;
+  country: string;
+  date: string;
+  image: string;
+  price: number;
+  originalPrice: number;
+  badge: string;
+  flight: { from: string; airline: string };
+  accommodation: { name: string; type: string; distance: string };
+  tickets: { type: string; section: string };
+  includes: string[];
+}
+
+export const eventPackages: EventPackage[] = [
+  {
+    id: "wc-2026-usa",
+    event: "FIFA World Cup 2026",
+    location: "New York / New Jersey",
+    country: "United States",
+    date: "June 2026",
+    image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=600&h=400&fit=crop",
+    price: 3499,
+    originalPrice: 5299,
+    badge: "⚽ World Cup",
+    flight: { from: "São Paulo (GRU)", airline: "LATAM Airlines" },
+    accommodation: { name: "Manhattan Loft near MetLife", type: "Airbnb", distance: "25 min from stadium" },
+    tickets: { type: "Group Stage", section: "Category 2" },
+    includes: ["Round-trip flight", "7 nights accommodation", "2 match tickets", "Airport transfer", "Travel insurance"],
+  },
+  {
+    id: "wc-2026-final",
+    event: "FIFA World Cup 2026 — Final",
+    location: "New York / New Jersey",
+    country: "United States",
+    date: "July 2026",
+    image: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=600&h=400&fit=crop",
+    price: 6999,
+    originalPrice: 9999,
+    badge: "🏆 Grand Final",
+    flight: { from: "São Paulo (GRU)", airline: "American Airlines" },
+    accommodation: { name: "Luxury Hotel Times Square", type: "Hotel 5★", distance: "30 min from stadium" },
+    tickets: { type: "Final Match", section: "Category 1" },
+    includes: ["Round-trip flight", "5 nights hotel", "Final match ticket", "VIP lounge access", "Airport transfer", "City tour"],
+  },
+  {
+    id: "olympics-2028",
+    event: "Olympic Games 2028",
+    location: "Los Angeles",
+    country: "United States",
+    date: "July 2028",
+    image: "https://images.unsplash.com/photo-1461896836934-bd45ba8fcf9b?w=600&h=400&fit=crop",
+    price: 4299,
+    originalPrice: 6499,
+    badge: "🏅 Olympics",
+    flight: { from: "São Paulo (GRU)", airline: "Delta Airlines" },
+    accommodation: { name: "Santa Monica Beach Apartment", type: "Airbnb", distance: "20 min from venues" },
+    tickets: { type: "Multi-event Pass", section: "3 events included" },
+    includes: ["Round-trip flight", "10 nights accommodation", "3 event tickets", "Metro pass", "Travel insurance"],
+  },
+  {
+    id: "superbowl-2027",
+    event: "Super Bowl LXI",
+    location: "Los Angeles",
+    country: "United States",
+    date: "February 2027",
+    image: "https://images.unsplash.com/photo-1495563923587-bdc4282494d0?w=600&h=400&fit=crop",
+    price: 5499,
+    originalPrice: 7999,
+    badge: "🏈 Super Bowl",
+    flight: { from: "São Paulo (GRU)", airline: "United Airlines" },
+    accommodation: { name: "Downtown LA Hotel", type: "Hotel 4★", distance: "15 min from SoFi Stadium" },
+    tickets: { type: "Super Bowl", section: "Upper Level" },
+    includes: ["Round-trip flight", "4 nights hotel", "Game ticket", "Pre-game tailgate", "Airport transfer"],
+  },
+  {
+    id: "f1-monaco-2026",
+    event: "F1 Grand Prix Monaco",
+    location: "Monte Carlo",
+    country: "Monaco",
+    date: "May 2026",
+    image: "https://images.unsplash.com/photo-1504707748692-419802cf939d?w=600&h=400&fit=crop",
+    price: 4799,
+    originalPrice: 6999,
+    badge: "🏎️ Formula 1",
+    flight: { from: "São Paulo (GRU)", airline: "Air France" },
+    accommodation: { name: "Nice Riviera Apartment", type: "Airbnb", distance: "30 min from circuit" },
+    tickets: { type: "Race Day", section: "Grandstand K" },
+    includes: ["Round-trip flight", "5 nights accommodation", "Race day ticket", "Pit lane walk", "Airport transfer"],
+  },
+  {
+    id: "carnival-rio-2027",
+    event: "Carnaval do Rio 2027",
+    location: "Rio de Janeiro",
+    country: "Brazil",
+    date: "February 2027",
+    image: "https://images.unsplash.com/photo-1518310383802-640c2de311b2?w=600&h=400&fit=crop",
+    price: 1899,
+    originalPrice: 2899,
+    badge: "🎭 Carnival",
+    flight: { from: "São Paulo (GRU)", airline: "GOL" },
+    accommodation: { name: "Copacabana Beachfront", type: "Hotel 4★", distance: "5 min from Sambódromo" },
+    tickets: { type: "Sambódromo", section: "Setor 9 - Arquibancada" },
+    includes: ["Round-trip flight", "5 nights hotel", "Sambódromo ticket", "Blocos guide", "Airport transfer"],
+  },
+  {
+    id: "champions-league-2026",
+    event: "UEFA Champions League Final",
+    location: "Munich",
+    country: "Germany",
+    date: "May 2026",
+    image: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=600&h=400&fit=crop",
+    price: 3999,
+    originalPrice: 5799,
+    badge: "⚽ Champions",
+    flight: { from: "São Paulo (GRU)", airline: "Lufthansa" },
+    accommodation: { name: "Munich City Center Flat", type: "Airbnb", distance: "20 min from Allianz Arena" },
+    tickets: { type: "Final Match", section: "Category 2" },
+    includes: ["Round-trip flight", "4 nights accommodation", "Final ticket", "Fan zone access", "Airport transfer"],
+  },
+  {
+    id: "wimbledon-2026",
+    event: "Wimbledon 2026",
+    location: "London",
+    country: "England",
+    date: "July 2026",
+    image: "https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=600&h=400&fit=crop",
+    price: 3299,
+    originalPrice: 4899,
+    badge: "🎾 Tennis",
+    flight: { from: "São Paulo (GRU)", airline: "British Airways" },
+    accommodation: { name: "Wimbledon Village B&B", type: "B&B", distance: "10 min walk from courts" },
+    tickets: { type: "Centre Court", section: "Debenture Seat" },
+    includes: ["Round-trip flight", "5 nights accommodation", "2 day passes", "Strawberries & cream experience", "Airport transfer"],
+  },
+];
