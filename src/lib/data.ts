@@ -1,0 +1,26 @@
+export const destinations = [
+  { name: "Paris", country: "France", price: 499, rating: 4.8, slug: "paris", image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&h=450&fit=crop" },
+  { name: "Rio de Janeiro", country: "Brazil", price: 599, rating: 4.7, slug: "rio", image: "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=600&h=450&fit=crop" },
+  { name: "Tokyo", country: "Japan", price: 799, rating: 4.9, slug: "tokyo", image: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=600&h=450&fit=crop" },
+  { name: "Rome", country: "Italy", price: 449, rating: 4.6, slug: "rome", image: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=600&h=450&fit=crop" },
+  { name: "Bali", country: "Indonesia", price: 649, rating: 4.8, slug: "bali", image: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600&h=450&fit=crop" },
+  { name: "New York", country: "United States", price: 399, rating: 4.5, slug: "new-york", image: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=600&h=450&fit=crop" },
+];
+
+export const deals = [
+  { id: 1, title: "Last Minute to Cancún", description: "All-inclusive resort, 5 nights", price: 699, originalPrice: 1099, image: "https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?w=600&h=400&fit=crop", badge: "Hot Deal" },
+  { id: 2, title: "Weekend in Lisbon", description: "Flight + Hotel, 3 nights", price: 349, originalPrice: 549, image: "https://images.unsplash.com/photo-1585208798174-6cedd86e019a?w=600&h=400&fit=crop", badge: "Last Minute" },
+  { id: 3, title: "Cruise to the Caribbean", description: "7-night cruise, all meals included", price: 899, originalPrice: 1399, image: "https://images.unsplash.com/photo-1548574505-5e239809ee19?w=600&h=400&fit=crop", badge: "Seasonal" },
+  { id: 4, title: "Safari in Kenya", description: "5-day safari adventure", price: 1299, originalPrice: 1899, image: "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=600&h=400&fit=crop", badge: "Adventure" },
+  { id: 5, title: "Maldives Escape", description: "Overwater villa, 4 nights", price: 1599, originalPrice: 2499, image: "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=600&h=400&fit=crop", badge: "Luxury" },
+  { id: 6, title: "Bangkok & Phuket", description: "Flight + 2 hotels, 7 nights", price: 799, originalPrice: 1199, image: "https://images.unsplash.com/photo-1508009603885-50cf7c579365?w=600&h=400&fit=crop", badge: "Best Value" },
+];
+
+export const destinationDetails: Record<string, { name: string; country: string; image: string; description: string; bestTime: string; experiences: string[] }> = {
+  paris: { name: "Paris", country: "France", image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1200&h=600&fit=crop", description: "The City of Light captivates with iconic landmarks, world-class cuisine, and timeless romance. From the Eiffel Tower to charming cafés, Paris offers an unforgettable experience.", bestTime: "April to June, September to November", experiences: ["Eiffel Tower", "Louvre Museum", "Montmartre", "Seine River Cruise", "Palace of Versailles"] },
+  rio: { name: "Rio de Janeiro", country: "Brazil", image: "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=1200&h=600&fit=crop", description: "Famous for its stunning beaches, vibrant carnival, and the iconic Christ the Redeemer statue, Rio combines natural beauty with infectious energy.", bestTime: "December to March", experiences: ["Christ the Redeemer", "Copacabana Beach", "Sugarloaf Mountain", "Carnival", "Tijuca Forest"] },
+  tokyo: { name: "Tokyo", country: "Japan", image: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=1200&h=600&fit=crop", description: "A mesmerizing blend of ultra-modern technology and ancient tradition. Tokyo offers incredible food, stunning temples, and endless entertainment.", bestTime: "March to May, September to November", experiences: ["Shibuya Crossing", "Senso-ji Temple", "Tsukiji Market", "Akihabara", "Mount Fuji Day Trip"] },
+  rome: { name: "Rome", country: "Italy", image: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=1200&h=600&fit=crop", description: "The Eternal City is a living museum with ancient ruins, Renaissance art, and incredible Italian cuisine at every corner.", bestTime: "April to June, September to October", experiences: ["Colosseum", "Vatican City", "Trevi Fountain", "Roman Forum", "Trastevere"] },
+  bali: { name: "Bali", country: "Indonesia", image: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=1200&h=600&fit=crop", description: "A tropical paradise of rice terraces, sacred temples, and pristine beaches. Bali offers spiritual retreats and adventure in equal measure.", bestTime: "April to October", experiences: ["Ubud Rice Terraces", "Tanah Lot Temple", "Uluwatu", "Seminyak Beach", "Mount Batur Sunrise Trek"] },
+  "new-york": { name: "New York", country: "United States", image: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=1200&h=600&fit=crop", description: "The city that never sleeps pulses with energy, culture, and iconic landmarks. From Broadway to Central Park, NYC has it all.", bestTime: "April to June, September to November", experiences: ["Statue of Liberty", "Central Park", "Times Square", "Brooklyn Bridge", "Metropolitan Museum"] },
+};
