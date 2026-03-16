@@ -4,22 +4,23 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
+import { useI18n } from "@/lib/i18n";
 
 const Deals = () => {
+  const { t } = useI18n();
+
   return (
     <div className="min-h-screen">
       <div className="hero-gradient py-12 md:py-16 text-center">
         <div className="container">
           <div className="flex items-center justify-center gap-2 mb-3">
             <Sparkles className="h-5 w-5 text-accent" />
-            <span className="text-sm font-semibold text-primary-foreground/80 uppercase tracking-wide">Limited Time</span>
+            <span className="text-sm font-semibold text-primary-foreground/80 uppercase tracking-wide">{t("deals.limitedTime")}</span>
           </div>
           <h1 className="font-display text-3xl md:text-5xl font-bold text-primary-foreground mb-3">
-            Exclusive Deals
+            {t("deals.title")}
           </h1>
-          <p className="text-primary-foreground/70 max-w-md mx-auto">
-            Save big on flights, hotels, cruises and vacation packages
-          </p>
+          <p className="text-primary-foreground/70 max-w-md mx-auto">{t("deals.subtitle")}</p>
         </div>
       </div>
 
@@ -44,11 +45,11 @@ const Deals = () => {
                   <span className="text-lg font-bold text-primary">${deal.price}</span>
                   <span className="text-sm text-muted-foreground line-through">${deal.originalPrice}</span>
                   <Badge variant="secondary" className="ml-auto">
-                    {Math.round((1 - deal.price / deal.originalPrice) * 100)}% OFF
+                    {Math.round((1 - deal.price / deal.originalPrice) * 100)}% {t("deals.off")}
                   </Badge>
                 </div>
                 <Button className="w-full gap-2">
-                  View Deal <ExternalLink className="h-4 w-4" />
+                  {t("deals.viewDeal")} <ExternalLink className="h-4 w-4" />
                 </Button>
               </div>
             </motion.div>
