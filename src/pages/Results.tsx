@@ -5,9 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import Footer from "@/components/Footer";
 import { destinations } from "@/lib/data";
 import { motion } from "framer-motion";
+import { useI18n } from "@/lib/i18n";
 
 const Results = () => {
   const [searchParams] = useSearchParams();
+  const { t } = useI18n();
   const type = searchParams.get("type") || "flights";
   const from = searchParams.get("from") || "";
   const to = searchParams.get("to") || "";
@@ -17,10 +19,10 @@ const Results = () => {
       <div className="bg-muted/50 py-8">
         <div className="container">
           <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4">
-            <ArrowLeft className="h-4 w-4" /> Back to Search
+            <ArrowLeft className="h-4 w-4" /> {t("results.backToSearch")}
           </Link>
           <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground">
-            {type.charAt(0).toUpperCase() + type.slice(1)} Results
+            {type.charAt(0).toUpperCase() + type.slice(1)} {t("results.results")}
             {from && to && <span className="text-muted-foreground font-normal text-lg"> — {from} → {to}</span>}
           </h1>
         </div>
@@ -49,9 +51,9 @@ const Results = () => {
                 </div>
                 <p className="text-sm text-muted-foreground mb-3">{d.country}</p>
                 <div className="flex items-center justify-between">
-                  <span className="text-lg font-bold text-primary">From ${d.price}</span>
+                  <span className="text-lg font-bold text-primary">{t("index.fromPrice")} ${d.price}</span>
                   <Button size="sm" className="gap-1">
-                    View Deal <ExternalLink className="h-3 w-3" />
+                    {t("deals.viewDeal")} <ExternalLink className="h-3 w-3" />
                   </Button>
                 </div>
               </div>

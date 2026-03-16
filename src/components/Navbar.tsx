@@ -1,12 +1,17 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Plane, Sun, Moon, Menu, X } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Plane, Sun, Moon, Menu, X, LogOut, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/lib/i18n";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Navbar = () => {
   const [dark, setDark] = useState(() => localStorage.getItem("theme") === "dark");
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { t, locale, setLocale } = useI18n();
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
@@ -14,10 +19,16 @@ const Navbar = () => {
   }, [dark]);
 
   const links = [
-    { to: "/", label: "Home" },
-    { to: "/results", label: "Search" },
-    { to: "/deals", label: "Deals" },
+    { to: "/", label: t("nav.home") },
+    { to: "/results", label: t("nav.search") },
+    { to: "/deals", label: t("nav.deals") },
+    { to: "/packages", label: t("nav.packages") },
   ];
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-lg">
@@ -47,14 +58,35 @@ const Navbar = () => {
           <Button
             variant="ghost"
             size="icon"
+            onClick={() => setLocale(locale === "en" ? "pt" : "en")}
+            className="rounded-full text-xs font-bold"
+            title={locale === "en" ? "Mudar para Português" : "Switch to English"}
+          >
+            <Globe className="h-4 w-4" />
+          </Button>
+          <span className="text-xs font-semibold text-muted-foreground uppercase">
+            {locale}
+          </span>
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => setDark(!dark)}
             className="rounded-full"
           >
             {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
-          <Button variant="default" size="sm" className="hidden md:inline-flex">
-            Sign In
-          </Button>
+          {user ? (
+            <Button variant="ghost" size="sm" onClick={handleSignOut} className="hidden md:inline-flex gap-1">
+              <LogOut className="h-4 w-4" />
+              {t("nav.signOut")}
+            </Button>
+          ) : (
+            <Link to="/auth">
+              <Button variant="default" size="sm" className="hidden md:inline-flex">
+                {t("nav.signIn")}
+              </Button>
+            </Link>
+          )}
           <Button
             variant="ghost"
             size="icon"
@@ -78,9 +110,17 @@ const Navbar = () => {
               {l.label}
             </Link>
           ))}
-          <Button variant="default" size="sm" className="w-full mt-2">
-            Sign In
-          </Button>
+          {user ? (
+            <Button variant="default" size="sm" className="w-full mt-2" onClick={handleSignOut}>
+              {t("nav.signOut")}
+            </Button>
+          ) : (
+            <Link to="/auth" onClick={() => setMenuOpen(false)}>
+              <Button variant="default" size="sm" className="w-full mt-2">
+                {t("nav.signIn")}
+              </Button>
+            </Link>
+          )}
         </div>
       )}
     </nav>
