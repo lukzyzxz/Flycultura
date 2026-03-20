@@ -88,6 +88,13 @@ const translations = {
     "auth.backToLogin": "Back to login",
     "auth.resetSent": "Password reset email sent! Check your inbox.",
     "auth.signUpSuccess": "Account created! Check your email to confirm.",
+    "auth.confirmPassword": "Confirm Password",
+    "auth.errorEmailRequired": "Email is required",
+    "auth.errorEmailInvalid": "Enter a valid email address",
+    "auth.errorPasswordRequired": "Password is required",
+    "auth.errorPasswordMin": "Password must be at least 6 characters",
+    "auth.errorNameRequired": "Full name is required",
+    "auth.errorPasswordsMismatch": "Passwords do not match",
 
     // Event Packages
     "events.title": "Event Packages",
