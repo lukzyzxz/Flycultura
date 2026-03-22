@@ -89,7 +89,7 @@ const PackageDetail = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {pkg.includes.map((item) => (
                   <div key={item} className="flex items-center gap-2 text-sm text-card-foreground">
-                    <Check className="h-4 w-4 text-green-500 shrink-0" />
+                    <Check className="h-4 w-4 text-primary shrink-0" />
                     <span>{item}</span>
                   </div>
                 ))}
