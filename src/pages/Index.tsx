@@ -83,23 +83,24 @@ const Index = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="group rounded-xl overflow-hidden bg-card card-shadow hover:card-shadow-hover transition-shadow"
               >
-                <div className="relative aspect-[16/9] overflow-hidden">
-                  <img src={pkg.image} alt={pkg.event} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  <Badge className="absolute top-3 left-3 bg-accent text-accent-foreground border-0">{pkg.badge}</Badge>
-                </div>
-                <div className="p-4">
-                  <h3 className="font-display font-bold text-card-foreground mb-1">{pkg.event}</h3>
-                  <p className="text-sm text-muted-foreground mb-3">{pkg.location} — {pkg.date}</p>
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold text-primary">${pkg.price}</span>
-                    <span className="text-sm text-muted-foreground line-through">${pkg.originalPrice}</span>
-                    <Badge variant="secondary" className="ml-auto">
-                      {Math.round((1 - pkg.price / pkg.originalPrice) * 100)}% {t("deals.off")}
-                    </Badge>
+                <Link to={`/packages/${pkg.id}`} className="group block rounded-xl overflow-hidden bg-card card-shadow hover:card-shadow-hover transition-shadow">
+                  <div className="relative aspect-[16/9] overflow-hidden">
+                    <img src={pkg.image} alt={pkg.event} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <Badge className="absolute top-3 left-3 bg-accent text-accent-foreground border-0">{pkg.badge}</Badge>
                   </div>
-                </div>
+                  <div className="p-4">
+                    <h3 className="font-display font-bold text-card-foreground mb-1">{pkg.event}</h3>
+                    <p className="text-sm text-muted-foreground mb-3">{pkg.location} — {pkg.date}</p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg font-bold text-primary">R$ {pkg.price.toLocaleString("pt-BR")}</span>
+                      <span className="text-sm text-muted-foreground line-through">R$ {pkg.originalPrice.toLocaleString("pt-BR")}</span>
+                      <Badge variant="secondary" className="ml-auto">
+                        {Math.round((1 - pkg.price / pkg.originalPrice) * 100)}% {t("deals.off")}
+                      </Badge>
+                    </div>
+                  </div>
+                </Link>
               </motion.div>
             ))}
           </div>
