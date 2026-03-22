@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import HeroSearch from "@/components/HeroSearch";
 import DestinationCard from "@/components/DestinationCard";
 import Footer from "@/components/Footer";
