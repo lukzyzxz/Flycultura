@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import Footer from "@/components/Footer";
 import { eventPackages } from "@/lib/events-data";
 import { Badge } from "@/components/ui/badge";
@@ -38,23 +39,24 @@ const EventPackages = () => {
               transition={{ delay: i * 0.05 }}
               className="group rounded-xl overflow-hidden bg-card card-shadow hover:card-shadow-hover transition-shadow"
             >
-              <div className="relative aspect-[16/9] overflow-hidden">
-                <img
-                  src={pkg.image}
-                  alt={pkg.event}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <Badge className="absolute top-3 left-3 bg-accent text-accent-foreground border-0 text-sm">
-                  {pkg.badge}
-                </Badge>
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background/80 to-transparent p-4">
-                  <h3 className="font-display text-xl font-bold text-foreground">{pkg.event}</h3>
-                  <p className="text-sm text-muted-foreground">{pkg.location}, {pkg.country} — {pkg.date}</p>
+              <Link to={`/packages/${pkg.id}`}>
+                <div className="relative aspect-[16/9] overflow-hidden">
+                  <img
+                    src={pkg.image}
+                    alt={pkg.event}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <Badge className="absolute top-3 left-3 bg-accent text-accent-foreground border-0 text-sm">
+                    {pkg.badge}
+                  </Badge>
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background/80 to-transparent p-4">
+                    <h3 className="font-display text-xl font-bold text-foreground">{pkg.event}</h3>
+                    <p className="text-sm text-muted-foreground">{pkg.location}, {pkg.country} — {pkg.date}</p>
+                  </div>
                 </div>
-              </div>
+              </Link>
 
               <div className="p-5 space-y-4">
-                {/* What's included */}
                 <div>
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
                     {t("events.includes")}
@@ -79,27 +81,27 @@ const EventPackages = () => {
                   </div>
                 </div>
 
-                {/* Tags */}
                 <div className="flex flex-wrap gap-1.5">
-                  {pkg.includes.map((item) => (
+                  {pkg.includes.slice(0, 4).map((item) => (
                     <Badge key={item} variant="secondary" className="text-xs">
                       {item}
                     </Badge>
                   ))}
                 </div>
 
-                {/* Price & CTA */}
                 <div className="flex items-center justify-between pt-2 border-t border-border">
                   <div>
-                    <span className="text-sm text-muted-foreground line-through">${pkg.originalPrice}</span>
+                    <span className="text-sm text-muted-foreground line-through">R$ {pkg.originalPrice.toLocaleString("pt-BR")}</span>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-2xl font-bold text-primary">${pkg.price}</span>
+                      <span className="text-2xl font-bold text-primary">R$ {pkg.price.toLocaleString("pt-BR")}</span>
                       <span className="text-sm text-muted-foreground">{t("events.perPerson")}</span>
                     </div>
                   </div>
-                  <Button className="gap-2">
-                    {t("events.viewPackage")} <ExternalLink className="h-4 w-4" />
-                  </Button>
+                  <Link to={`/packages/${pkg.id}`}>
+                    <Button className="gap-2">
+                      {t("events.viewPackage")} <ExternalLink className="h-4 w-4" />
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </motion.div>

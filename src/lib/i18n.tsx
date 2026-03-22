@@ -12,6 +12,7 @@ const translations = {
     "nav.signIn": "Sign In",
     "nav.signOut": "Sign Out",
     "nav.myAccount": "My Account",
+    "nav.cart": "Cart",
 
     // Hero
     "hero.title1": "Explore the World",
@@ -95,6 +96,8 @@ const translations = {
     "auth.errorPasswordMin": "Password must be at least 6 characters",
     "auth.errorNameRequired": "Full name is required",
     "auth.errorPasswordsMismatch": "Passwords do not match",
+    "auth.googleSignIn": "Continue with Google",
+    "auth.orContinueWith": "or continue with email",
 
     // Event Packages
     "events.title": "Event Packages",
@@ -109,6 +112,25 @@ const translations = {
     "events.perPerson": "/person",
     "events.viewPackage": "View Package",
     "events.allInclusive": "All-Inclusive",
+
+    // Package Detail
+    "package.whatsIncluded": "What's Included",
+    "package.highlights": "Highlights",
+    "package.noCommitment": "No commitment — free cancellation up to 30 days before",
+
+    // Cart
+    "cart.title": "Your Cart",
+    "cart.empty": "Your cart is empty",
+    "cart.emptySubtitle": "Browse our event packages and add them to your cart",
+    "cart.browsePackages": "Browse Packages",
+    "cart.addToCart": "Add to Cart",
+    "cart.added": "Added to cart!",
+    "cart.summary": "Order Summary",
+    "cart.total": "Total",
+    "cart.checkout": "Proceed to Checkout",
+    "cart.clearCart": "Clear cart",
+    "cart.loginToBook": "Sign in to Book",
+    "cart.loginRequired": "You need to be signed in to complete a booking",
   },
   pt: {
     // Navbar
@@ -119,6 +141,7 @@ const translations = {
     "nav.signIn": "Entrar",
     "nav.signOut": "Sair",
     "nav.myAccount": "Minha Conta",
+    "nav.cart": "Carrinho",
 
     // Hero
     "hero.title1": "Explore o Mundo",
@@ -202,6 +225,8 @@ const translations = {
     "auth.errorPasswordMin": "A senha deve ter pelo menos 6 caracteres",
     "auth.errorNameRequired": "Nome completo é obrigatório",
     "auth.errorPasswordsMismatch": "As senhas não coincidem",
+    "auth.googleSignIn": "Continuar com Google",
+    "auth.orContinueWith": "ou continue com e-mail",
 
     // Event Packages
     "events.title": "Pacotes de Eventos",
@@ -216,6 +241,25 @@ const translations = {
     "events.perPerson": "/pessoa",
     "events.viewPackage": "Ver Pacote",
     "events.allInclusive": "Tudo Incluso",
+
+    // Package Detail
+    "package.whatsIncluded": "O que está incluído",
+    "package.highlights": "Destaques",
+    "package.noCommitment": "Sem compromisso — cancelamento gratuito até 30 dias antes",
+
+    // Cart
+    "cart.title": "Seu Carrinho",
+    "cart.empty": "Seu carrinho está vazio",
+    "cart.emptySubtitle": "Navegue pelos pacotes de eventos e adicione ao carrinho",
+    "cart.browsePackages": "Ver Pacotes",
+    "cart.addToCart": "Adicionar ao Carrinho",
+    "cart.added": "Adicionado ao carrinho!",
+    "cart.summary": "Resumo do Pedido",
+    "cart.total": "Total",
+    "cart.checkout": "Finalizar Reserva",
+    "cart.clearCart": "Limpar carrinho",
+    "cart.loginToBook": "Entre para Reservar",
+    "cart.loginRequired": "Você precisa estar logado para concluir a reserva",
   },
 } as const;
 
