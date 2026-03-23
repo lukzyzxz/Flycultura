@@ -80,15 +80,15 @@ export async function searchHotels(params: {
   try {
     const hotels = data?.data?.hotels || [];
     return hotels.slice(0, 12).map((h: any) => ({
-      id: String(h.hotel_id || h.property?.id || ""),
-      name: h.property?.name || h.hotel_name || "Hotel",
-      image: h.property?.photoUrls?.[0] || h.max_photo_url || "",
-      rating: h.property?.reviewScore || h.review_score || 0,
+      id: String(h.hotel_id || ""),
+      name: h.property?.name || "Hotel",
+      image: h.property?.photoUrls?.[0] || "",
+      rating: h.property?.reviewScore || 0,
       reviewScore: h.property?.reviewScoreWord || "",
-      price: h.property?.priceBreakdown?.grossPrice?.value || h.min_total_price || 0,
-      currency: "BRL",
+      price: Math.round(h.property?.priceBreakdown?.grossPrice?.value || 0),
+      currency: h.property?.priceBreakdown?.grossPrice?.currency || "BRL",
       address: h.property?.wishlistName || "",
-      distance: h.property?.distanceFromSearch || "",
+      distance: h.accessibilityLabel?.match(/(\d[\d.,]+ (?:km|m) from centre)/)?.[1] || "",
     }));
   } catch {
     return [];
