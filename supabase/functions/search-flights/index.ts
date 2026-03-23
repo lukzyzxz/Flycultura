@@ -19,29 +19,24 @@ serve(async (req) => {
   }
 
   try {
-    const { originSkyId, destinationSkyId, originEntityId, destinationEntityId, date, adults, cabinClass } = await req.json();
+    const { from, to, departDate, adults } = await req.json();
 
+    // Use Booking.com flight search API
     const params = new URLSearchParams({
-      originSkyId: originSkyId || "SAOP",
-      destinationSkyId: destinationSkyId || "NYCA",
-      originEntityId: originEntityId || "27546053",
-      destinationEntityId: destinationEntityId || "27537542",
-      cabinClass: cabinClass || "economy",
+      fromId: from || "GRU.AIRPORT",
+      toId: to || "JFK.AIRPORT",
+      departDate: departDate || new Date(Date.now() + 30 * 86400000).toISOString().split("T")[0],
       adults: String(adults || 1),
-      sortBy: "best",
-      currency: "BRL",
-      market: "pt-BR",
-      countryCode: "BR",
+      cabinClass: "ECONOMY",
+      currency_code: "BRL",
     });
 
-    if (date) params.set("date", date);
-
-    const url = `https://sky-scrapper.p.rapidapi.com/api/v2/flights/searchFlightsComplete?${params}`;
+    const url = `https://booking-com15.p.rapidapi.com/api/v1/flights/searchFlights?${params}`;
 
     const response = await fetch(url, {
       headers: {
         "Content-Type": "application/json",
-        "x-rapidapi-host": "sky-scrapper.p.rapidapi.com",
+        "x-rapidapi-host": "booking-com15.p.rapidapi.com",
         "x-rapidapi-key": RAPIDAPI_KEY,
       },
     });
@@ -49,7 +44,11 @@ serve(async (req) => {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(`Sky Scrapper API error [${response.status}]: ${JSON.stringify(data)}`);
+      console.error(`Booking flights API error [${response.status}]:`, JSON.stringify(data));
+      // Return fallback data instead of error
+      return new Response(JSON.stringify({ data: { flightOffers: [] }, fallback: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     return new Response(JSON.stringify(data), {
@@ -57,9 +56,8 @@ serve(async (req) => {
     });
   } catch (error: unknown) {
     console.error("Error searching flights:", error);
-    const msg = error instanceof Error ? error.message : "Unknown error";
-    return new Response(JSON.stringify({ error: msg }), {
-      status: 500,
+    // Return empty results instead of 500
+    return new Response(JSON.stringify({ data: { flightOffers: [] }, fallback: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }

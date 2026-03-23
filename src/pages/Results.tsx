@@ -18,7 +18,7 @@ const Results = () => {
 
   const flightsQuery = useQuery({
     queryKey: ["flights", from, to],
-    queryFn: () => searchFlights({ originSkyId: from || "SAOP", destinationSkyId: to || "NYCA" }),
+    queryFn: () => searchFlights({ from: from || "GRU.AIRPORT", to: to || "JFK.AIRPORT" }),
     enabled: type === "flights",
     staleTime: 5 * 60 * 1000,
   });
