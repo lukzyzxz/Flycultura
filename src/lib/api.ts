@@ -58,18 +58,19 @@ export async function searchFlights(params: {
       const seg = offer.segments?.[0] || {};
       const leg = seg.legs?.[0] || {};
       const carrier = leg.carriersData?.[0] || {};
+      const totalSeconds = seg.totalTime || 0;
       return {
         id: offer.token || String(idx),
-        airline: carrier.name || seg.legs?.[0]?.carriersData?.[0]?.name || "Airline",
+        airline: carrier.name || "Airline",
         logo: carrier.logo || "",
-        departure: leg.departureTime || "",
-        arrival: leg.arrivalTime || "",
-        duration: `${Math.floor((seg.totalTime || 0) / 3600)}h ${Math.floor(((seg.totalTime || 0) % 3600) / 60)}m`,
+        departure: seg.departureTime || "",
+        arrival: seg.arrivalTime || "",
+        duration: `${Math.floor(totalSeconds / 3600)}h ${Math.floor((totalSeconds % 3600) / 60)}m`,
         stops: (seg.legs?.length || 1) - 1,
         price: offer.priceBreakdown?.total?.units || 0,
         currency: "BRL",
-        origin: leg.departureAirport?.name || params.from || "",
-        destination: leg.arrivalAirport?.name || params.to || "",
+        origin: seg.departureAirport?.name || params.from || "",
+        destination: seg.arrivalAirport?.name || params.to || "",
       };
     });
   } catch {
