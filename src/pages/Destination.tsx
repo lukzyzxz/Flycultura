@@ -53,7 +53,7 @@ const Destination = () => {
           <div className="lg:col-span-2 space-y-8">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
               <h2 className="font-display text-2xl font-bold text-foreground mb-3">{t("dest.about")} {detail.name}</h2>
-              <p className="text-muted-foreground leading-relaxed">{detail.description}</p>
+              <p className="text-muted-foreground leading-relaxed">{locale === "pt" ? detail.description : detail.descriptionEn}</p>
             </motion.div>
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
               <h2 className="font-display text-2xl font-bold text-foreground mb-3">{t("dest.topExperiences")}</h2>
