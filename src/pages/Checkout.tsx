@@ -234,18 +234,18 @@ const Checkout = () => {
               <h2 className="font-display text-lg font-bold text-card-foreground">{t("cart.summary")}</h2>
               <div className="space-y-3">
                 {items.map((item) => (
-                  <div key={item.package.id} className="flex gap-3">
+                  <div key={item.product.id} className="flex gap-3">
                     <img
-                      src={item.package.image}
-                      alt={item.package.event}
+                      src={item.product.image}
+                      alt={item.product.name}
                       className="w-16 h-12 rounded-lg object-cover shrink-0"
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-card-foreground truncate">{item.package.event}</p>
+                      <p className="text-sm font-medium text-card-foreground truncate">{item.product.name}</p>
                       <p className="text-xs text-muted-foreground">x{item.quantity}</p>
                     </div>
                     <span className="text-sm font-semibold text-primary shrink-0">
-                      R$ {(item.package.price * item.quantity).toLocaleString("pt-BR")}
+                      R$ {(item.product.price * item.quantity).toLocaleString("pt-BR")}
                     </span>
                   </div>
                 ))}
