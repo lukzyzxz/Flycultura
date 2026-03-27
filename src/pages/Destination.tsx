@@ -40,7 +40,7 @@ const Destination = () => {
               {dest && (
                 <>
                   <span className="flex items-center gap-1 text-accent"><Star className="h-4 w-4 fill-current" /> {dest.rating}</span>
-                  <span className="text-lg font-bold text-primary">{t("index.fromPrice")} ${dest.price}</span>
+                  <span className="text-lg font-bold text-primary">{t("index.fromPrice")} R$ {dest.price.toLocaleString("pt-BR")}</span>
                 </>
               )}
             </div>
