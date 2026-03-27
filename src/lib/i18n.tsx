@@ -275,6 +275,21 @@ const translations = {
     "cart.clearCart": "Limpar carrinho",
     "cart.loginToBook": "Entre para Reservar",
     "cart.loginRequired": "Você precisa estar logado para concluir a reserva",
+
+    // Checkout
+    "checkout.title": "Finalizar Pagamento",
+    "checkout.backToCart": "Voltar ao carrinho",
+    "checkout.paymentDetails": "Dados de Pagamento",
+    "checkout.securePayment": "Suas informações de pagamento são criptografadas e seguras (protótipo)",
+    "checkout.cardName": "Nome no Cartão",
+    "checkout.cardNumber": "Número do Cartão",
+    "checkout.expiry": "Validade",
+    "checkout.pay": "Pagar",
+    "checkout.processing": "Processando pagamento...",
+    "checkout.doNotClose": "Por favor, não feche esta página",
+    "checkout.successTitle": "Reserva Confirmada!",
+    "checkout.successDesc": "Você receberá um e-mail de confirmação com todos os detalhes da sua reserva.",
+    "checkout.prototype": "⚠️ Este é um protótipo — nenhuma cobrança real será feita.",
   },
 } as const;
 
