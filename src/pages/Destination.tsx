@@ -73,7 +73,7 @@ const Destination = () => {
                 <span>{t("dest.bestTime")}: {detail.bestTime}</span>
               </div>
               {dest && (
-                <p className="text-2xl font-bold text-primary mb-4">{t("index.fromPrice")} ${dest.price} <span className="text-sm font-normal text-muted-foreground">{t("dest.perPerson")}</span></p>
+                <p className="text-2xl font-bold text-primary mb-4">{t("index.fromPrice")} R$ {dest.price.toLocaleString("pt-BR")} <span className="text-sm font-normal text-muted-foreground">{t("dest.perPerson")}</span></p>
               )}
               <Button className="w-full mb-2">{t("dest.bookNow")}</Button>
               <Button variant="outline" className="w-full">{t("dest.compareDeals")}</Button>
