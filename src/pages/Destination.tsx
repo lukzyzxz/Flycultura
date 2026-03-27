@@ -9,7 +9,7 @@ import { useI18n } from "@/lib/i18n";
 
 const Destination = () => {
   const { slug } = useParams();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const detail = destinationDetails[slug || ""];
   const dest = destinations.find((d) => d.slug === slug);
 
