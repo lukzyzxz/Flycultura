@@ -14,6 +14,7 @@ import Destination from "./pages/Destination.tsx";
 import EventPackages from "./pages/EventPackages.tsx";
 import PackageDetail from "./pages/PackageDetail.tsx";
 import Cart from "./pages/Cart.tsx";
+import Checkout from "./pages/Checkout.tsx";
 import Auth from "./pages/Auth.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import NotFound from "./pages/NotFound.tsx";
