@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Plane, Sun, Moon, Menu, X, LogOut, Globe, ShoppingCart } from "lucide-react";
+import { Plane, Sun, Moon, Menu, X, LogOut, Globe, ShoppingCart, Compass } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/contexts/AuthContext";
@@ -22,9 +22,9 @@ const Navbar = () => {
 
   const links = [
     { to: "/", label: t("nav.home") },
-    { to: "/results", label: t("nav.search") },
-    { to: "/deals", label: t("nav.deals") },
     { to: "/packages", label: t("nav.packages") },
+    { to: "/deals", label: t("nav.deals") },
+    { to: "/guide", label: t("nav.guides") },
   ];
 
   const handleSignOut = async () => {
