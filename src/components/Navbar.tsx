@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Plane, Sun, Moon, Menu, X, LogOut, Globe } from "lucide-react";
+import { Plane, Sun, Moon, Menu, X, LogOut, Globe, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
 
 const Navbar = () => {
   const [dark, setDark] = useState(() => localStorage.getItem("theme") === "dark");
@@ -12,6 +13,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { t, locale, setLocale } = useI18n();
   const { user, signOut } = useAuth();
+  const { totalItems } = useCart();
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
@@ -75,6 +77,19 @@ const Navbar = () => {
           >
             {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
+
+          {/* Cart */}
+          <Link to="/cart" className="relative">
+            <Button variant="ghost" size="icon" className="rounded-full">
+              <ShoppingCart className="h-4 w-4" />
+            </Button>
+            {totalItems > 0 && (
+              <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+                {totalItems > 9 ? "9+" : totalItems}
+              </span>
+            )}
+          </Link>
+
           {user ? (
             <Button variant="ghost" size="sm" onClick={handleSignOut} className="hidden md:inline-flex gap-1">
               <LogOut className="h-4 w-4" />
@@ -110,6 +125,9 @@ const Navbar = () => {
               {l.label}
             </Link>
           ))}
+          <Link to="/cart" onClick={() => setMenuOpen(false)} className="block px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted">
+            {t("nav.cart")} {totalItems > 0 && `(${totalItems})`}
+          </Link>
           {user ? (
             <Button variant="default" size="sm" className="w-full mt-2" onClick={handleSignOut}>
               {t("nav.signOut")}

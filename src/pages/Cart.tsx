@@ -128,7 +128,7 @@ const Cart = () => {
                   <p className="text-xs text-muted-foreground text-center">{t("cart.loginRequired")}</p>
                 </div>
               ) : (
-                <Button className="w-full" size="lg">
+                <Button className="w-full" size="lg" onClick={() => navigate("/checkout")}>
                   {t("cart.checkout")}
                 </Button>
               )}
