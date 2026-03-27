@@ -58,7 +58,7 @@ const Destination = () => {
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
               <h2 className="font-display text-2xl font-bold text-foreground mb-3">{t("dest.topExperiences")}</h2>
               <div className="flex flex-wrap gap-2">
-                {detail.experiences.map((exp) => (
+                {(locale === "pt" ? detail.experiences : detail.experiencesEn).map((exp) => (
                   <Badge key={exp} variant="secondary" className="text-sm py-1.5 px-3">{exp}</Badge>
                 ))}
               </div>
