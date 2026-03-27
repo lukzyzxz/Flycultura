@@ -131,6 +131,21 @@ const translations = {
     "cart.clearCart": "Clear cart",
     "cart.loginToBook": "Sign in to Book",
     "cart.loginRequired": "You need to be signed in to complete a booking",
+
+    // Checkout
+    "checkout.title": "Checkout",
+    "checkout.backToCart": "Back to cart",
+    "checkout.paymentDetails": "Payment Details",
+    "checkout.securePayment": "Your payment info is encrypted and secure (prototype)",
+    "checkout.cardName": "Name on Card",
+    "checkout.cardNumber": "Card Number",
+    "checkout.expiry": "Expiry",
+    "checkout.pay": "Pay",
+    "checkout.processing": "Processing payment...",
+    "checkout.doNotClose": "Please do not close this page",
+    "checkout.successTitle": "Booking Confirmed!",
+    "checkout.successDesc": "You will receive a confirmation email with all the details of your booking.",
+    "checkout.prototype": "⚠️ This is a prototype — no real charges will be made.",
   },
   pt: {
     // Navbar
