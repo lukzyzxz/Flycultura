@@ -1,20 +1,45 @@
 import { useSearchParams, Link } from "react-router-dom";
-import { Star, ArrowLeft, Plane, Hotel as HotelIcon, Loader2 } from "lucide-react";
+import { Star, ArrowLeft, Plane, Hotel as HotelIcon, Loader2, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Footer from "@/components/Footer";
 import { destinations } from "@/lib/data";
+import { eventPackages } from "@/lib/events-data";
 import { searchFlights, searchHotels, FlightResult, HotelResult } from "@/lib/api";
+import { useCart, CartProduct } from "@/contexts/CartContext";
+import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { useI18n } from "@/lib/i18n";
 import { useQuery } from "@tanstack/react-query";
 
 const Results = () => {
   const [searchParams] = useSearchParams();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const { addItem } = useCart();
+  const { toast } = useToast();
   const type = searchParams.get("type") || "flights";
   const from = searchParams.get("from") || "";
   const to = searchParams.get("to") || "";
+  const query = to.toLowerCase().trim();
+
+  // Filter matching event packages based on search
+  const matchingPackages = eventPackages.filter((pkg) => {
+    if (!query) return false;
+    const searchTerms = [
+      pkg.location.toLowerCase(),
+      pkg.country.toLowerCase(),
+      pkg.event.toLowerCase(),
+      ...pkg.tags,
+    ];
+    return searchTerms.some((term) => term.includes(query) || query.includes(term));
+  });
+
+  // Filter matching destinations
+  const matchingDestinations = destinations.filter((d) => {
+    if (!query) return true;
+    const searchTerms = [d.name.toLowerCase(), d.country.toLowerCase(), ...d.tags];
+    return searchTerms.some((term) => term.includes(query) || query.includes(term));
+  });
 
   const flightsQuery = useQuery({
     queryKey: ["flights", from, to],
@@ -33,7 +58,50 @@ const Results = () => {
   const isLoading = (type === "flights" && flightsQuery.isLoading) || (type === "hotels" && hotelsQuery.isLoading);
   const isError = (type === "flights" && flightsQuery.isError) || (type === "hotels" && hotelsQuery.isError);
 
-  const typeLabel = type === "flights" ? "Voos" : type === "hotels" ? "Hotéis" : type.charAt(0).toUpperCase() + type.slice(1);
+  const handleAddFlight = (flight: FlightResult) => {
+    const product: CartProduct = {
+      id: `flight-${flight.id}`,
+      type: "flight",
+      name: `${flight.airline} — ${flight.origin} → ${flight.destination}`,
+      image: flight.logo || "https://images.unsplash.com/photo-1436491865332-7a61a109db05?w=400&h=300&fit=crop",
+      price: flight.price,
+      description: `${flight.departure} → ${flight.arrival} | ${flight.duration}`,
+    };
+    addItem(product);
+    toast({ title: t("cart.added"), description: product.name });
+  };
+
+  const handleAddHotel = (hotel: HotelResult) => {
+    const product: CartProduct = {
+      id: `hotel-${hotel.id}`,
+      type: "hotel",
+      name: hotel.name,
+      image: hotel.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop",
+      price: hotel.price,
+      description: hotel.address || "",
+    };
+    addItem(product);
+    toast({ title: t("cart.added"), description: product.name });
+  };
+
+  const handleAddPackage = (pkg: typeof eventPackages[0]) => {
+    const product: CartProduct = {
+      id: pkg.id,
+      type: "event",
+      name: pkg.event,
+      image: pkg.image,
+      price: pkg.price,
+      description: `${pkg.location} — ${pkg.date}`,
+    };
+    addItem(product);
+    toast({ title: t("cart.added"), description: product.name });
+  };
+
+  const typeLabel = type === "flights" 
+    ? (locale === "pt" ? "Voos" : "Flights") 
+    : type === "hotels" 
+      ? (locale === "pt" ? "Hotéis" : "Hotels") 
+      : type.charAt(0).toUpperCase() + type.slice(1);
 
   return (
     <div className="min-h-screen">
@@ -44,24 +112,64 @@ const Results = () => {
           </Link>
           <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground">
             {typeLabel} {t("results.results")}
-            {from && to && <span className="text-muted-foreground font-normal text-lg"> — {from} → {to}</span>}
+            {query && <span className="text-muted-foreground font-normal text-lg"> — "{to}"</span>}
           </h1>
         </div>
       </div>
 
       <div className="container py-10">
+        {/* Matching Event Packages */}
+        {matchingPackages.length > 0 && (
+          <div className="mb-10">
+            <h2 className="font-display text-xl font-bold text-foreground mb-4">
+              {locale === "pt" ? "📦 Pacotes de Eventos Relacionados" : "📦 Related Event Packages"}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {matchingPackages.map((pkg, i) => (
+                <motion.div
+                  key={pkg.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="rounded-xl overflow-hidden bg-card card-shadow"
+                >
+                  <Link to={`/packages/${pkg.id}`}>
+                    <div className="relative aspect-[16/9] overflow-hidden bg-muted">
+                      <img src={pkg.image} alt={pkg.event} className="w-full h-full object-contain" />
+                      <Badge className="absolute top-3 left-3 bg-accent text-accent-foreground border-0">{pkg.badge}</Badge>
+                    </div>
+                  </Link>
+                  <div className="p-4">
+                    <Link to={`/packages/${pkg.id}`}>
+                      <h3 className="font-display font-bold text-card-foreground mb-1 hover:text-primary transition-colors">{pkg.event}</h3>
+                    </Link>
+                    <p className="text-sm text-muted-foreground mb-2">{pkg.location} — {pkg.date}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-lg font-bold text-primary">R$ {pkg.price.toLocaleString("pt-BR")}</span>
+                      <Button size="sm" onClick={() => handleAddPackage(pkg)} className="gap-1">
+                        <ShoppingCart className="h-3.5 w-3.5" />
+                        {t("cart.addToCart")}
+                      </Button>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {isLoading && (
           <div className="flex flex-col items-center justify-center py-20 gap-4">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-muted-foreground">Buscando os melhores preços...</p>
+            <p className="text-muted-foreground">{locale === "pt" ? "Buscando os melhores preços..." : "Searching best prices..."}</p>
           </div>
         )}
 
         {isError && (
           <div className="text-center py-20">
-            <p className="text-destructive mb-4">Erro ao buscar resultados. Tente novamente.</p>
+            <p className="text-destructive mb-4">{locale === "pt" ? "Erro ao buscar resultados. Tente novamente." : "Error fetching results. Try again."}</p>
             <Button onClick={() => type === "flights" ? flightsQuery.refetch() : hotelsQuery.refetch()}>
-              Tentar novamente
+              {locale === "pt" ? "Tentar novamente" : "Try again"}
             </Button>
           </div>
         )}
@@ -92,7 +200,7 @@ const Results = () => {
                       <div className="w-full border-t border-border relative">
                         <Plane className="h-3 w-3 text-primary absolute -top-1.5 right-0" />
                       </div>
-                      <p className="text-xs">{flight.stops === 0 ? "Direto" : `${flight.stops} parada${flight.stops > 1 ? "s" : ""}`}</p>
+                      <p className="text-xs">{flight.stops === 0 ? (locale === "pt" ? "Direto" : "Direct") : `${flight.stops} ${locale === "pt" ? "parada" : "stop"}${flight.stops > 1 ? "s" : ""}`}</p>
                     </div>
                     <div className="text-center">
                       <p className="font-bold text-card-foreground">{flight.arrival ? new Date(flight.arrival).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "--"}</p>
@@ -101,12 +209,15 @@ const Results = () => {
                   </div>
                   <div className="text-right md:w-1/5">
                     <p className="text-xl font-bold text-primary">R$ {flight.price.toLocaleString("pt-BR")}</p>
-                    <Button size="sm" className="mt-1">Selecionar</Button>
+                    <Button size="sm" className="mt-1 gap-1" onClick={() => handleAddFlight(flight)}>
+                      <ShoppingCart className="h-3.5 w-3.5" />
+                      {locale === "pt" ? "Selecionar" : "Select"}
+                    </Button>
                   </div>
                 </motion.div>
               ))
             ) : (
-              <FallbackDestinations />
+              matchingPackages.length === 0 && <FallbackDestinations matchingDestinations={matchingDestinations} />
             )}
           </div>
         )}
@@ -139,19 +250,34 @@ const Results = () => {
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-lg font-bold text-primary">R$ {hotel.price.toLocaleString("pt-BR")}</span>
-                      <Button size="sm">Reservar</Button>
+                      <Button size="sm" onClick={() => handleAddHotel(hotel)} className="gap-1">
+                        <ShoppingCart className="h-3.5 w-3.5" />
+                        {locale === "pt" ? "Reservar" : "Book"}
+                      </Button>
                     </div>
                   </div>
                 </motion.div>
               ))
             ) : (
-              <FallbackDestinations />
+              matchingPackages.length === 0 && <FallbackDestinations matchingDestinations={matchingDestinations} />
             )}
           </div>
         )}
 
         {/* Fallback for packages/cruises */}
-        {type !== "flights" && type !== "hotels" && <FallbackDestinations />}
+        {type !== "flights" && type !== "hotels" && matchingPackages.length === 0 && (
+          <FallbackDestinations matchingDestinations={matchingDestinations} />
+        )}
+
+        {/* Matching Destinations */}
+        {matchingDestinations.length > 0 && (type === "packages" || type === "cruises") && (
+          <div className="mt-10">
+            <h2 className="font-display text-xl font-bold text-foreground mb-4">
+              {locale === "pt" ? "🌍 Destinos Encontrados" : "🌍 Destinations Found"}
+            </h2>
+            <FallbackDestinations matchingDestinations={matchingDestinations} />
+          </div>
+        )}
       </div>
 
       <Footer />
@@ -159,11 +285,13 @@ const Results = () => {
   );
 };
 
-const FallbackDestinations = () => {
+const FallbackDestinations = ({ matchingDestinations }: { matchingDestinations?: typeof destinations }) => {
   const { t } = useI18n();
+  const items = matchingDestinations && matchingDestinations.length > 0 ? matchingDestinations : destinations.slice(0, 6);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {destinations.map((d, i) => (
+      {items.map((d, i) => (
         <motion.div
           key={d.slug}
           initial={{ opacity: 0, y: 20 }}
@@ -184,7 +312,7 @@ const FallbackDestinations = () => {
             </div>
             <p className="text-sm text-muted-foreground mb-3">{d.country}</p>
             <div className="flex items-center justify-between">
-              <span className="text-lg font-bold text-primary">{t("index.fromPrice")} R$ {(d.price * 5).toLocaleString("pt-BR")}</span>
+              <span className="text-lg font-bold text-primary">{t("index.fromPrice")} R$ {d.price.toLocaleString("pt-BR")}</span>
               <Link to={`/destination/${d.slug}`}>
                 <Button size="sm">{t("deals.viewDeal")}</Button>
               </Link>

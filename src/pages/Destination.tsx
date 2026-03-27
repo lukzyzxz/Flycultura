@@ -9,7 +9,7 @@ import { useI18n } from "@/lib/i18n";
 
 const Destination = () => {
   const { slug } = useParams();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const detail = destinationDetails[slug || ""];
   const dest = destinations.find((d) => d.slug === slug);
 
@@ -40,7 +40,7 @@ const Destination = () => {
               {dest && (
                 <>
                   <span className="flex items-center gap-1 text-accent"><Star className="h-4 w-4 fill-current" /> {dest.rating}</span>
-                  <span className="text-lg font-bold text-primary">{t("index.fromPrice")} ${dest.price}</span>
+                  <span className="text-lg font-bold text-primary">{t("index.fromPrice")} R$ {dest.price.toLocaleString("pt-BR")}</span>
                 </>
               )}
             </div>
@@ -53,12 +53,12 @@ const Destination = () => {
           <div className="lg:col-span-2 space-y-8">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
               <h2 className="font-display text-2xl font-bold text-foreground mb-3">{t("dest.about")} {detail.name}</h2>
-              <p className="text-muted-foreground leading-relaxed">{detail.description}</p>
+              <p className="text-muted-foreground leading-relaxed">{locale === "pt" ? detail.description : detail.descriptionEn}</p>
             </motion.div>
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
               <h2 className="font-display text-2xl font-bold text-foreground mb-3">{t("dest.topExperiences")}</h2>
               <div className="flex flex-wrap gap-2">
-                {detail.experiences.map((exp) => (
+                {(locale === "pt" ? detail.experiences : detail.experiencesEn).map((exp) => (
                   <Badge key={exp} variant="secondary" className="text-sm py-1.5 px-3">{exp}</Badge>
                 ))}
               </div>
@@ -73,7 +73,7 @@ const Destination = () => {
                 <span>{t("dest.bestTime")}: {detail.bestTime}</span>
               </div>
               {dest && (
-                <p className="text-2xl font-bold text-primary mb-4">{t("index.fromPrice")} ${dest.price} <span className="text-sm font-normal text-muted-foreground">{t("dest.perPerson")}</span></p>
+                <p className="text-2xl font-bold text-primary mb-4">{t("index.fromPrice")} R$ {dest.price.toLocaleString("pt-BR")} <span className="text-sm font-normal text-muted-foreground">{t("dest.perPerson")}</span></p>
               )}
               <Button className="w-full mb-2">{t("dest.bookNow")}</Button>
               <Button variant="outline" className="w-full">{t("dest.compareDeals")}</Button>

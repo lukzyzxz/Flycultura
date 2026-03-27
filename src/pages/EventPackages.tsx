@@ -40,11 +40,11 @@ const EventPackages = () => {
               className="group rounded-xl overflow-hidden bg-card card-shadow hover:card-shadow-hover transition-shadow"
             >
               <Link to={`/packages/${pkg.id}`}>
-                <div className="relative aspect-[16/9] overflow-hidden">
+                <div className="relative aspect-[16/9] overflow-hidden bg-muted">
                   <img
                     src={pkg.image}
                     alt={pkg.event}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                   />
                   <Badge className="absolute top-3 left-3 bg-accent text-accent-foreground border-0 text-sm">
                     {pkg.badge}

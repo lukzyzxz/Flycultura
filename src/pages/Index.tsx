@@ -3,15 +3,45 @@ import DestinationCard from "@/components/DestinationCard";
 import Footer from "@/components/Footer";
 import { destinations, deals } from "@/lib/data";
 import { eventPackages } from "@/lib/events-data";
+import { useCart, CartProduct } from "@/contexts/CartContext";
+import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles, Ticket } from "lucide-react";
+import { ArrowRight, Sparkles, Ticket, ShoppingCart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useI18n } from "@/lib/i18n";
 
 const Index = () => {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const { addItem } = useCart();
+  const { toast } = useToast();
+
+  const handleAddPackage = (pkg: typeof eventPackages[0]) => {
+    const product: CartProduct = {
+      id: pkg.id,
+      type: "event",
+      name: pkg.event,
+      image: pkg.image,
+      price: pkg.price,
+      description: `${pkg.location} — ${pkg.date}`,
+    };
+    addItem(product);
+    toast({ title: t("cart.added"), description: product.name });
+  };
+
+  const handleAddDeal = (deal: typeof deals[0]) => {
+    const product: CartProduct = {
+      id: `deal-${deal.id}`,
+      type: "deal",
+      name: locale === "pt" ? deal.title : deal.titleEn,
+      image: deal.image,
+      price: deal.price,
+      description: locale === "pt" ? deal.description : deal.descriptionEn,
+    };
+    addItem(product);
+    toast({ title: t("cart.added"), description: product.name });
+  };
 
   return (
     <div className="min-h-screen">
@@ -35,7 +65,7 @@ const Index = () => {
           </motion.div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {destinations.map((d, i) => (
+            {destinations.slice(0, 6).map((d, i) => (
               <motion.div
                 key={d.slug}
                 initial={{ opacity: 0, y: 20 }}
@@ -84,23 +114,31 @@ const Index = () => {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
               >
-                <Link to={`/packages/${pkg.id}`} className="group block rounded-xl overflow-hidden bg-card card-shadow hover:card-shadow-hover transition-shadow">
-                  <div className="relative aspect-[16/9] overflow-hidden">
-                    <img src={pkg.image} alt={pkg.event} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    <Badge className="absolute top-3 left-3 bg-accent text-accent-foreground border-0">{pkg.badge}</Badge>
-                  </div>
+                <div className="group rounded-xl overflow-hidden bg-card card-shadow hover:card-shadow-hover transition-shadow">
+                  <Link to={`/packages/${pkg.id}`}>
+                    <div className="relative aspect-[16/9] overflow-hidden bg-muted">
+                      <img src={pkg.image} alt={pkg.event} className="w-full h-full object-contain" />
+                      <Badge className="absolute top-3 left-3 bg-accent text-accent-foreground border-0">{pkg.badge}</Badge>
+                    </div>
+                  </Link>
                   <div className="p-4">
-                    <h3 className="font-display font-bold text-card-foreground mb-1">{pkg.event}</h3>
+                    <Link to={`/packages/${pkg.id}`}>
+                      <h3 className="font-display font-bold text-card-foreground mb-1 hover:text-primary transition-colors">{pkg.event}</h3>
+                    </Link>
                     <p className="text-sm text-muted-foreground mb-3">{pkg.location} — {pkg.date}</p>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 mb-3">
                       <span className="text-lg font-bold text-primary">R$ {pkg.price.toLocaleString("pt-BR")}</span>
                       <span className="text-sm text-muted-foreground line-through">R$ {pkg.originalPrice.toLocaleString("pt-BR")}</span>
                       <Badge variant="secondary" className="ml-auto">
                         {Math.round((1 - pkg.price / pkg.originalPrice) * 100)}% {t("deals.off")}
                       </Badge>
                     </div>
+                    <Button className="w-full gap-2" onClick={() => handleAddPackage(pkg)}>
+                      <ShoppingCart className="h-4 w-4" />
+                      {t("cart.addToCart")}
+                    </Button>
                   </div>
-                </Link>
+                </div>
               </motion.div>
             ))}
           </div>
@@ -143,19 +181,23 @@ const Index = () => {
                 className="group rounded-xl overflow-hidden bg-card card-shadow hover:card-shadow-hover transition-shadow"
               >
                 <div className="relative aspect-[3/2] overflow-hidden">
-                  <img src={deal.image} alt={deal.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  <Badge className="absolute top-3 left-3 bg-accent text-accent-foreground border-0">{deal.badge}</Badge>
+                  <img src={deal.image} alt={locale === "pt" ? deal.title : deal.titleEn} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <Badge className="absolute top-3 left-3 bg-accent text-accent-foreground border-0">{locale === "pt" ? deal.badge : deal.badgeEn}</Badge>
                 </div>
                 <div className="p-4">
-                  <h3 className="font-display font-bold text-card-foreground mb-1">{deal.title}</h3>
-                  <p className="text-sm text-muted-foreground mb-3">{deal.description}</p>
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold text-primary">${deal.price}</span>
-                    <span className="text-sm text-muted-foreground line-through">${deal.originalPrice}</span>
+                  <h3 className="font-display font-bold text-card-foreground mb-1">{locale === "pt" ? deal.title : deal.titleEn}</h3>
+                  <p className="text-sm text-muted-foreground mb-3">{locale === "pt" ? deal.description : deal.descriptionEn}</p>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-lg font-bold text-primary">R$ {deal.price.toLocaleString("pt-BR")}</span>
+                    <span className="text-sm text-muted-foreground line-through">R$ {deal.originalPrice.toLocaleString("pt-BR")}</span>
                     <Badge variant="secondary" className="ml-auto">
                       {Math.round((1 - deal.price / deal.originalPrice) * 100)}% {t("deals.off")}
                     </Badge>
                   </div>
+                  <Button className="w-full gap-2" onClick={() => handleAddDeal(deal)}>
+                    <ShoppingCart className="h-4 w-4" />
+                    {t("cart.addToCart")}
+                  </Button>
                 </div>
               </motion.div>
             ))}
@@ -178,9 +220,11 @@ const Index = () => {
             <p className="text-primary-foreground/70 max-w-lg mx-auto mb-6">
               {t("index.ctaSubtitle")}
             </p>
-            <Button size="lg" variant="secondary" className="font-semibold">
-              {t("index.ctaBtn")}
-            </Button>
+            <Link to="/packages">
+              <Button size="lg" variant="secondary" className="font-semibold">
+                {t("index.ctaBtn")}
+              </Button>
+            </Link>
           </motion.div>
         </div>
       </section>

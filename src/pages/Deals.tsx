@@ -2,12 +2,29 @@ import Footer from "@/components/Footer";
 import { deals } from "@/lib/data";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Sparkles } from "lucide-react";
+import { ShoppingCart, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { useI18n } from "@/lib/i18n";
+import { useCart, CartProduct } from "@/contexts/CartContext";
+import { useToast } from "@/hooks/use-toast";
 
 const Deals = () => {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const { addItem } = useCart();
+  const { toast } = useToast();
+
+  const handleAddToCart = (deal: typeof deals[0]) => {
+    const product: CartProduct = {
+      id: `deal-${deal.id}`,
+      type: "deal",
+      name: locale === "pt" ? deal.title : deal.titleEn,
+      image: deal.image,
+      price: deal.price,
+      description: locale === "pt" ? deal.description : deal.descriptionEn,
+    };
+    addItem(product);
+    toast({ title: t("cart.added"), description: product.name });
+  };
 
   return (
     <div className="min-h-screen">
@@ -35,21 +52,22 @@ const Deals = () => {
               className="group rounded-xl overflow-hidden bg-card card-shadow hover:card-shadow-hover transition-shadow"
             >
               <div className="relative aspect-[3/2] overflow-hidden">
-                <img src={deal.image} alt={deal.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                <Badge className="absolute top-3 left-3 bg-accent text-accent-foreground border-0">{deal.badge}</Badge>
+                <img src={deal.image} alt={locale === "pt" ? deal.title : deal.titleEn} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <Badge className="absolute top-3 left-3 bg-accent text-accent-foreground border-0">{locale === "pt" ? deal.badge : deal.badgeEn}</Badge>
               </div>
               <div className="p-4">
-                <h3 className="font-display font-bold text-card-foreground mb-1">{deal.title}</h3>
-                <p className="text-sm text-muted-foreground mb-3">{deal.description}</p>
+                <h3 className="font-display font-bold text-card-foreground mb-1">{locale === "pt" ? deal.title : deal.titleEn}</h3>
+                <p className="text-sm text-muted-foreground mb-3">{locale === "pt" ? deal.description : deal.descriptionEn}</p>
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-lg font-bold text-primary">${deal.price}</span>
-                  <span className="text-sm text-muted-foreground line-through">${deal.originalPrice}</span>
+                  <span className="text-lg font-bold text-primary">R$ {deal.price.toLocaleString("pt-BR")}</span>
+                  <span className="text-sm text-muted-foreground line-through">R$ {deal.originalPrice.toLocaleString("pt-BR")}</span>
                   <Badge variant="secondary" className="ml-auto">
                     {Math.round((1 - deal.price / deal.originalPrice) * 100)}% {t("deals.off")}
                   </Badge>
                 </div>
-                <Button className="w-full gap-2">
-                  {t("deals.viewDeal")} <ExternalLink className="h-4 w-4" />
+                <Button className="w-full gap-2" onClick={() => handleAddToCart(deal)}>
+                  <ShoppingCart className="h-4 w-4" />
+                  {t("deals.addToCart")}
                 </Button>
               </div>
             </motion.div>

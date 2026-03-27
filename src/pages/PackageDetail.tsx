@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { eventPackages } from "@/lib/events-data";
-import { useCart } from "@/contexts/CartContext";
+import { useCart, CartProduct } from "@/contexts/CartContext";
 import { useI18n } from "@/lib/i18n";
 import { useToast } from "@/hooks/use-toast";
 import Footer from "@/components/Footer";
@@ -31,7 +31,16 @@ const PackageDetail = () => {
   }
 
   const handleAddToCart = () => {
-    addItem(pkg);
+    const product: CartProduct = {
+      id: pkg.id,
+      type: "event",
+      name: pkg.event,
+      image: pkg.image,
+      price: pkg.price,
+      description: `${pkg.location} — ${pkg.date}`,
+      meta: { location: pkg.location, date: pkg.date, country: pkg.country },
+    };
+    addItem(product);
     toast({ title: t("cart.added"), description: pkg.event });
   };
 
@@ -40,8 +49,8 @@ const PackageDetail = () => {
   return (
     <div className="min-h-screen">
       {/* Hero */}
-      <div className="relative h-[50vh] min-h-[400px] overflow-hidden">
-        <img src={pkg.image} alt={pkg.event} className="w-full h-full object-cover" />
+      <div className="relative h-[50vh] min-h-[400px] overflow-hidden bg-muted">
+        <img src={pkg.image} alt={pkg.event} className="w-full h-full object-contain bg-muted" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12">
           <div className="container">
@@ -107,6 +116,21 @@ const PackageDetail = () => {
                 ))}
               </div>
             </motion.div>
+
+            {/* Tourist Spots */}
+            {pkg.touristSpots && pkg.touristSpots.length > 0 && (
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+                <h2 className="font-display text-xl font-bold text-foreground mb-3">{t("package.touristSpots")}</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {pkg.touristSpots.map((spot) => (
+                    <div key={spot} className="flex items-center gap-2 text-sm text-card-foreground">
+                      <MapPin className="h-4 w-4 text-accent shrink-0" />
+                      <span>{spot}</span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
           </div>
 
           {/* Sidebar - Pricing & CTA */}
