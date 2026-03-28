@@ -28,7 +28,9 @@ const Results = () => {
     const searchTerms = [
       pkg.location.toLowerCase(),
       pkg.country.toLowerCase(),
+      pkg.countryEn.toLowerCase(),
       pkg.event.toLowerCase(),
+      pkg.eventEn.toLowerCase(),
       ...pkg.tags,
     ];
     return searchTerms.some((term) => term.includes(query) || query.includes(term));
@@ -41,9 +43,42 @@ const Results = () => {
     return searchTerms.some((term) => term.includes(query) || query.includes(term));
   });
 
+  // Resolve airport codes for flight search
+  const resolveAirportCode = (input: string): string => {
+    if (!input) return "GRU.AIRPORT";
+    const lower = input.toLowerCase();
+    const airportMap: Record<string, string> = {
+      "são paulo": "GRU.AIRPORT", "sao paulo": "GRU.AIRPORT", "guarulhos": "GRU.AIRPORT", "gru": "GRU.AIRPORT",
+      "new york": "JFK.AIRPORT", "nova york": "JFK.AIRPORT", "jfk": "JFK.AIRPORT",
+      "miami": "MIA.AIRPORT", "mia": "MIA.AIRPORT",
+      "los angeles": "LAX.AIRPORT", "lax": "LAX.AIRPORT",
+      "paris": "CDG.AIRPORT", "cdg": "CDG.AIRPORT",
+      "londres": "LHR.AIRPORT", "london": "LHR.AIRPORT", "lhr": "LHR.AIRPORT",
+      "tokyo": "NRT.AIRPORT", "tóquio": "NRT.AIRPORT", "nrt": "NRT.AIRPORT",
+      "roma": "FCO.AIRPORT", "rome": "FCO.AIRPORT", "fco": "FCO.AIRPORT",
+      "barcelona": "BCN.AIRPORT", "bcn": "BCN.AIRPORT",
+      "dubai": "DXB.AIRPORT", "dxb": "DXB.AIRPORT",
+      "cancun": "CUN.AIRPORT", "cancún": "CUN.AIRPORT", "cun": "CUN.AIRPORT",
+      "buenos aires": "EZE.AIRPORT", "eze": "EZE.AIRPORT",
+      "rio de janeiro": "GIG.AIRPORT", "rio": "GIG.AIRPORT", "gig": "GIG.AIRPORT",
+      "toronto": "YYZ.AIRPORT", "yyz": "YYZ.AIRPORT",
+      "munique": "MUC.AIRPORT", "munich": "MUC.AIRPORT", "muc": "MUC.AIRPORT",
+      "mexico": "MEX.AIRPORT", "cidade do mexico": "MEX.AIRPORT", "mexico city": "MEX.AIRPORT",
+      "monte carlo": "NCE.AIRPORT", "monaco": "NCE.AIRPORT", "nice": "NCE.AIRPORT",
+      "bali": "DPS.AIRPORT", "dps": "DPS.AIRPORT",
+    };
+    for (const [key, code] of Object.entries(airportMap)) {
+      if (lower.includes(key)) return code;
+    }
+    return `${input.toUpperCase().slice(0, 3)}.AIRPORT`;
+  };
+
+  const fromCode = resolveAirportCode(from);
+  const toCode = resolveAirportCode(to);
+
   const flightsQuery = useQuery({
-    queryKey: ["flights", from, to],
-    queryFn: () => searchFlights({ from: from || "GRU.AIRPORT", to: to || "JFK.AIRPORT" }),
+    queryKey: ["flights", fromCode, toCode],
+    queryFn: () => searchFlights({ from: fromCode, to: toCode }),
     enabled: type === "flights",
     staleTime: 5 * 60 * 1000,
   });
@@ -88,20 +123,24 @@ const Results = () => {
     const product: CartProduct = {
       id: pkg.id,
       type: "event",
-      name: pkg.event,
+      name: locale === "pt" ? pkg.event : pkg.eventEn,
       image: pkg.image,
       price: pkg.price,
-      description: `${pkg.location} — ${pkg.date}`,
+      description: `${pkg.location} — ${locale === "pt" ? pkg.date : pkg.dateEn}`,
     };
     addItem(product);
     toast({ title: t("cart.added"), description: product.name });
   };
 
-  const typeLabel = type === "flights" 
-    ? (locale === "pt" ? "Voos" : "Flights") 
-    : type === "hotels" 
-      ? (locale === "pt" ? "Hotéis" : "Hotels") 
-      : type.charAt(0).toUpperCase() + type.slice(1);
+  const typeLabel = type === "flights"
+    ? t("hero.flights")
+    : type === "hotels"
+      ? t("hero.hotels")
+      : type === "packages"
+        ? t("hero.packages")
+        : type === "cruises"
+          ? t("hero.cruises")
+          : type;
 
   return (
     <div className="min-h-screen">
@@ -135,15 +174,19 @@ const Results = () => {
                 >
                   <Link to={`/packages/${pkg.id}`}>
                     <div className="relative aspect-[16/9] overflow-hidden bg-muted">
-                      <img src={pkg.image} alt={pkg.event} className="w-full h-full object-contain" />
+                      <img src={pkg.image} alt={locale === "pt" ? pkg.event : pkg.eventEn} className="w-full h-full object-cover" />
                       <Badge className="absolute top-3 left-3 bg-accent text-accent-foreground border-0">{pkg.badge}</Badge>
                     </div>
                   </Link>
                   <div className="p-4">
                     <Link to={`/packages/${pkg.id}`}>
-                      <h3 className="font-display font-bold text-card-foreground mb-1 hover:text-primary transition-colors">{pkg.event}</h3>
+                      <h3 className="font-display font-bold text-card-foreground mb-1 hover:text-primary transition-colors">
+                        {locale === "pt" ? pkg.event : pkg.eventEn}
+                      </h3>
                     </Link>
-                    <p className="text-sm text-muted-foreground mb-2">{pkg.location} — {pkg.date}</p>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      {pkg.location} — {locale === "pt" ? pkg.date : pkg.dateEn}
+                    </p>
                     <div className="flex items-center justify-between">
                       <span className="text-lg font-bold text-primary">R$ {pkg.price.toLocaleString("pt-BR")}</span>
                       <Button size="sm" onClick={() => handleAddPackage(pkg)} className="gap-1">
@@ -192,7 +235,7 @@ const Results = () => {
                   </div>
                   <div className="flex-1 flex items-center gap-4 text-sm text-muted-foreground">
                     <div className="text-center">
-                      <p className="font-bold text-card-foreground">{flight.departure ? new Date(flight.departure).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "--"}</p>
+                      <p className="font-bold text-card-foreground">{flight.departure ? new Date(flight.departure).toLocaleTimeString(locale === "pt" ? "pt-BR" : "en-US", { hour: "2-digit", minute: "2-digit" }) : "--"}</p>
                       <p className="text-xs">{flight.origin}</p>
                     </div>
                     <div className="flex-1 flex flex-col items-center">
@@ -203,7 +246,7 @@ const Results = () => {
                       <p className="text-xs">{flight.stops === 0 ? (locale === "pt" ? "Direto" : "Direct") : `${flight.stops} ${locale === "pt" ? "parada" : "stop"}${flight.stops > 1 ? "s" : ""}`}</p>
                     </div>
                     <div className="text-center">
-                      <p className="font-bold text-card-foreground">{flight.arrival ? new Date(flight.arrival).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "--"}</p>
+                      <p className="font-bold text-card-foreground">{flight.arrival ? new Date(flight.arrival).toLocaleTimeString(locale === "pt" ? "pt-BR" : "en-US", { hour: "2-digit", minute: "2-digit" }) : "--"}</p>
                       <p className="text-xs">{flight.destination}</p>
                     </div>
                   </div>

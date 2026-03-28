@@ -3,7 +3,19 @@ import { Link } from "react-router-dom";
 import { useI18n } from "@/lib/i18n";
 
 const Footer = () => {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+
+  const exploreLinks = locale === "pt"
+    ? ["Voos", "Hotéis", "Pacotes", "Cruzeiros"]
+    : ["Flights", "Hotels", "Packages", "Cruises"];
+
+  const companyLinks = locale === "pt"
+    ? ["Sobre", "Blog", "Carreiras", "Imprensa"]
+    : ["About", "Blog", "Careers", "Press"];
+
+  const supportLinks = locale === "pt"
+    ? ["Central de Ajuda", "Contato", "Privacidade", "Termos"]
+    : ["Help Center", "Contact", "Privacy", "Terms"];
 
   return (
     <footer className="border-t border-border bg-card py-12">
@@ -17,9 +29,9 @@ const Footer = () => {
             <p className="text-sm text-muted-foreground">{t("footer.tagline")}</p>
           </div>
           {[
-            { title: t("footer.explore"), links: ["Flights", "Hotels", "Packages", "Cruises"] },
-            { title: t("footer.company"), links: ["About", "Blog", "Careers", "Press"] },
-            { title: t("footer.support"), links: ["Help Center", "Contact", "Privacy", "Terms"] },
+            { title: t("footer.explore"), links: exploreLinks },
+            { title: t("footer.company"), links: companyLinks },
+            { title: t("footer.support"), links: supportLinks },
           ].map((col) => (
             <div key={col.title}>
               <h4 className="font-display font-semibold text-card-foreground mb-3">{col.title}</h4>

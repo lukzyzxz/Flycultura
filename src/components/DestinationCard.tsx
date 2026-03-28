@@ -34,7 +34,7 @@ const DestinationCard = ({ name, country, image, price, rating, slug }: Destinat
           </div>
           <p className="text-sm text-muted-foreground mb-2">{country}</p>
           <p className="text-lg font-bold text-primary">
-            {t("index.fromPrice")} ${price}
+            {t("index.fromPrice")} R$ {price.toLocaleString("pt-BR")}
           </p>
         </div>
       </Link>
