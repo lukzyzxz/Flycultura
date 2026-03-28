@@ -21,7 +21,6 @@ serve(async (req) => {
   try {
     const { from, to, departDate, adults } = await req.json();
 
-    // Use Booking.com flight search API
     const params = new URLSearchParams({
       fromId: from || "GRU.AIRPORT",
       toId: to || "JFK.AIRPORT",
@@ -45,7 +44,6 @@ serve(async (req) => {
 
     if (!response.ok) {
       console.error(`Booking flights API error [${response.status}]:`, JSON.stringify(data));
-      // Return fallback data instead of error
       return new Response(JSON.stringify({ data: { flightOffers: [] }, fallback: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -56,7 +54,6 @@ serve(async (req) => {
     });
   } catch (error: unknown) {
     console.error("Error searching flights:", error);
-    // Return empty results instead of 500
     return new Response(JSON.stringify({ data: { flightOffers: [] }, fallback: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
