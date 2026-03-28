@@ -6,11 +6,11 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { CreditCard, Lock, CheckCircle, ArrowLeft, ShieldCheck } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Checkout = () => {
   const { items, totalPrice, clearCart } = useCart();
@@ -68,6 +68,24 @@ const Checkout = () => {
     if (!isValid) return;
 
     setStep("processing");
+
+    // Save order to database
+    try {
+      await supabase.from("user_orders").insert({
+        user_id: user.id,
+        total_price: totalPrice,
+        items: items.map((i) => ({
+          id: i.product.id,
+          name: i.product.name,
+          price: i.product.price,
+          quantity: i.quantity,
+          type: i.product.type,
+        })),
+        status: "completed",
+      });
+    } catch {
+      // Continue even if save fails
+    }
 
     // Simulate payment processing
     await new Promise((res) => setTimeout(res, 2500));

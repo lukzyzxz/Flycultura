@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Plane, Sun, Moon, Menu, X, LogOut, Globe, ShoppingCart, Compass } from "lucide-react";
+import { Plane, Sun, Moon, Menu, X, LogOut, Globe, ShoppingCart, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/contexts/AuthContext";
@@ -91,10 +91,17 @@ const Navbar = () => {
           </Link>
 
           {user ? (
-            <Button variant="ghost" size="sm" onClick={handleSignOut} className="hidden md:inline-flex gap-1">
-              <LogOut className="h-4 w-4" />
-              {t("nav.signOut")}
-            </Button>
+            <div className="hidden md:flex items-center gap-1">
+              <Link to="/profile">
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <User className="h-4 w-4" />
+                </Button>
+              </Link>
+              <Button variant="ghost" size="sm" onClick={handleSignOut} className="gap-1">
+                <LogOut className="h-4 w-4" />
+                {t("nav.signOut")}
+              </Button>
+            </div>
           ) : (
             <Link to="/auth">
               <Button variant="default" size="sm" className="hidden md:inline-flex">
@@ -129,9 +136,14 @@ const Navbar = () => {
             {t("nav.cart")} {totalItems > 0 && `(${totalItems})`}
           </Link>
           {user ? (
-            <Button variant="default" size="sm" className="w-full mt-2" onClick={handleSignOut}>
-              {t("nav.signOut")}
-            </Button>
+            <>
+              <Link to="/profile" onClick={() => setMenuOpen(false)} className="block px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted">
+                {t("nav.myAccount")}
+              </Link>
+              <Button variant="default" size="sm" className="w-full mt-2" onClick={handleSignOut}>
+                {t("nav.signOut")}
+              </Button>
+            </>
           ) : (
             <Link to="/auth" onClick={() => setMenuOpen(false)}>
               <Button variant="default" size="sm" className="w-full mt-2">

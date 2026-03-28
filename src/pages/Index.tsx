@@ -21,10 +21,10 @@ const Index = () => {
     const product: CartProduct = {
       id: pkg.id,
       type: "event",
-      name: pkg.event,
+      name: locale === "pt" ? pkg.event : pkg.eventEn,
       image: pkg.image,
       price: pkg.price,
-      description: `${pkg.location} — ${pkg.date}`,
+      description: `${pkg.location} — ${locale === "pt" ? pkg.date : pkg.dateEn}`,
     };
     addItem(product);
     toast({ title: t("cart.added"), description: product.name });
@@ -117,15 +117,19 @@ const Index = () => {
                 <div className="group rounded-xl overflow-hidden bg-card card-shadow hover:card-shadow-hover transition-shadow">
                   <Link to={`/packages/${pkg.id}`}>
                     <div className="relative aspect-[16/9] overflow-hidden bg-muted">
-                      <img src={pkg.image} alt={pkg.event} className="w-full h-full object-contain" />
+                      <img src={pkg.image} alt={locale === "pt" ? pkg.event : pkg.eventEn} className="w-full h-full object-cover" />
                       <Badge className="absolute top-3 left-3 bg-accent text-accent-foreground border-0">{pkg.badge}</Badge>
                     </div>
                   </Link>
                   <div className="p-4">
                     <Link to={`/packages/${pkg.id}`}>
-                      <h3 className="font-display font-bold text-card-foreground mb-1 hover:text-primary transition-colors">{pkg.event}</h3>
+                      <h3 className="font-display font-bold text-card-foreground mb-1 hover:text-primary transition-colors">
+                        {locale === "pt" ? pkg.event : pkg.eventEn}
+                      </h3>
                     </Link>
-                    <p className="text-sm text-muted-foreground mb-3">{pkg.location} — {pkg.date}</p>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      {pkg.location} — {locale === "pt" ? pkg.date : pkg.dateEn}
+                    </p>
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-lg font-bold text-primary">R$ {pkg.price.toLocaleString("pt-BR")}</span>
                       <span className="text-sm text-muted-foreground line-through">R$ {pkg.originalPrice.toLocaleString("pt-BR")}</span>
