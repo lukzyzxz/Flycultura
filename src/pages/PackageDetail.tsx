@@ -1,4 +1,5 @@
 import { useParams, Link } from "react-router-dom";
+import { useEffect } from "react";
 import { eventPackages } from "@/lib/events-data";
 import { useCart, CartProduct } from "@/contexts/CartContext";
 import { useI18n } from "@/lib/i18n";
@@ -10,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import {
   Plane, Hotel, Ticket, Car, ArrowLeft, ShoppingCart, Check, MapPin, Calendar, Star, Heart,
 } from "lucide-react";
@@ -21,8 +23,15 @@ const PackageDetail = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { addItem: addRecent } = useRecentlyViewed();
 
   const pkg = eventPackages.find((p) => p.id === id);
+
+  useEffect(() => {
+    if (pkg) {
+      addRecent({ id: pkg.id, type: "event", name: locale === "pt" ? pkg.event : pkg.eventEn, image: pkg.image, price: pkg.price });
+    }
+  }, [id]);
 
   const { data: isFavorite = false } = useQuery({
     queryKey: ["favorite", user?.id, id],

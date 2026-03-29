@@ -1,60 +1,36 @@
 import HeroSearch from "@/components/HeroSearch";
 import DestinationCard from "@/components/DestinationCard";
+import DiscoverySections from "@/components/DiscoverySections";
+import RecentlyViewed from "@/components/RecentlyViewed";
 import Footer from "@/components/Footer";
-import { destinations, deals } from "@/lib/data";
-import { eventPackages } from "@/lib/events-data";
-import { useCart, CartProduct } from "@/contexts/CartContext";
-import { useToast } from "@/hooks/use-toast";
+import { destinations } from "@/lib/data";
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles, Ticket, ShoppingCart } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useI18n } from "@/lib/i18n";
+import { ArrowRight, Sparkles } from "lucide-react";
 
 const Index = () => {
   const { t, locale } = useI18n();
-  const { addItem } = useCart();
-  const { toast } = useToast();
-
-  const handleAddPackage = (pkg: typeof eventPackages[0]) => {
-    const product: CartProduct = {
-      id: pkg.id,
-      type: "event",
-      name: locale === "pt" ? pkg.event : pkg.eventEn,
-      image: pkg.image,
-      price: pkg.price,
-      description: `${pkg.location} — ${locale === "pt" ? pkg.date : pkg.dateEn}`,
-    };
-    addItem(product);
-    toast({ title: t("cart.added"), description: product.name });
-  };
-
-  const handleAddDeal = (deal: typeof deals[0]) => {
-    const product: CartProduct = {
-      id: `deal-${deal.id}`,
-      type: "deal",
-      name: locale === "pt" ? deal.title : deal.titleEn,
-      image: deal.image,
-      price: deal.price,
-      description: locale === "pt" ? deal.description : deal.descriptionEn,
-    };
-    addItem(product);
-    toast({ title: t("cart.added"), description: product.name });
-  };
 
   return (
     <div className="min-h-screen">
       <HeroSearch />
 
+      {/* Recently Viewed */}
+      <RecentlyViewed />
+
+      {/* Discovery Feed */}
+      <DiscoverySections />
+
       {/* Popular Destinations */}
-      <section className="py-16 md:py-24">
+      <section className="py-14 md:py-20">
         <div className="container">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="text-center mb-10"
           >
             <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-3">
               {t("index.popularTitle")}
@@ -71,7 +47,7 @@ const Index = () => {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
+                transition={{ delay: i * 0.08 }}
               >
                 <DestinationCard {...d} />
               </motion.div>
@@ -80,137 +56,8 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Event Packages Preview */}
-      <section className="py-16 md:py-24 bg-muted/50">
-        <div className="container">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="flex items-center justify-between mb-12"
-          >
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Ticket className="h-5 w-5 text-accent" />
-                <span className="text-sm font-semibold text-accent uppercase tracking-wide">{t("events.allInclusive")}</span>
-              </div>
-              <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground">
-                {t("events.featured")}
-              </h2>
-            </div>
-            <Link to="/packages">
-              <Button variant="outline" className="gap-2">
-                {t("index.viewAll")} <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {eventPackages.slice(0, 3).map((pkg, i) => (
-              <motion.div
-                key={pkg.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-              >
-                <div className="group rounded-xl overflow-hidden bg-card card-shadow hover:card-shadow-hover transition-shadow">
-                  <Link to={`/packages/${pkg.id}`}>
-                    <div className="relative aspect-[16/9] overflow-hidden bg-muted">
-                      <img src={pkg.image} alt={locale === "pt" ? pkg.event : pkg.eventEn} className="w-full h-full object-cover" />
-                      <Badge className="absolute top-3 left-3 bg-accent text-accent-foreground border-0">{pkg.badge}</Badge>
-                    </div>
-                  </Link>
-                  <div className="p-4">
-                    <Link to={`/packages/${pkg.id}`}>
-                      <h3 className="font-display font-bold text-card-foreground mb-1 hover:text-primary transition-colors">
-                        {locale === "pt" ? pkg.event : pkg.eventEn}
-                      </h3>
-                    </Link>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      {pkg.location} — {locale === "pt" ? pkg.date : pkg.dateEn}
-                    </p>
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-lg font-bold text-primary">R$ {pkg.price.toLocaleString("pt-BR")}</span>
-                      <span className="text-sm text-muted-foreground line-through">R$ {pkg.originalPrice.toLocaleString("pt-BR")}</span>
-                      <Badge variant="secondary" className="ml-auto">
-                        {Math.round((1 - pkg.price / pkg.originalPrice) * 100)}% {t("deals.off")}
-                      </Badge>
-                    </div>
-                    <Button className="w-full gap-2" onClick={() => handleAddPackage(pkg)}>
-                      <ShoppingCart className="h-4 w-4" />
-                      {t("cart.addToCart")}
-                    </Button>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Hot Deals */}
-      <section className="py-16 md:py-24">
-        <div className="container">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="flex items-center justify-between mb-12"
-          >
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Sparkles className="h-5 w-5 text-accent" />
-                <span className="text-sm font-semibold text-accent uppercase tracking-wide">{t("index.specialOffers")}</span>
-              </div>
-              <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground">
-                {t("index.hotDeals")}
-              </h2>
-            </div>
-            <Link to="/deals">
-              <Button variant="outline" className="gap-2">
-                {t("index.viewAll")} <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {deals.slice(0, 3).map((deal, i) => (
-              <motion.div
-                key={deal.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="group rounded-xl overflow-hidden bg-card card-shadow hover:card-shadow-hover transition-shadow"
-              >
-                <div className="relative aspect-[3/2] overflow-hidden">
-                  <img src={deal.image} alt={locale === "pt" ? deal.title : deal.titleEn} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  <Badge className="absolute top-3 left-3 bg-accent text-accent-foreground border-0">{locale === "pt" ? deal.badge : deal.badgeEn}</Badge>
-                </div>
-                <div className="p-4">
-                  <h3 className="font-display font-bold text-card-foreground mb-1">{locale === "pt" ? deal.title : deal.titleEn}</h3>
-                  <p className="text-sm text-muted-foreground mb-3">{locale === "pt" ? deal.description : deal.descriptionEn}</p>
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-lg font-bold text-primary">R$ {deal.price.toLocaleString("pt-BR")}</span>
-                    <span className="text-sm text-muted-foreground line-through">R$ {deal.originalPrice.toLocaleString("pt-BR")}</span>
-                    <Badge variant="secondary" className="ml-auto">
-                      {Math.round((1 - deal.price / deal.originalPrice) * 100)}% {t("deals.off")}
-                    </Badge>
-                  </div>
-                  <Button className="w-full gap-2" onClick={() => handleAddDeal(deal)}>
-                    <ShoppingCart className="h-4 w-4" />
-                    {t("cart.addToCart")}
-                  </Button>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* CTA */}
-      <section className="py-16 md:py-24">
+      <section className="py-14 md:py-20">
         <div className="container">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -218,6 +65,7 @@ const Index = () => {
             viewport={{ once: true }}
             className="hero-gradient rounded-2xl p-10 md:p-16 text-center"
           >
+            <Sparkles className="h-8 w-8 text-primary-foreground/80 mx-auto mb-4" />
             <h2 className="font-display text-3xl md:text-4xl font-bold text-primary-foreground mb-4">
               {t("index.ctaTitle")}
             </h2>
@@ -225,8 +73,8 @@ const Index = () => {
               {t("index.ctaSubtitle")}
             </p>
             <Link to="/packages">
-              <Button size="lg" variant="secondary" className="font-semibold">
-                {t("index.ctaBtn")}
+              <Button size="lg" variant="secondary" className="font-semibold gap-2">
+                {t("index.ctaBtn")} <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
           </motion.div>
