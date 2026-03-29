@@ -1,4 +1,5 @@
 import { useParams, Link } from "react-router-dom";
+import { useEffect } from "react";
 import { ArrowLeft, Calendar, MapPin, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -6,12 +7,20 @@ import Footer from "@/components/Footer";
 import { destinationDetails, destinations } from "@/lib/data";
 import { motion } from "framer-motion";
 import { useI18n } from "@/lib/i18n";
+import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 
 const Destination = () => {
   const { slug } = useParams();
   const { t, locale } = useI18n();
   const detail = destinationDetails[slug || ""];
   const dest = destinations.find((d) => d.slug === slug);
+  const { addItem } = useRecentlyViewed();
+
+  useEffect(() => {
+    if (detail && dest) {
+      addItem({ id: dest.slug, type: "destination", name: detail.name, image: detail.image, price: dest.price, slug: dest.slug });
+    }
+  }, [slug]);
 
   if (!detail) {
     return (
