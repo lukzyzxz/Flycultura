@@ -5,9 +5,10 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
-import { Trash2, Plus, Minus, ShoppingCart, ArrowRight, Clock, ShieldCheck, Tag } from "lucide-react";
+import { Trash2, Plus, Minus, ShoppingCart, ArrowRight, Clock, ShieldCheck, Tag, MapPin } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { eventPackages } from "@/lib/events-data";
+import { useState } from "react";
 
 const Cart = () => {
   const { items, removeItem, updateQuantity, totalPrice, clearCart } = useCart();
