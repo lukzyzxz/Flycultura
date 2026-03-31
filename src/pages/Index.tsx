@@ -2,6 +2,7 @@ import HeroSearch from "@/components/HeroSearch";
 import DestinationCard from "@/components/DestinationCard";
 import DiscoverySections from "@/components/DiscoverySections";
 import RecentlyViewed from "@/components/RecentlyViewed";
+import ForYouSection from "@/components/ForYouSection";
 import Footer from "@/components/Footer";
 import { destinations } from "@/lib/data";
 import { motion } from "framer-motion";
@@ -19,6 +20,9 @@ const Index = () => {
 
       {/* Recently Viewed */}
       <RecentlyViewed />
+
+      {/* For You - personalized */}
+      <ForYouSection />
 
       {/* Discovery Feed */}
       <DiscoverySections />

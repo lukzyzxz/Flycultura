@@ -24,7 +24,6 @@ const Navbar = () => {
     { to: "/", label: t("nav.home") },
     { to: "/packages", label: t("nav.packages") },
     { to: "/deals", label: t("nav.deals") },
-    { to: "/guide", label: t("nav.guides") },
   ];
 
   const handleSignOut = async () => {

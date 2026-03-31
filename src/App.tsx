@@ -15,7 +15,7 @@ import EventPackages from "./pages/EventPackages.tsx";
 import PackageDetail from "./pages/PackageDetail.tsx";
 import Cart from "./pages/Cart.tsx";
 import Checkout from "./pages/Checkout.tsx";
-import TravelGuide from "./pages/TravelGuide.tsx";
+
 import Auth from "./pages/Auth.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import Profile from "./pages/Profile.tsx";
@@ -41,7 +41,7 @@ const App = () => (
                 <Route path="/packages/:id" element={<PackageDetail />} />
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/checkout" element={<Checkout />} />
-                <Route path="/guide" element={<TravelGuide />} />
+                
                 <Route path="/destination/:slug" element={<Destination />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
