@@ -11,6 +11,17 @@ interface Props {
   onClose: () => void;
 }
 
+const prefOptionsPt = [
+  "Aventura", "Cultura", "Praia", "Gastronomia", "Luxo", "Econômico",
+  "Família", "Romântico", "Natureza", "Vida Noturna", "Compras",
+  "Esportes", "Arte & Museus", "Relaxamento", "Mochilão", "Fotografia",
+];
+const prefOptionsEn = [
+  "Adventure", "Culture", "Beach", "Gastronomy", "Luxury", "Budget",
+  "Family", "Romantic", "Nature", "Nightlife", "Shopping",
+  "Sports", "Art & Museums", "Relaxation", "Backpacking", "Photography",
+];
+
 const TripPlannerModal = ({ open, onClose }: Props) => {
   const { t, locale } = useI18n();
   const [step, setStep] = useState(0);
@@ -21,9 +32,7 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState("");
 
-  const prefOptions = locale === "pt"
-    ? ["Aventura", "Cultura", "Praia", "Gastronomia", "Luxo", "Econômico", "Família", "Romântico"]
-    : ["Adventure", "Culture", "Beach", "Gastronomy", "Luxury", "Budget", "Family", "Romantic"];
+  const prefOptions = locale === "pt" ? prefOptionsPt : prefOptionsEn;
 
   const togglePref = (p: string) =>
     setPreferences((prev) => (prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]));
@@ -32,16 +41,12 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
     setLoading(true);
     setResult("");
     try {
-      const prompt = locale === "pt"
-        ? `Crie um plano de viagem completo para ${destination}, com duração de ${dates}, orçamento de R$ ${budget}. Preferências: ${preferences.join(", ")}. Inclua: roteiro dia a dia, estimativas de custos (voo, hotel, alimentação, passeios), dicas locais e sugestões de economia. Formato markdown.`
-        : `Create a complete travel plan for ${destination}, duration ${dates}, budget R$ ${budget}. Preferences: ${preferences.join(", ")}. Include: day-by-day itinerary, cost estimates (flights, hotel, food, activities), local tips and money-saving suggestions. Markdown format.`;
-
       const { data, error } = await supabase.functions.invoke("generate-itinerary", {
-        body: { prompt, destination, days: parseInt(dates) || 7, interests: preferences.join(", ") },
+        body: { destination, days: parseInt(dates) || 7, interests: preferences.join(", "), budget, locale },
       });
 
       if (error) throw error;
-      setResult(data?.itinerary || data?.text || (locale === "pt" ? "Erro ao gerar plano." : "Error generating plan."));
+      setResult(data?.itinerary || (locale === "pt" ? "Erro ao gerar plano." : "Error generating plan."));
       setStep(3);
     } catch {
       setResult(locale === "pt" ? "Não foi possível gerar o plano. Tente novamente." : "Could not generate plan. Please try again.");
@@ -79,7 +84,6 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
           className="bg-card rounded-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto card-shadow"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Header */}
           <div className="flex items-center justify-between p-5 border-b border-border">
             <div className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-primary" />
@@ -93,7 +97,6 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
           </div>
 
           <div className="p-5 space-y-5">
-            {/* Step indicator */}
             {step < 3 && (
               <div className="flex gap-2">
                 {[0, 1, 2].map((s) => (
@@ -170,7 +173,7 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
                 <div>
                   <label className="text-sm font-medium text-foreground mb-2 block">
                     <Heart className="h-4 w-4 inline mr-1" />
-                    {locale === "pt" ? "O que você curte?" : "What do you enjoy?"}
+                    {locale === "pt" ? "O que você curte? (selecione pelo menos 1)" : "What do you enjoy? (select at least 1)"}
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {prefOptions.map((p) => (
