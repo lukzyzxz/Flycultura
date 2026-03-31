@@ -102,6 +102,49 @@ const Cart = () => {
               </motion.div>
             ))}
 
+            {/* Guide Upsell */}
+            {items.some((i) => i.product.type === "event") && !items.some((i) => i.product.type === "guide") && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="rounded-xl border-2 border-dashed border-primary/30 bg-primary/5 p-5 mt-4"
+              >
+                <div className="flex items-start gap-3">
+                  <MapPin className="h-6 w-6 text-primary shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <h4 className="font-display font-bold text-foreground mb-1">
+                      {locale === "pt" ? "Adicionar Guia Profissional?" : "Add a Professional Guide?"}
+                    </h4>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      {locale === "pt"
+                        ? "Um guia local que fala seu idioma para tours e experiências personalizadas. Inclui dicas de transporte e restaurantes."
+                        : "A local guide who speaks your language for personalized tours. Includes transport tips and restaurant recommendations."}
+                    </p>
+                    <div className="flex items-center gap-3">
+                      <span className="text-lg font-bold text-primary">R$ 350<span className="text-xs font-normal text-muted-foreground">/{locale === "pt" ? "dia" : "day"}</span></span>
+                      <Button
+                        size="sm"
+                        className="gap-1.5"
+                        onClick={() => {
+                          addItem({
+                            id: "professional-guide",
+                            type: "guide",
+                            name: locale === "pt" ? "Guia Profissional Local" : "Professional Local Guide",
+                            image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=200&h=150&fit=crop",
+                            price: 350,
+                            description: locale === "pt" ? "Guia especializado — R$ 350/dia" : "Expert guide — R$ 350/day",
+                          });
+                        }}
+                      >
+                        <Plus className="h-3.5 w-3.5" />
+                        {locale === "pt" ? "Adicionar" : "Add"}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
             {/* Upsell */}
             {upsell.length > 0 && (
               <div className="mt-8">
