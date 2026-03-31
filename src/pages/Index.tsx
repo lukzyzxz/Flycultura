@@ -21,6 +21,9 @@ const Index = () => {
       {/* Recently Viewed */}
       <RecentlyViewed />
 
+      {/* For You - personalized */}
+      <ForYouSection />
+
       {/* Discovery Feed */}
       <DiscoverySections />
 
