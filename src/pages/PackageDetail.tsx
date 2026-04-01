@@ -51,6 +51,13 @@ const PackageDetail = () => {
     ? flightQuery.data.reduce((min, f) => f.price < min.price ? f : min, flightQuery.data[0])
     : null;
 
+  // Auto-select cheapest flight when data loads
+  useEffect(() => {
+    if (cheapestFlight && !selectedFlight) {
+      setSelectedFlight(cheapestFlight);
+    }
+  }, [cheapestFlight?.id]);
+
   const { data: isFavorite = false } = useQuery({
     queryKey: ["favorite", user?.id, id],
     queryFn: async () => {
