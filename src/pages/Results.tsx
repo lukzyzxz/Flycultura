@@ -1,4 +1,4 @@
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { Star, ArrowLeft, Plane, Hotel as HotelIcon, Loader2, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +7,7 @@ import { destinations } from "@/lib/data";
 import { eventPackages } from "@/lib/events-data";
 import { searchFlights, searchHotels, FlightResult, HotelResult } from "@/lib/api";
 import { useCart, CartProduct } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { useI18n } from "@/lib/i18n";
@@ -16,6 +17,8 @@ const Results = () => {
   const [searchParams] = useSearchParams();
   const { t, locale } = useI18n();
   const { addItem } = useCart();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const type = searchParams.get("type") || "flights";
   const from = searchParams.get("from") || "";
