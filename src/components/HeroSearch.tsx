@@ -12,6 +12,7 @@ const HeroSearch = () => {
   const [activeTab, setActiveTab] = useState("flights");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [plannerOpen, setPlannerOpen] = useState(false);
   const navigate = useNavigate();
   const { t, locale } = useI18n();
@@ -28,7 +29,16 @@ const HeroSearch = () => {
     : ["Budget", "Luxury", "Adventure", "Family", "Beach", "Cultural"];
 
   const handleSearch = () => {
-    navigate(`/results?type=${activeTab}&from=${from}&to=${to}`);
+    const filterParam = activeFilter ? `&filter=${activeFilter}` : "";
+    navigate(`/results?type=${activeTab}&from=${from}&to=${to}${filterParam}`);
+  };
+
+  const handleFilterClick = (f: string) => {
+    if (activeFilter === f) {
+      setActiveFilter(null);
+    } else {
+      setActiveFilter(f);
+    }
   };
 
   return (
@@ -112,13 +122,17 @@ const HeroSearch = () => {
                 </div>
               </div>
 
-              {/* Quick filters */}
+              {/* Quick filters — toggle style, don't set destination */}
               <div className="flex flex-wrap gap-2 mt-3">
                 {quickFilters.map((f) => (
                   <button
                     key={f}
-                    onClick={() => setTo(f)}
-                    className="px-3 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+                    onClick={() => handleFilterClick(f)}
+                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                      activeFilter === f
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                    }`}
                   >
                     {f}
                   </button>
