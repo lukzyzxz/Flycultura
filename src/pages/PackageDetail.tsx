@@ -224,7 +224,7 @@ const PackageDetail = () => {
             )}
 
             {/* Real Flight Prices Section */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+            <motion.div id="flights-section" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
               <h2 className="font-display text-xl font-bold text-foreground mb-3 flex items-center gap-2">
                 <Plane className="h-5 w-5 text-primary" />
                 {locale === "pt" ? "Voos Disponíveis" : "Available Flights"}
