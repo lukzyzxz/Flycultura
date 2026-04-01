@@ -90,7 +90,13 @@ const PackageDetail = () => {
     );
   }
 
+  const navigate = useNavigate();
+
   const handleAddToCart = () => {
+    if (!user) {
+      navigate(`/auth?redirect=/packages/${pkg.id}`);
+      return;
+    }
     const product: CartProduct = {
       id: pkg.id,
       type: "event",
@@ -105,6 +111,10 @@ const PackageDetail = () => {
   };
 
   const handleAddFlight = (flight: FlightResult) => {
+    if (!user) {
+      navigate(`/auth?redirect=/packages/${pkg.id}`);
+      return;
+    }
     const product: CartProduct = {
       id: `flight-${flight.id}-${pkg.id}`,
       type: "flight",
