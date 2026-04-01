@@ -99,34 +99,30 @@ const PackageDetail = () => {
       navigate(`/auth?redirect=/packages/${pkg.id}`);
       return;
     }
+    const totalPrice = selectedFlight ? pkg.price + selectedFlight.price : pkg.price;
+    const flightInfo = selectedFlight ? ` + ${selectedFlight.airline}` : "";
     const product: CartProduct = {
-      id: pkg.id,
+      id: selectedFlight ? `${pkg.id}__flight-${selectedFlight.id}` : pkg.id,
       type: "event",
-      name: locale === "pt" ? pkg.event : pkg.eventEn,
+      name: `${locale === "pt" ? pkg.event : pkg.eventEn}${flightInfo}`,
       image: pkg.image,
-      price: pkg.price,
+      price: totalPrice,
       description: `${pkg.location} — ${locale === "pt" ? pkg.date : pkg.dateEn}`,
       meta: { location: pkg.location, date: pkg.date, country: pkg.country },
     };
+    // Remove any previous version of this package from cart
+    const existingIds = items.filter(i => i.product.id.startsWith(pkg.id)).map(i => i.product.id);
+    existingIds.forEach(eid => removeItem(eid));
     addItem(product);
     toast({ title: t("cart.added"), description: product.name });
   };
 
-  const handleAddFlight = (flight: FlightResult) => {
-    if (!user) {
-      navigate(`/auth?redirect=/packages/${pkg.id}`);
-      return;
+  const handleSelectFlight = (flight: FlightResult) => {
+    if (selectedFlight?.id === flight.id) {
+      setSelectedFlight(null);
+    } else {
+      setSelectedFlight(flight);
     }
-    const product: CartProduct = {
-      id: `flight-${flight.id}-${pkg.id}`,
-      type: "flight",
-      name: `${flight.airline} — ${flight.origin} → ${flight.destination}`,
-      image: "https://images.unsplash.com/photo-1436491865332-7a61a109db05?w=400&h=300&fit=crop",
-      price: flight.price,
-      description: `${flight.departure ? new Date(flight.departure).toLocaleTimeString(locale === "pt" ? "pt-BR" : "en-US", { hour: "2-digit", minute: "2-digit" }) : ""} | ${flight.duration}`,
-    };
-    addItem(product);
-    toast({ title: t("cart.added"), description: product.name });
   };
 
   const discount = Math.round((1 - pkg.price / pkg.originalPrice) * 100);
