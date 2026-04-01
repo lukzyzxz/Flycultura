@@ -51,6 +51,13 @@ const PackageDetail = () => {
     ? flightQuery.data.reduce((min, f) => f.price < min.price ? f : min, flightQuery.data[0])
     : null;
 
+  // Auto-select cheapest flight when data loads
+  useEffect(() => {
+    if (cheapestFlight && !selectedFlight) {
+      setSelectedFlight(cheapestFlight);
+    }
+  }, [cheapestFlight?.id]);
+
   const { data: isFavorite = false } = useQuery({
     queryKey: ["favorite", user?.id, id],
     queryFn: async () => {
@@ -99,10 +106,11 @@ const PackageDetail = () => {
       navigate(`/auth?redirect=/packages/${pkg.id}`);
       return;
     }
-    const totalPrice = selectedFlight ? pkg.price + selectedFlight.price : pkg.price;
-    const flightInfo = selectedFlight ? ` + ${selectedFlight.airline}` : "";
+    const activeFlight = selectedFlight || cheapestFlight;
+    const totalPrice = activeFlight ? pkg.price + activeFlight.price : pkg.price;
+    const flightInfo = activeFlight ? ` + ${activeFlight.airline}` : "";
     const product: CartProduct = {
-      id: selectedFlight ? `${pkg.id}__flight-${selectedFlight.id}` : pkg.id,
+      id: activeFlight ? `${pkg.id}__flight-${activeFlight.id}` : pkg.id,
       type: "event",
       name: `${locale === "pt" ? pkg.event : pkg.eventEn}${flightInfo}`,
       image: pkg.image,
@@ -118,11 +126,8 @@ const PackageDetail = () => {
   };
 
   const handleSelectFlight = (flight: FlightResult) => {
-    if (selectedFlight?.id === flight.id) {
-      setSelectedFlight(null);
-    } else {
-      setSelectedFlight(flight);
-    }
+    // Always must have a flight selected — only swap, never deselect
+    setSelectedFlight(flight);
   };
 
   const discount = Math.round((1 - pkg.price / pkg.originalPrice) * 100);
@@ -219,7 +224,7 @@ const PackageDetail = () => {
             )}
 
             {/* Real Flight Prices Section */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+            <motion.div id="flights-section" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
               <h2 className="font-display text-xl font-bold text-foreground mb-3 flex items-center gap-2">
                 <Plane className="h-5 w-5 text-primary" />
                 {locale === "pt" ? "Voos Disponíveis" : "Available Flights"}
@@ -341,33 +346,18 @@ const PackageDetail = () => {
                 <div className="rounded-lg bg-primary/5 p-3 border border-primary/20">
                   <div className="flex items-center justify-between mb-1">
                     <p className="text-xs text-muted-foreground">
-                      ✈️ {locale === "pt" ? "Voo selecionado" : "Selected flight"}
+                      ✈️ {locale === "pt" ? "Voo incluído" : "Included flight"}
                     </p>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedFlight(null)}
-                      className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+                    <a
+                      href="#flights-section"
+                      className="text-xs text-primary hover:underline flex items-center gap-1"
                     >
                       <RefreshCw className="h-3 w-3" />
-                      {locale === "pt" ? "Trocar" : "Change"}
-                    </button>
+                      {locale === "pt" ? "Trocar voo" : "Change flight"}
+                    </a>
                   </div>
                   <p className="text-sm font-semibold text-card-foreground">
                     {selectedFlight.airline} — <span className="text-primary">+ R$ {selectedFlight.price.toLocaleString("pt-BR")}</span>
-                  </p>
-                </div>
-              )}
-
-              {!selectedFlight && cheapestFlight && (
-                <div className="rounded-lg bg-muted/50 p-3 border border-border/50">
-                  <p className="text-xs text-muted-foreground mb-1">
-                    {locale === "pt" ? "✈️ A partir de" : "✈️ Starting from"}
-                  </p>
-                  <p className="text-sm font-semibold text-card-foreground">
-                    {cheapestFlight.airline} — <span className="text-primary">+ R$ {cheapestFlight.price.toLocaleString("pt-BR")}</span>
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {locale === "pt" ? "Selecione um voo acima para incluir" : "Select a flight above to include"}
                   </p>
                 </div>
               )}
