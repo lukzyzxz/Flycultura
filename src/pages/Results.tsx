@@ -44,14 +44,14 @@ const Results = () => {
   });
 
   // Resolve airport codes for flight search
-  const resolveAirportCode = (input: string): string => {
-    if (!input) return "GRU.AIRPORT";
+  const resolveAirportCode = (input: string, fallback?: string): string => {
+    if (!input) return fallback || "GRU.AIRPORT";
     const lower = input.toLowerCase();
     const airportMap: Record<string, string> = {
       "são paulo": "GRU.AIRPORT", "sao paulo": "GRU.AIRPORT", "guarulhos": "GRU.AIRPORT", "gru": "GRU.AIRPORT",
-      "new york": "JFK.AIRPORT", "nova york": "JFK.AIRPORT", "jfk": "JFK.AIRPORT",
+      "new york": "JFK.AIRPORT", "nova york": "JFK.AIRPORT", "jfk": "JFK.AIRPORT", "new jersey": "JFK.AIRPORT",
       "miami": "MIA.AIRPORT", "mia": "MIA.AIRPORT",
-      "los angeles": "LAX.AIRPORT", "lax": "LAX.AIRPORT",
+      "los angeles": "LAX.AIRPORT", "lax": "LAX.AIRPORT", "indio": "LAX.AIRPORT", "california": "LAX.AIRPORT",
       "paris": "CDG.AIRPORT", "cdg": "CDG.AIRPORT",
       "londres": "LHR.AIRPORT", "london": "LHR.AIRPORT", "lhr": "LHR.AIRPORT",
       "tokyo": "NRT.AIRPORT", "tóquio": "NRT.AIRPORT", "nrt": "NRT.AIRPORT",
@@ -66,6 +66,16 @@ const Results = () => {
       "mexico": "MEX.AIRPORT", "cidade do mexico": "MEX.AIRPORT", "mexico city": "MEX.AIRPORT",
       "monte carlo": "NCE.AIRPORT", "monaco": "NCE.AIRPORT", "nice": "NCE.AIRPORT",
       "bali": "DPS.AIRPORT", "dps": "DPS.AIRPORT",
+      "istanbul": "IST.AIRPORT", "istambul": "IST.AIRPORT", "ist": "IST.AIRPORT",
+      "marrakech": "RAK.AIRPORT", "marraquexe": "RAK.AIRPORT", "rak": "RAK.AIRPORT",
+      "sydney": "SYD.AIRPORT", "syd": "SYD.AIRPORT",
+      "prague": "PRG.AIRPORT", "praga": "PRG.AIRPORT", "prg": "PRG.AIRPORT",
+      "cartagena": "CTG.AIRPORT", "ctg": "CTG.AIRPORT",
+      "seoul": "ICN.AIRPORT", "seul": "ICN.AIRPORT", "icn": "ICN.AIRPORT",
+      "lisbon": "LIS.AIRPORT", "lisboa": "LIS.AIRPORT", "lis": "LIS.AIRPORT",
+      "amsterdam": "AMS.AIRPORT", "ams": "AMS.AIRPORT",
+      "bangkok": "BKK.AIRPORT", "bkk": "BKK.AIRPORT",
+      "singapore": "SIN.AIRPORT", "cingapura": "SIN.AIRPORT", "sin": "SIN.AIRPORT",
     };
     for (const [key, code] of Object.entries(airportMap)) {
       if (lower.includes(key)) return code;
