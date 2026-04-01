@@ -126,11 +126,8 @@ const PackageDetail = () => {
   };
 
   const handleSelectFlight = (flight: FlightResult) => {
-    if (selectedFlight?.id === flight.id) {
-      setSelectedFlight(null);
-    } else {
-      setSelectedFlight(flight);
-    }
+    // Always must have a flight selected — only swap, never deselect
+    setSelectedFlight(flight);
   };
 
   const discount = Math.round((1 - pkg.price / pkg.originalPrice) * 100);
