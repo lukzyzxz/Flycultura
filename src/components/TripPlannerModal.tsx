@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Sparkles, MapPin, Calendar, DollarSign, Heart, Loader2 } from "lucide-react";
+import { X, Sparkles, MapPin, Calendar, DollarSign, Heart, Loader2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useI18n } from "@/lib/i18n";
@@ -22,13 +22,26 @@ const prefOptionsEn = [
   "Sports", "Art & Museums", "Relaxation", "Backpacking", "Photography",
 ];
 
+/** Strip markdown formatting for clean display */
+const stripMarkdown = (text: string): string => {
+  return text
+    .replace(/^#{1,6}\s+/gm, "")       // Remove # headers
+    .replace(/\*\*(.+?)\*\*/g, "$1")    // **bold** → bold
+    .replace(/\*(.+?)\*/g, "$1")        // *italic* → italic
+    .replace(/^[-*]\s+/gm, "• ")        // - item → • item
+    .replace(/^>\s+/gm, "")             // > blockquote
+    .replace(/`(.+?)`/g, "$1")          // `code`
+    .replace(/\n{3,}/g, "\n\n");        // Multiple blank lines
+};
+
 const TripPlannerModal = ({ open, onClose }: Props) => {
-  const { t, locale } = useI18n();
+  const { locale } = useI18n();
   const [step, setStep] = useState(0);
   const [destination, setDestination] = useState("");
   const [dates, setDates] = useState("");
   const [budget, setBudget] = useState("");
   const [preferences, setPreferences] = useState<string[]>([]);
+  const [customInterest, setCustomInterest] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState("");
 
@@ -36,6 +49,14 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
 
   const togglePref = (p: string) =>
     setPreferences((prev) => (prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]));
+
+  const addCustomInterest = () => {
+    const trimmed = customInterest.trim();
+    if (trimmed && !preferences.includes(trimmed)) {
+      setPreferences((prev) => [...prev, trimmed]);
+      setCustomInterest("");
+    }
+  };
 
   const handleGenerate = async () => {
     setLoading(true);
@@ -46,7 +67,8 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
       });
 
       if (error) throw error;
-      setResult(data?.itinerary || (locale === "pt" ? "Erro ao gerar plano." : "Error generating plan."));
+      const raw = data?.itinerary || (locale === "pt" ? "Erro ao gerar plano." : "Error generating plan.");
+      setResult(stripMarkdown(raw));
       setStep(3);
     } catch {
       setResult(locale === "pt" ? "Não foi possível gerar o plano. Tente novamente." : "Could not generate plan. Please try again.");
@@ -62,6 +84,7 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
     setDates("");
     setBudget("");
     setPreferences([]);
+    setCustomInterest("");
     setResult("");
   };
 
@@ -173,7 +196,7 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
                 <div>
                   <label className="text-sm font-medium text-foreground mb-2 block">
                     <Heart className="h-4 w-4 inline mr-1" />
-                    {locale === "pt" ? "O que você curte? (selecione pelo menos 1)" : "What do you enjoy? (select at least 1)"}
+                    {locale === "pt" ? "O que você curte? (selecione ou digite)" : "What do you enjoy? (select or type)"}
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {prefOptions.map((p) => (
@@ -189,6 +212,38 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
                         {p}
                       </button>
                     ))}
+                    {/* Show custom interests as chips */}
+                    {preferences
+                      .filter((p) => !prefOptions.includes(p))
+                      .map((p) => (
+                        <button
+                          key={p}
+                          onClick={() => togglePref(p)}
+                          className="px-3 py-1.5 rounded-full text-sm font-medium bg-accent text-accent-foreground transition-all"
+                        >
+                          {p} ✕
+                        </button>
+                      ))}
+                  </div>
+                  {/* Custom interest input */}
+                  <div className="flex gap-2 mt-3">
+                    <Input
+                      placeholder={locale === "pt" ? "Digite outro interesse..." : "Type another interest..."}
+                      value={customInterest}
+                      onChange={(e) => setCustomInterest(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addCustomInterest())}
+                      className="text-sm"
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={addCustomInterest}
+                      disabled={!customInterest.trim()}
+                      className="shrink-0"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -214,7 +269,7 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
             {step === 3 && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
                 <div className="bg-muted/50 rounded-xl p-4 max-h-96 overflow-y-auto">
-                  <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap text-sm">
+                  <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap text-sm leading-relaxed">
                     {result}
                   </div>
                 </div>
