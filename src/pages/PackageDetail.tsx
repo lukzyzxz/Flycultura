@@ -110,7 +110,7 @@ const PackageDetail = () => {
     const totalPrice = activeFlight ? pkg.price + activeFlight.price : pkg.price;
     const flightInfo = activeFlight ? ` + ${activeFlight.airline}` : "";
     const product: CartProduct = {
-      id: selectedFlight ? `${pkg.id}__flight-${selectedFlight.id}` : pkg.id,
+      id: activeFlight ? `${pkg.id}__flight-${activeFlight.id}` : pkg.id,
       type: "event",
       name: `${locale === "pt" ? pkg.event : pkg.eventEn}${flightInfo}`,
       image: pkg.image,
