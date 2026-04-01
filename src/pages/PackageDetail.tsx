@@ -237,34 +237,59 @@ const PackageDetail = () => {
 
               {flightQuery.data && flightQuery.data.length > 0 && (
                 <div className="space-y-3">
-                  {flightQuery.data.slice(0, 5).map((flight, i) => (
-                    <div key={flight.id} className="flex flex-col sm:flex-row items-center gap-3 p-3 rounded-lg bg-muted/50 border border-border/50">
-                      <div className="flex items-center gap-2 sm:w-1/4">
-                        {flight.logo && <img src={flight.logo} alt={flight.airline} className="h-6 w-6 object-contain" />}
-                        <span className="text-sm font-medium text-card-foreground">{flight.airline}</span>
-                      </div>
-                      <div className="flex-1 flex items-center gap-3 text-xs text-muted-foreground">
-                        <span className="font-semibold text-card-foreground">
-                          {flight.departure ? new Date(flight.departure).toLocaleTimeString(locale === "pt" ? "pt-BR" : "en-US", { hour: "2-digit", minute: "2-digit" }) : "--"}
-                        </span>
-                        <div className="flex-1 text-center">
-                          <span>{flight.duration}</span>
-                          <div className="border-t border-border mx-2" />
-                          <span>{flight.stops === 0 ? (locale === "pt" ? "Direto" : "Direct") : `${flight.stops} ${locale === "pt" ? "parada(s)" : "stop(s)"}`}</span>
+                  {flightQuery.data.slice(0, 5).map((flight) => {
+                    const isSelected = selectedFlight?.id === flight.id;
+                    return (
+                      <div
+                        key={flight.id}
+                        className={`flex flex-col sm:flex-row items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                          isSelected
+                            ? "bg-primary/10 border-primary ring-1 ring-primary/30"
+                            : "bg-muted/50 border-border/50 hover:border-primary/30"
+                        }`}
+                        onClick={() => handleSelectFlight(flight)}
+                      >
+                        <div className="flex items-center gap-2 sm:w-1/4">
+                          {flight.logo && <img src={flight.logo} alt={flight.airline} className="h-6 w-6 object-contain" />}
+                          <span className="text-sm font-medium text-card-foreground">{flight.airline}</span>
                         </div>
-                        <span className="font-semibold text-card-foreground">
-                          {flight.arrival ? new Date(flight.arrival).toLocaleTimeString(locale === "pt" ? "pt-BR" : "en-US", { hour: "2-digit", minute: "2-digit" }) : "--"}
-                        </span>
+                        <div className="flex-1 flex items-center gap-3 text-xs text-muted-foreground">
+                          <span className="font-semibold text-card-foreground">
+                            {flight.departure ? new Date(flight.departure).toLocaleTimeString(locale === "pt" ? "pt-BR" : "en-US", { hour: "2-digit", minute: "2-digit" }) : "--"}
+                          </span>
+                          <div className="flex-1 text-center">
+                            <span>{flight.duration}</span>
+                            <div className="border-t border-border mx-2" />
+                            <span>{flight.stops === 0 ? (locale === "pt" ? "Direto" : "Direct") : `${flight.stops} ${locale === "pt" ? "parada(s)" : "stop(s)"}`}</span>
+                          </div>
+                          <span className="font-semibold text-card-foreground">
+                            {flight.arrival ? new Date(flight.arrival).toLocaleTimeString(locale === "pt" ? "pt-BR" : "en-US", { hour: "2-digit", minute: "2-digit" }) : "--"}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-lg font-bold text-primary">R$ {flight.price.toLocaleString("pt-BR")}</span>
+                          <Button
+                            size="sm"
+                            variant={isSelected ? "default" : "outline"}
+                            onClick={(e) => { e.stopPropagation(); handleSelectFlight(flight); }}
+                            className="gap-1"
+                          >
+                            {isSelected ? (
+                              <>
+                                <Check className="h-3.5 w-3.5" />
+                                {locale === "pt" ? "Selecionado" : "Selected"}
+                              </>
+                            ) : (
+                              <>
+                                <Plane className="h-3.5 w-3.5" />
+                                {locale === "pt" ? "Selecionar" : "Select"}
+                              </>
+                            )}
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-lg font-bold text-primary">R$ {flight.price.toLocaleString("pt-BR")}</span>
-                        <Button size="sm" variant="outline" onClick={() => handleAddFlight(flight)} className="gap-1">
-                          <ShoppingCart className="h-3.5 w-3.5" />
-                          {locale === "pt" ? "Adicionar" : "Add"}
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
 
