@@ -336,20 +336,63 @@ const PackageDetail = () => {
                 </div>
               </div>
 
-              {/* Real flight price indicator */}
-              {cheapestFlight && (
-                <div className="rounded-lg bg-muted/50 p-3 border border-border/50">
-                  <p className="text-xs text-muted-foreground mb-1">
-                    {locale === "pt" ? "✈️ Voo mais barato encontrado" : "✈️ Cheapest flight found"}
-                  </p>
+              {/* Selected flight price */}
+              {selectedFlight && (
+                <div className="rounded-lg bg-primary/5 p-3 border border-primary/20">
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-xs text-muted-foreground">
+                      ✈️ {locale === "pt" ? "Voo selecionado" : "Selected flight"}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedFlight(null)}
+                      className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+                    >
+                      <RefreshCw className="h-3 w-3" />
+                      {locale === "pt" ? "Trocar" : "Change"}
+                    </button>
+                  </div>
                   <p className="text-sm font-semibold text-card-foreground">
-                    {cheapestFlight.airline} — <span className="text-primary">R$ {cheapestFlight.price.toLocaleString("pt-BR")}</span>
+                    {selectedFlight.airline} — <span className="text-primary">+ R$ {selectedFlight.price.toLocaleString("pt-BR")}</span>
                   </p>
                 </div>
               )}
+
+              {!selectedFlight && cheapestFlight && (
+                <div className="rounded-lg bg-muted/50 p-3 border border-border/50">
+                  <p className="text-xs text-muted-foreground mb-1">
+                    {locale === "pt" ? "✈️ A partir de" : "✈️ Starting from"}
+                  </p>
+                  <p className="text-sm font-semibold text-card-foreground">
+                    {cheapestFlight.airline} — <span className="text-primary">+ R$ {cheapestFlight.price.toLocaleString("pt-BR")}</span>
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {locale === "pt" ? "Selecione um voo acima para incluir" : "Select a flight above to include"}
+                  </p>
+                </div>
+              )}
+
               {flightQuery.isLoading && (
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Loader2 className="h-3 w-3 animate-spin" /> {locale === "pt" ? "Buscando voos..." : "Searching flights..."}
+                </div>
+              )}
+
+              {/* Total with flight */}
+              {selectedFlight && (
+                <div className="rounded-lg bg-accent/10 p-3 border border-accent/20">
+                  <div className="flex justify-between text-sm text-muted-foreground">
+                    <span>{locale === "pt" ? "Pacote" : "Package"}</span>
+                    <span>R$ {pkg.price.toLocaleString("pt-BR")}</span>
+                  </div>
+                  <div className="flex justify-between text-sm text-muted-foreground">
+                    <span>{locale === "pt" ? "Voo" : "Flight"}</span>
+                    <span>R$ {selectedFlight.price.toLocaleString("pt-BR")}</span>
+                  </div>
+                  <div className="border-t border-border mt-2 pt-2 flex justify-between">
+                    <span className="font-bold text-foreground">Total</span>
+                    <span className="font-bold text-primary text-lg">R$ {(pkg.price + selectedFlight.price).toLocaleString("pt-BR")}</span>
+                  </div>
                 </div>
               )}
 
