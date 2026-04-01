@@ -4,16 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useI18n } from "@/lib/i18n";
 import { useCart, CartProduct } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { eventPackages } from "@/lib/events-data";
 import { deals } from "@/lib/data";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useEffect } from "react";
 
 const DiscoverySections = () => {
   const { t, locale } = useI18n();
   const { addItem } = useCart();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [loaded, setLoaded] = useState(false);
 
