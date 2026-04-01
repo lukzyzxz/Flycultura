@@ -13,8 +13,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { searchFlights, FlightResult } from "@/lib/api";
+import { useState } from "react";
 import {
-  Plane, Hotel, Ticket, Car, ArrowLeft, ShoppingCart, Check, MapPin, Calendar, Star, Heart, Loader2,
+  Plane, Hotel, Ticket, Car, ArrowLeft, ShoppingCart, Check, MapPin, Calendar, Star, Heart, Loader2, RefreshCw,
 } from "lucide-react";
 
 const PackageDetail = () => {
