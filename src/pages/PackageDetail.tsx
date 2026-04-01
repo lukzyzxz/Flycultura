@@ -106,8 +106,9 @@ const PackageDetail = () => {
       navigate(`/auth?redirect=/packages/${pkg.id}`);
       return;
     }
-    const totalPrice = selectedFlight ? pkg.price + selectedFlight.price : pkg.price;
-    const flightInfo = selectedFlight ? ` + ${selectedFlight.airline}` : "";
+    const activeFlight = selectedFlight || cheapestFlight;
+    const totalPrice = activeFlight ? pkg.price + activeFlight.price : pkg.price;
+    const flightInfo = activeFlight ? ` + ${activeFlight.airline}` : "";
     const product: CartProduct = {
       id: selectedFlight ? `${pkg.id}__flight-${selectedFlight.id}` : pkg.id,
       type: "event",
