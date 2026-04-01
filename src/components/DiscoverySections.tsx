@@ -41,6 +41,10 @@ const DiscoverySections = () => {
     .slice(0, 4);
 
   const handleAddPackage = (pkg: typeof eventPackages[0]) => {
+    if (!user) {
+      navigate(`/auth?redirect=/packages/${pkg.id}`);
+      return;
+    }
     const product: CartProduct = {
       id: pkg.id,
       type: "event",
@@ -54,6 +58,10 @@ const DiscoverySections = () => {
   };
 
   const handleAddDeal = (deal: typeof deals[0]) => {
+    if (!user) {
+      navigate("/auth?redirect=/deals");
+      return;
+    }
     const product: CartProduct = {
       id: `deal-${deal.id}`,
       type: "deal",
