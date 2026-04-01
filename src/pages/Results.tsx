@@ -83,8 +83,11 @@ const Results = () => {
     return `${input.toUpperCase().slice(0, 3)}.AIRPORT`;
   };
 
-  const fromCode = resolveAirportCode(from);
-  const toCode = resolveAirportCode(to);
+  const fromCode = resolveAirportCode(from, "GRU.AIRPORT");
+  const toCode = resolveAirportCode(to, "JFK.AIRPORT");
+
+  // Prevent same origin/destination
+  const safeToCode = toCode === fromCode ? "JFK.AIRPORT" : toCode;
 
   const flightsQuery = useQuery({
     queryKey: ["flights", fromCode, toCode],
