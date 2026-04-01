@@ -12,8 +12,9 @@ import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
+import { searchFlights, FlightResult } from "@/lib/api";
 import {
-  Plane, Hotel, Ticket, Car, ArrowLeft, ShoppingCart, Check, MapPin, Calendar, Star, Heart,
+  Plane, Hotel, Ticket, Car, ArrowLeft, ShoppingCart, Check, MapPin, Calendar, Star, Heart, Loader2,
 } from "lucide-react";
 
 const PackageDetail = () => {
@@ -32,6 +33,21 @@ const PackageDetail = () => {
       addRecent({ id: pkg.id, type: "event", name: locale === "pt" ? pkg.event : pkg.eventEn, image: pkg.image, price: pkg.price });
     }
   }, [id]);
+
+  // Fetch real flight prices for this package's route
+  const flightQuery = useQuery({
+    queryKey: ["package-flights", pkg?.flight.fromCode, pkg?.flight.toCode],
+    queryFn: () => searchFlights({
+      from: `${pkg!.flight.fromCode}.AIRPORT`,
+      to: `${pkg!.flight.toCode}.AIRPORT`,
+    }),
+    enabled: !!pkg && pkg.flight.fromCode !== pkg.flight.toCode,
+    staleTime: 10 * 60 * 1000,
+  });
+
+  const cheapestFlight = flightQuery.data?.length
+    ? flightQuery.data.reduce((min, f) => f.price < min.price ? f : min, flightQuery.data[0])
+    : null;
 
   const { data: isFavorite = false } = useQuery({
     queryKey: ["favorite", user?.id, id],
@@ -83,6 +99,19 @@ const PackageDetail = () => {
       price: pkg.price,
       description: `${pkg.location} — ${locale === "pt" ? pkg.date : pkg.dateEn}`,
       meta: { location: pkg.location, date: pkg.date, country: pkg.country },
+    };
+    addItem(product);
+    toast({ title: t("cart.added"), description: product.name });
+  };
+
+  const handleAddFlight = (flight: FlightResult) => {
+    const product: CartProduct = {
+      id: `flight-${flight.id}-${pkg.id}`,
+      type: "flight",
+      name: `${flight.airline} — ${flight.origin} → ${flight.destination}`,
+      image: "https://images.unsplash.com/photo-1436491865332-7a61a109db05?w=400&h=300&fit=crop",
+      price: flight.price,
+      description: `${flight.departure ? new Date(flight.departure).toLocaleTimeString(locale === "pt" ? "pt-BR" : "en-US", { hour: "2-digit", minute: "2-digit" }) : ""} | ${flight.duration}`,
     };
     addItem(product);
     toast({ title: t("cart.added"), description: product.name });
@@ -180,6 +209,63 @@ const PackageDetail = () => {
                 </div>
               </motion.div>
             )}
+
+            {/* Real Flight Prices Section */}
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+              <h2 className="font-display text-xl font-bold text-foreground mb-3 flex items-center gap-2">
+                <Plane className="h-5 w-5 text-primary" />
+                {locale === "pt" ? "Voos Disponíveis" : "Available Flights"}
+                <span className="text-sm font-normal text-muted-foreground">
+                  ({pkg.flight.from} → {pkg.location})
+                </span>
+              </h2>
+
+              {flightQuery.isLoading && (
+                <div className="flex items-center gap-3 py-6 text-muted-foreground">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span>{locale === "pt" ? "Buscando voos em tempo real..." : "Searching real-time flights..."}</span>
+                </div>
+              )}
+
+              {flightQuery.data && flightQuery.data.length > 0 && (
+                <div className="space-y-3">
+                  {flightQuery.data.slice(0, 5).map((flight, i) => (
+                    <div key={flight.id} className="flex flex-col sm:flex-row items-center gap-3 p-3 rounded-lg bg-muted/50 border border-border/50">
+                      <div className="flex items-center gap-2 sm:w-1/4">
+                        {flight.logo && <img src={flight.logo} alt={flight.airline} className="h-6 w-6 object-contain" />}
+                        <span className="text-sm font-medium text-card-foreground">{flight.airline}</span>
+                      </div>
+                      <div className="flex-1 flex items-center gap-3 text-xs text-muted-foreground">
+                        <span className="font-semibold text-card-foreground">
+                          {flight.departure ? new Date(flight.departure).toLocaleTimeString(locale === "pt" ? "pt-BR" : "en-US", { hour: "2-digit", minute: "2-digit" }) : "--"}
+                        </span>
+                        <div className="flex-1 text-center">
+                          <span>{flight.duration}</span>
+                          <div className="border-t border-border mx-2" />
+                          <span>{flight.stops === 0 ? (locale === "pt" ? "Direto" : "Direct") : `${flight.stops} ${locale === "pt" ? "parada(s)" : "stop(s)"}`}</span>
+                        </div>
+                        <span className="font-semibold text-card-foreground">
+                          {flight.arrival ? new Date(flight.arrival).toLocaleTimeString(locale === "pt" ? "pt-BR" : "en-US", { hour: "2-digit", minute: "2-digit" }) : "--"}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-lg font-bold text-primary">R$ {flight.price.toLocaleString("pt-BR")}</span>
+                        <Button size="sm" variant="outline" onClick={() => handleAddFlight(flight)} className="gap-1">
+                          <ShoppingCart className="h-3.5 w-3.5" />
+                          {locale === "pt" ? "Adicionar" : "Add"}
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {flightQuery.data && flightQuery.data.length === 0 && (
+                <p className="text-sm text-muted-foreground py-4">
+                  {locale === "pt" ? "Nenhum voo encontrado para esta rota no momento." : "No flights found for this route at the moment."}
+                </p>
+              )}
+            </motion.div>
           </div>
 
           {/* Sidebar - Pricing & CTA */}
@@ -216,6 +302,24 @@ const PackageDetail = () => {
                   <span className="text-sm text-muted-foreground">{t("events.perPerson")}</span>
                 </div>
               </div>
+
+              {/* Real flight price indicator */}
+              {cheapestFlight && (
+                <div className="rounded-lg bg-muted/50 p-3 border border-border/50">
+                  <p className="text-xs text-muted-foreground mb-1">
+                    {locale === "pt" ? "✈️ Voo mais barato encontrado" : "✈️ Cheapest flight found"}
+                  </p>
+                  <p className="text-sm font-semibold text-card-foreground">
+                    {cheapestFlight.airline} — <span className="text-primary">R$ {cheapestFlight.price.toLocaleString("pt-BR")}</span>
+                  </p>
+                </div>
+              )}
+              {flightQuery.isLoading && (
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Loader2 className="h-3 w-3 animate-spin" /> {locale === "pt" ? "Buscando voos..." : "Searching flights..."}
+                </div>
+              )}
+
               <Button onClick={handleAddToCart} className="w-full gap-2" size="lg">
                 <ShoppingCart className="h-5 w-5" />
                 {t("cart.addToCart")}
