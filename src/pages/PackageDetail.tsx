@@ -21,11 +21,12 @@ import {
 const PackageDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { t, locale } = useI18n();
-  const { addItem } = useCart();
+  const { addItem, removeItem, items } = useCart();
   const { toast } = useToast();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { addItem: addRecent } = useRecentlyViewed();
+  const [selectedFlight, setSelectedFlight] = useState<FlightResult | null>(null);
 
   const pkg = eventPackages.find((p) => p.id === id);
 
