@@ -21,9 +21,18 @@ serve(async (req) => {
   try {
     const { from, to, departDate, adults } = await req.json();
 
+    // Reject same origin/destination
+    const fromId = from || "GRU.AIRPORT";
+    const toId = to || "JFK.AIRPORT";
+    if (fromId === toId) {
+      return new Response(JSON.stringify({ data: { flightOffers: [] }, fallback: true, reason: "same_origin_dest" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const params = new URLSearchParams({
-      fromId: from || "GRU.AIRPORT",
-      toId: to || "JFK.AIRPORT",
+      fromId,
+      toId,
       departDate: departDate || new Date(Date.now() + 30 * 86400000).toISOString().split("T")[0],
       adults: String(adults || 1),
       cabinClass: "ECONOMY",
