@@ -90,9 +90,9 @@ const Results = () => {
   const safeToCode = toCode === fromCode ? "JFK.AIRPORT" : toCode;
 
   const flightsQuery = useQuery({
-    queryKey: ["flights", fromCode, toCode],
-    queryFn: () => searchFlights({ from: fromCode, to: toCode }),
-    enabled: type === "flights",
+    queryKey: ["flights", fromCode, safeToCode],
+    queryFn: () => searchFlights({ from: fromCode, to: safeToCode }),
+    enabled: type === "flights" && fromCode !== safeToCode,
     staleTime: 5 * 60 * 1000,
   });
 
