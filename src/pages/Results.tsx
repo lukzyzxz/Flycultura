@@ -110,6 +110,7 @@ const Results = () => {
   const isError = (type === "flights" && flightsQuery.isError) || (type === "hotels" && hotelsQuery.isError);
 
   const handleAddFlight = (flight: FlightResult) => {
+    if (!user) { navigate(`/auth?redirect=/results?${searchParams.toString()}`); return; }
     const product: CartProduct = {
       id: `flight-${flight.id}`,
       type: "flight",
@@ -123,6 +124,7 @@ const Results = () => {
   };
 
   const handleAddHotel = (hotel: HotelResult) => {
+    if (!user) { navigate(`/auth?redirect=/results?${searchParams.toString()}`); return; }
     const product: CartProduct = {
       id: `hotel-${hotel.id}`,
       type: "hotel",
@@ -136,6 +138,7 @@ const Results = () => {
   };
 
   const handleAddPackage = (pkg: typeof eventPackages[0]) => {
+    if (!user) { navigate(`/auth?redirect=/packages/${pkg.id}`); return; }
     const product: CartProduct = {
       id: pkg.id,
       type: "event",
