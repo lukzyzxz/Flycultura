@@ -209,7 +209,7 @@ const Cart = () => {
 
               {!user ? (
                 <div className="space-y-2">
-                  <Button onClick={() => navigate("/auth")} className="w-full" size="lg">{t("cart.loginToBook")}</Button>
+                  <Button onClick={() => navigate("/auth?redirect=/cart")} className="w-full" size="lg">{t("cart.loginToBook")}</Button>
                   <p className="text-xs text-muted-foreground text-center">{t("cart.loginRequired")}</p>
                 </div>
               ) : (

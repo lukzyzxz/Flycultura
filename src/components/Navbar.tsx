@@ -39,7 +39,7 @@ const Navbar = () => {
           <span className="text-gradient">FlyCultura</span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-1">
+        <div className="hidden md:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
           {links.map((l) => (
             <Link
               key={l.to}
