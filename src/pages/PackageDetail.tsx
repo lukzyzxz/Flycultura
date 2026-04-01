@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { eventPackages } from "@/lib/events-data";
 import { useCart, CartProduct } from "@/contexts/CartContext";
@@ -90,7 +90,13 @@ const PackageDetail = () => {
     );
   }
 
+  const navigate = useNavigate();
+
   const handleAddToCart = () => {
+    if (!user) {
+      navigate(`/auth?redirect=/packages/${pkg.id}`);
+      return;
+    }
     const product: CartProduct = {
       id: pkg.id,
       type: "event",
@@ -105,6 +111,10 @@ const PackageDetail = () => {
   };
 
   const handleAddFlight = (flight: FlightResult) => {
+    if (!user) {
+      navigate(`/auth?redirect=/packages/${pkg.id}`);
+      return;
+    }
     const product: CartProduct = {
       id: `flight-${flight.id}-${pkg.id}`,
       type: "flight",

@@ -83,11 +83,14 @@ const Auth = () => {
         const { error } = await signUp(values.email, values.password, values.fullName);
         if (error) throw error;
         toast({ title: t("auth.signUpSuccess") });
+        // After signup, switch to signin so user can log in and be redirected home
         switchMode("signin");
       } else {
         const { error } = await signIn(values.email, values.password);
         if (error) throw error;
-        navigate("/");
+        // Redirect to previous page or home after login
+        const redirectTo = new URLSearchParams(window.location.search).get("redirect") || "/";
+        navigate(redirectTo);
       }
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
