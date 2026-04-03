@@ -548,7 +548,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "US",
     date: "Junho 2025",
     dateEn: "June 2025",
-    image: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=800&h=500&fit=crop",
+    image: "https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=800&h=500&fit=crop",
     price: 15490,
     originalPrice: 23290,
     badge: "🏆 Clubes",
