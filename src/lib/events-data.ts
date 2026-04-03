@@ -173,7 +173,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "US",
     date: "Julho 2026",
     dateEn: "July 2026",
-    image: "https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=800&h=500&fit=crop",
+    image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=500&fit=crop",
     price: 36990,
     originalPrice: 52990,
     badge: "🏆 Grande Final",
