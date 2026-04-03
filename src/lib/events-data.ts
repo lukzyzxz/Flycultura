@@ -490,7 +490,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "US",
     date: "Abril 2027",
     dateEn: "April 2027",
-    image: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&h=500&fit=crop",
+    image: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&h=500&fit=crop",
     price: 14990,
     originalPrice: 22490,
     badge: "🎵 Festival",
