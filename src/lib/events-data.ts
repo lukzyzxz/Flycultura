@@ -403,7 +403,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "US",
     date: "Junho 2027",
     dateEn: "June 2027",
-    image: "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&h=500&fit=crop",
+    image: "https://images.unsplash.com/photo-1504450758481-7338bbe75c8e?w=800&h=500&fit=crop",
     price: 24990,
     originalPrice: 37490,
     badge: "🏀 NBA",
