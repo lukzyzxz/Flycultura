@@ -15,6 +15,10 @@ import EventPackages from "./pages/EventPackages.tsx";
 import PackageDetail from "./pages/PackageDetail.tsx";
 import Cart from "./pages/Cart.tsx";
 import Checkout from "./pages/Checkout.tsx";
+import About from "./pages/About.tsx";
+import HelpCenter from "./pages/HelpCenter.tsx";
+import Privacy from "./pages/Privacy.tsx";
+import Terms from "./pages/Terms.tsx";
 
 import Auth from "./pages/Auth.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";

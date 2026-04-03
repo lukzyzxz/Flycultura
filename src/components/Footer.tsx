@@ -6,16 +6,42 @@ const Footer = () => {
   const { t, locale } = useI18n();
 
   const exploreLinks = locale === "pt"
-    ? ["Voos", "Hotéis", "Pacotes", "Cruzeiros"]
-    : ["Flights", "Hotels", "Packages", "Cruises"];
+    ? [
+        { label: "Voos", to: "/results?type=flights" },
+        { label: "Hotéis", to: "/results?type=hotels" },
+        { label: "Pacotes", to: "/packages" },
+        { label: "Ofertas", to: "/deals" },
+      ]
+    : [
+        { label: "Flights", to: "/results?type=flights" },
+        { label: "Hotels", to: "/results?type=hotels" },
+        { label: "Packages", to: "/packages" },
+        { label: "Deals", to: "/deals" },
+      ];
 
   const companyLinks = locale === "pt"
-    ? ["Sobre", "Blog", "Carreiras", "Imprensa"]
-    : ["About", "Blog", "Careers", "Press"];
+    ? [
+        { label: "Sobre", to: "/about" },
+        { label: "Carreiras", to: "/about" },
+      ]
+    : [
+        { label: "About", to: "/about" },
+        { label: "Careers", to: "/about" },
+      ];
 
   const supportLinks = locale === "pt"
-    ? ["Central de Ajuda", "Contato", "Privacidade", "Termos"]
-    : ["Help Center", "Contact", "Privacy", "Terms"];
+    ? [
+        { label: "Central de Ajuda", to: "/help" },
+        { label: "Contato", to: "/help" },
+        { label: "Privacidade", to: "/privacy" },
+        { label: "Termos", to: "/terms" },
+      ]
+    : [
+        { label: "Help Center", to: "/help" },
+        { label: "Contact", to: "/help" },
+        { label: "Privacy", to: "/privacy" },
+        { label: "Terms", to: "/terms" },
+      ];
 
   return (
     <footer className="border-t border-border bg-card py-12">
@@ -37,8 +63,10 @@ const Footer = () => {
               <h4 className="font-display font-semibold text-card-foreground mb-3">{col.title}</h4>
               <ul className="space-y-2">
                 {col.links.map((l) => (
-                  <li key={l}>
-                    <span className="text-sm text-muted-foreground hover:text-primary cursor-pointer transition-colors">{l}</span>
+                  <li key={l.label}>
+                    <Link to={l.to} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                      {l.label}
+                    </Link>
                   </li>
                 ))}
               </ul>
