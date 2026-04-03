@@ -258,7 +258,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "BR",
     date: "Novembro 2026",
     dateEn: "November 2026",
-    image: "https://images.unsplash.com/photo-1541447270888-83e8494f9c08?w=800&h=500&fit=crop",
+    image: "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=800&h=500&fit=crop",
     price: 4990,
     originalPrice: 7990,
     badge: "🏎️ Fórmula 1",
