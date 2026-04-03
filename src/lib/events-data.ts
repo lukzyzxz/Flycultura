@@ -92,7 +92,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "US",
     date: "Junho 2026",
     dateEn: "June 2026",
-    image: "https://images.unsplash.com/photo-1522778526097-ce0a22ceb253?w=800&h=500&fit=crop",
+    image: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=800&h=500&fit=crop",
     price: 19290,
     originalPrice: 28990,
     badge: "⚽ Copa do Mundo",
