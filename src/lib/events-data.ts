@@ -316,7 +316,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "DE",
     date: "Maio 2026",
     dateEn: "May 2026",
-    image: "https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?w=800&h=500&fit=crop",
+    image: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=800&h=500&fit=crop",
     price: 21090,
     originalPrice: 30590,
     badge: "⚽ Champions",
