@@ -374,7 +374,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "BR",
     date: "Fevereiro 2027",
     dateEn: "February 2027",
-    image: "https://images.unsplash.com/photo-1518310383802-640c2de311b2?w=800&h=500&fit=crop",
+    image: "https://images.unsplash.com/photo-1551632811-561732d1e306?w=800&h=500&fit=crop",
     price: 4990,
     originalPrice: 7490,
     badge: "🎭 Carnaval",
