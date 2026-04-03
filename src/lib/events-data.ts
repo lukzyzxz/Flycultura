@@ -345,7 +345,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "GB",
     date: "Julho 2026",
     dateEn: "July 2026",
-    image: "https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800&h=500&fit=crop",
+    image: "https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=800&h=500&fit=crop",
     price: 17390,
     originalPrice: 25890,
     badge: "🎾 Tênis",
