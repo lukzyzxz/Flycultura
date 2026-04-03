@@ -432,7 +432,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "BR",
     date: "Setembro 2026",
     dateEn: "September 2026",
-    image: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800&h=500&fit=crop",
+    image: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&h=500&fit=crop",
     price: 3990,
     originalPrice: 5990,
     badge: "🎸 Festival",
