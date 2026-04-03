@@ -287,7 +287,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "US",
     date: "Fevereiro 2027",
     dateEn: "February 2027",
-    image: "https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?w=800&h=500&fit=crop",
+    image: "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=800&h=500&fit=crop",
     price: 28990,
     originalPrice: 42290,
     badge: "🏈 Super Bowl",
