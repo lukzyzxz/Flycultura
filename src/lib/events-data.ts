@@ -519,7 +519,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "AR",
     date: "Junho 2028",
     dateEn: "June 2028",
-    image: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=800&h=500&fit=crop",
+    image: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=800&h=500&fit=crop",
     price: 7990,
     originalPrice: 11990,
     badge: "⚽ Copa América",
