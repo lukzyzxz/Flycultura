@@ -19,6 +19,7 @@ import About from "./pages/About.tsx";
 import HelpCenter from "./pages/HelpCenter.tsx";
 import Privacy from "./pages/Privacy.tsx";
 import Terms from "./pages/Terms.tsx";
+import Blog from "./pages/Blog.tsx";
 
 import Auth from "./pages/Auth.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
