@@ -11,12 +11,14 @@ const Footer = () => {
         { label: "Hotéis", to: "/results?type=hotels" },
         { label: "Pacotes", to: "/packages" },
         { label: "Ofertas", to: "/deals" },
+        { label: "Blog", to: "/blog" },
       ]
     : [
         { label: "Flights", to: "/results?type=flights" },
         { label: "Hotels", to: "/results?type=hotels" },
         { label: "Packages", to: "/packages" },
         { label: "Deals", to: "/deals" },
+        { label: "Blog", to: "/blog" },
       ];
 
   const companyLinks = locale === "pt"
