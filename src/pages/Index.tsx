@@ -3,6 +3,7 @@ import DestinationCard from "@/components/DestinationCard";
 import DiscoverySections from "@/components/DiscoverySections";
 import RecentlyViewed from "@/components/RecentlyViewed";
 import ForYouSection from "@/components/ForYouSection";
+import Testimonials from "@/components/Testimonials";
 import Footer from "@/components/Footer";
 import { destinations } from "@/lib/data";
 import { motion } from "framer-motion";
@@ -59,6 +60,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Testimonials */}
+      <Testimonials />
 
       {/* CTA */}
       <section className="py-14 md:py-20">
