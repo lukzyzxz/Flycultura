@@ -217,7 +217,14 @@ const Checkout = () => {
                     placeholder="João Silva"
                     value={form.cardName}
                     onChange={(e) => setForm({ ...form, cardName: e.target.value })}
+                    aria-invalid={!!nameError}
+                    className={nameError ? "border-destructive" : ""}
                   />
+                  {nameError && (
+                    <p className="flex items-center gap-1 text-xs text-destructive mt-1">
+                      <AlertCircle className="h-3 w-3" /> {nameError}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -261,7 +268,14 @@ const Checkout = () => {
                       value={form.cpf}
                       onChange={(e) => setForm({ ...form, cpf: formatCPF(e.target.value) })}
                       maxLength={14}
+                      aria-invalid={!!cpfError}
+                      className={cpfError ? "border-destructive" : ""}
                     />
+                    {cpfError && (
+                      <p className="flex items-center gap-1 text-xs text-destructive mt-1">
+                        <AlertCircle className="h-3 w-3" /> {cpfError}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
