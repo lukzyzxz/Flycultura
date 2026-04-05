@@ -56,12 +56,53 @@ const Checkout = () => {
     return digits;
   };
 
+  // CPF validation using the official Brazilian algorithm
+  const validateCPF = (cpf: string): boolean => {
+    const digits = cpf.replace(/\D/g, "");
+    if (digits.length !== 11) return false;
+    // Reject known invalid sequences (all same digit)
+    if (/^(\d)\1{10}$/.test(digits)) return false;
+
+    // First check digit
+    let sum = 0;
+    for (let i = 0; i < 9; i++) sum += parseInt(digits[i]) * (10 - i);
+    let remainder = (sum * 10) % 11;
+    if (remainder === 10) remainder = 0;
+    if (remainder !== parseInt(digits[9])) return false;
+
+    // Second check digit
+    sum = 0;
+    for (let i = 0; i < 10; i++) sum += parseInt(digits[i]) * (11 - i);
+    remainder = (sum * 10) % 11;
+    if (remainder === 10) remainder = 0;
+    if (remainder !== parseInt(digits[10])) return false;
+
+    return true;
+  };
+
+  // Normalize name for comparison (remove accents, lowercase, trim)
+  const normalizeName = (name: string) =>
+    name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim().replace(/\s+/g, " ");
+
+  // Validate CPF and name match
+  const cpfDigits = form.cpf.replace(/\D/g, "");
+  const isCpfComplete = cpfDigits.length === 11;
+  const isCpfValid = useMemo(() => validateCPF(form.cpf), [form.cpf]);
+  
+  // Simple name validation: name must have at least 2 words (first + last name)
+  const nameWords = normalizeName(form.cardName).split(" ").filter(w => w.length > 0);
+  const isNameValid = nameWords.length >= 2 && form.cardName.trim().length >= 5;
+
+  const cpfError = isCpfComplete && !isCpfValid ? t("checkout.invalidCpf") : "";
+  const nameError = isCpfComplete && isCpfValid && form.cardName.length >= 3 && !isNameValid
+    ? t("checkout.cpfNameMismatch") : "";
+
   const isValid =
-    form.cardName.length >= 3 &&
+    isNameValid &&
     form.cardNumber.replace(/\s/g, "").length === 16 &&
     form.expiry.length === 5 &&
     form.cvv.length >= 3 &&
-    form.cpf.replace(/\D/g, "").length === 11;
+    isCpfValid;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
