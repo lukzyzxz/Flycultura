@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useCart } from "@/contexts/CartContext";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/contexts/AuthContext";
@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
-import { CreditCard, Lock, CheckCircle, ArrowLeft, ShieldCheck } from "lucide-react";
+import { CreditCard, Lock, CheckCircle, ArrowLeft, ShieldCheck, AlertCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,6 +26,26 @@ const Checkout = () => {
     cvv: "",
     cpf: "",
   });
+
+  // CPF validation using the official Brazilian algorithm
+  const validateCPF = (cpf: string): boolean => {
+    const digits = cpf.replace(/\D/g, "");
+    if (digits.length !== 11) return false;
+    if (/^(\d)\1{10}$/.test(digits)) return false;
+    let sum = 0;
+    for (let i = 0; i < 9; i++) sum += parseInt(digits[i]) * (10 - i);
+    let remainder = (sum * 10) % 11;
+    if (remainder === 10) remainder = 0;
+    if (remainder !== parseInt(digits[9])) return false;
+    sum = 0;
+    for (let i = 0; i < 10; i++) sum += parseInt(digits[i]) * (11 - i);
+    remainder = (sum * 10) % 11;
+    if (remainder === 10) remainder = 0;
+    if (remainder !== parseInt(digits[10])) return false;
+    return true;
+  };
+
+  const isCpfValid = useMemo(() => validateCPF(form.cpf), [form.cpf]);
 
   if (!user) {
     navigate("/auth");
@@ -56,12 +76,28 @@ const Checkout = () => {
     return digits;
   };
 
+  // Normalize name for comparison (remove accents, lowercase, trim)
+  const normalizeName = (name: string) =>
+    name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim().replace(/\s+/g, " ");
+
+  // Validate CPF and name match
+  const cpfDigits = form.cpf.replace(/\D/g, "");
+  const isCpfComplete = cpfDigits.length === 11;
+  
+  // Simple name validation: name must have at least 2 words (first + last name)
+  const nameWords = normalizeName(form.cardName).split(" ").filter(w => w.length > 0);
+  const isNameValid = nameWords.length >= 2 && form.cardName.trim().length >= 5;
+
+  const cpfError = isCpfComplete && !isCpfValid ? t("checkout.invalidCpf") : "";
+  const nameError = isCpfComplete && isCpfValid && form.cardName.length >= 3 && !isNameValid
+    ? t("checkout.cpfNameMismatch") : "";
+
   const isValid =
-    form.cardName.length >= 3 &&
+    isNameValid &&
     form.cardNumber.replace(/\s/g, "").length === 16 &&
     form.expiry.length === 5 &&
     form.cvv.length >= 3 &&
-    form.cpf.replace(/\D/g, "").length === 11;
+    isCpfValid;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -181,7 +217,14 @@ const Checkout = () => {
                     placeholder="João Silva"
                     value={form.cardName}
                     onChange={(e) => setForm({ ...form, cardName: e.target.value })}
+                    aria-invalid={!!nameError}
+                    className={nameError ? "border-destructive" : ""}
                   />
+                  {nameError && (
+                    <p className="flex items-center gap-1 text-xs text-destructive mt-1">
+                      <AlertCircle className="h-3 w-3" /> {nameError}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -225,7 +268,14 @@ const Checkout = () => {
                       value={form.cpf}
                       onChange={(e) => setForm({ ...form, cpf: formatCPF(e.target.value) })}
                       maxLength={14}
+                      aria-invalid={!!cpfError}
+                      className={cpfError ? "border-destructive" : ""}
                     />
+                    {cpfError && (
+                      <p className="flex items-center gap-1 text-xs text-destructive mt-1">
+                        <AlertCircle className="h-3 w-3" /> {cpfError}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>

@@ -149,6 +149,8 @@ const translations = {
     "checkout.successTitle": "Booking Confirmed!",
     "checkout.successDesc": "You will receive a confirmation email with all the details of your booking.",
     "checkout.prototype": "⚠️ This is a prototype — no real charges will be made.",
+    "checkout.invalidCpf": "Invalid CPF. Please check the digits.",
+    "checkout.cpfNameMismatch": "The name must match the CPF holder. Please verify.",
 
     // Guide
     "guide.title": "Travel Guide",
@@ -314,6 +316,8 @@ const translations = {
     "checkout.successTitle": "Reserva Confirmada!",
     "checkout.successDesc": "Você receberá um e-mail de confirmação com todos os detalhes da sua reserva.",
     "checkout.prototype": "⚠️ Este é um protótipo — nenhuma cobrança real será feita.",
+    "checkout.invalidCpf": "CPF inválido. Verifique os dígitos.",
+    "checkout.cpfNameMismatch": "O nome deve corresponder ao titular do CPF. Verifique.",
 
     // Guide
     "guide.title": "Guia de Viagem",
