@@ -70,6 +70,12 @@ const translations = {
     "footer.company": "Company",
     "footer.support": "Support",
     "footer.rights": "© 2026 FlyCultura. All rights reserved.",
+    "footer.newsletter": "Newsletter",
+    "footer.newsletterDesc": "Get the best travel deals and tips straight to your inbox.",
+    "footer.emailPlaceholder": "Your email",
+    "footer.subscribe": "Subscribe",
+    "footer.subscribeSuccess": "Subscribed successfully!",
+    "footer.subscribeError": "Please enter a valid email.",
 
     // Auth
     "auth.signIn": "Sign In",
@@ -237,6 +243,12 @@ const translations = {
     "footer.company": "Empresa",
     "footer.support": "Suporte",
     "footer.rights": "© 2026 FlyCultura. Todos os direitos reservados.",
+    "footer.newsletter": "Newsletter",
+    "footer.newsletterDesc": "Receba as melhores ofertas e dicas de viagem direto no seu email.",
+    "footer.emailPlaceholder": "Seu email",
+    "footer.subscribe": "Inscrever-se",
+    "footer.subscribeSuccess": "Inscrito com sucesso!",
+    "footer.subscribeError": "Por favor, insira um email válido.",
 
     // Auth
     "auth.signIn": "Entrar",
