@@ -202,7 +202,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "US",
     date: "Julho 2028",
     dateEn: "July 2028",
-    image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&h=500&fit=crop",
+    image: "https://images.unsplash.com/photo-1587280501635-68a0e82cd5ff?w=800&h=500&fit=crop",
     price: 22690,
     originalPrice: 34290,
     badge: "🏅 Olimpíadas",
