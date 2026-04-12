@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { generateFlights } from "@/lib/generated-flights";
 
 export interface FlightResult {
   id: string;
@@ -26,56 +26,18 @@ export interface HotelResult {
   distance: string;
 }
 
-const fallbackFlights: FlightResult[] = [
-  { id: "f1", airline: "LATAM Airlines", logo: "", departure: "08:30", arrival: "18:45", duration: "10h 15m", stops: 0, price: 3290, currency: "BRL", origin: "São Paulo (GRU)", destination: "New York (JFK)" },
-  { id: "f2", airline: "GOL", logo: "", departure: "22:10", arrival: "06:30", duration: "10h 20m", stops: 1, price: 2890, currency: "BRL", origin: "São Paulo (GRU)", destination: "New York (JFK)" },
-  { id: "f3", airline: "American Airlines", logo: "", departure: "11:00", arrival: "20:15", duration: "9h 15m", stops: 0, price: 4150, currency: "BRL", origin: "São Paulo (GRU)", destination: "New York (JFK)" },
-  { id: "f4", airline: "Delta Airlines", logo: "", departure: "14:30", arrival: "23:50", duration: "9h 20m", stops: 0, price: 3890, currency: "BRL", origin: "São Paulo (GRU)", destination: "New York (JFK)" },
-  { id: "f5", airline: "Azul", logo: "", departure: "01:15", arrival: "13:40", duration: "12h 25m", stops: 1, price: 2490, currency: "BRL", origin: "São Paulo (GRU)", destination: "New York (JFK)" },
-  { id: "f6", airline: "United Airlines", logo: "", departure: "19:00", arrival: "05:20", duration: "10h 20m", stops: 0, price: 3590, currency: "BRL", origin: "São Paulo (GRU)", destination: "New York (JFK)" },
-];
-
 export async function searchFlights(params: {
   from?: string;
   to?: string;
   departDate?: string;
   adults?: number;
 }): Promise<FlightResult[]> {
-  try {
-    const { data, error } = await supabase.functions.invoke("search-flights", {
-      body: params,
-    });
-
-    if (error) throw error;
-
-    // If fallback flag or no real offers, return mock
-    if (data?.fallback) return fallbackFlights;
-
-    const offers = data?.data?.flightOffers || [];
-    if (offers.length === 0) return fallbackFlights;
-
-    return offers.slice(0, 10).map((offer: any, idx: number) => {
-      const seg = offer.segments?.[0] || {};
-      const leg = seg.legs?.[0] || {};
-      const carrier = leg.carriersData?.[0] || {};
-      const totalSeconds = seg.totalTime || 0;
-      return {
-        id: offer.token || String(idx),
-        airline: carrier.name || "Airline",
-        logo: carrier.logo || "",
-        departure: seg.departureTime || "",
-        arrival: seg.arrivalTime || "",
-        duration: `${Math.floor(totalSeconds / 3600)}h ${Math.floor((totalSeconds % 3600) / 60)}m`,
-        stops: (seg.legs?.length || 1) - 1,
-        price: offer.priceBreakdown?.total?.units || 0,
-        currency: "BRL",
-        origin: seg.departureAirport?.name || params.from || "",
-        destination: seg.arrivalAirport?.name || params.to || "",
-      };
-    });
-  } catch {
-    return fallbackFlights;
-  }
+  // Simulate brief network delay
+  await new Promise((r) => setTimeout(r, 400 + Math.random() * 600));
+  const fromCode = params.from || "GRU.AIRPORT";
+  const toCode = params.to || "JFK.AIRPORT";
+  if (fromCode === toCode) return [];
+  return generateFlights(fromCode, toCode);
 }
 
 export async function searchHotels(params: {
@@ -85,34 +47,10 @@ export async function searchHotels(params: {
   checkout?: string;
   adults?: number;
 }): Promise<HotelResult[]> {
-  const { data, error } = await supabase.functions.invoke("search-hotels", {
-    body: params,
-  });
-
-  if (error) throw error;
-
-  try {
-    const hotels = data?.data?.hotels || [];
-    return hotels.slice(0, 12).map((h: any) => ({
-      id: String(h.hotel_id || ""),
-      name: h.property?.name || "Hotel",
-      image: h.property?.photoUrls?.[0] || "",
-      rating: h.property?.reviewScore || 0,
-      reviewScore: h.property?.reviewScoreWord || "",
-      price: Math.round(h.property?.priceBreakdown?.grossPrice?.value || 0),
-      currency: h.property?.priceBreakdown?.grossPrice?.currency || "BRL",
-      address: h.property?.wishlistName || "",
-      distance: h.accessibilityLabel?.match(/(\d[\d.,]+ (?:km|m) from centre)/)?.[1] || "",
-    }));
-  } catch {
-    return [];
-  }
+  // Return empty — hotels not used in main flow
+  return [];
 }
 
 export async function searchDestination(query: string) {
-  const { data, error } = await supabase.functions.invoke("search-destinations", {
-    body: { query },
-  });
-  if (error) throw error;
-  return data?.data || [];
+  return [];
 }

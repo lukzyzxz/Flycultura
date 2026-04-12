@@ -1,8 +1,10 @@
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Calendar, Clock, ArrowRight, Tag } from "lucide-react";
+import { Calendar, Clock, ArrowRight, Tag, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useI18n } from "@/lib/i18n";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import Footer from "@/components/Footer";
 
 const blogPosts = [
@@ -80,15 +82,50 @@ const blogPosts = [
   },
 ];
 
+const categories = {
+  pt: ["Todos", "Destinos", "Dicas", "Eventos", "Roteiros"],
+  en: ["All", "Destinations", "Tips", "Events", "Itineraries"],
+};
+
+const categoryMap: Record<string, string> = {
+  Destinations: "Destinos", Tips: "Dicas", Events: "Eventos", Itineraries: "Roteiros",
+  Destinos: "Destinos", Dicas: "Dicas", Eventos: "Eventos", Roteiros: "Roteiros",
+};
+
 const Blog = () => {
   const { locale } = useI18n();
+  const [activeCategory, setActiveCategory] = useState("Todos");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const featured = blogPosts[0];
-  const rest = blogPosts.slice(1);
+  const filteredPosts = useMemo(() => {
+    let posts = blogPosts;
+
+    // Filter by category
+    if (activeCategory !== "Todos" && activeCategory !== "All") {
+      const ptCat = categoryMap[activeCategory] || activeCategory;
+      posts = posts.filter((p) => p.category === ptCat);
+    }
+
+    // Filter by search
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      posts = posts.filter((p) => {
+        const title = locale === "pt" ? p.title : p.titleEn;
+        const excerpt = locale === "pt" ? p.excerpt : p.excerptEn;
+        const cat = locale === "pt" ? p.category : p.categoryEn;
+        return title.toLowerCase().includes(q) || excerpt.toLowerCase().includes(q) || cat.toLowerCase().includes(q);
+      });
+    }
+
+    return posts;
+  }, [activeCategory, searchQuery, locale]);
+
+  const featured = filteredPosts[0];
+  const rest = filteredPosts.slice(1);
+  const cats = locale === "pt" ? categories.pt : categories.en;
 
   return (
     <div className="min-h-screen">
-      {/* Hero */}
       <section className="hero-gradient py-16 md:py-24">
         <div className="container text-center">
           <motion.h1
@@ -112,95 +149,140 @@ const Blog = () => {
       </section>
 
       <div className="container py-12">
-        {/* Featured Post */}
-        <motion.article
+        {/* Search and Filters */}
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="group mb-12"
+          transition={{ delay: 0.15 }}
+          className="mb-8 space-y-4"
         >
-          <Link to={`/blog/${featured.id}`} className="block rounded-2xl overflow-hidden bg-card card-shadow hover:card-shadow-hover transition-all">
-            <div className="grid md:grid-cols-2">
-              <div className="aspect-[16/10] md:aspect-auto overflow-hidden">
-                <img
-                  src={featured.image}
-                  alt={locale === "pt" ? featured.title : featured.titleEn}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  loading="lazy"
-                />
-              </div>
-              <div className="p-6 md:p-10 flex flex-col justify-center">
-                <Badge className="w-fit mb-3 bg-accent/10 text-accent border-0">
-                  <Tag className="h-3 w-3 mr-1" />
-                  {locale === "pt" ? featured.category : featured.categoryEn}
-                </Badge>
-                <h2 className="font-display text-2xl md:text-3xl font-bold text-card-foreground mb-3 group-hover:text-primary transition-colors">
-                  {locale === "pt" ? featured.title : featured.titleEn}
-                </h2>
-                <p className="text-muted-foreground mb-4 leading-relaxed">
-                  {locale === "pt" ? featured.excerpt : featured.excerptEn}
-                </p>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <Calendar className="h-3.5 w-3.5" />
-                    {new Date(featured.date).toLocaleDateString(locale === "pt" ? "pt-BR" : "en-US", { day: "numeric", month: "short", year: "numeric" })}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="h-3.5 w-3.5" />
-                    {featured.readTime} min
-                  </span>
-                </div>
-              </div>
-            </div>
-          </Link>
-        </motion.article>
-
-        {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {rest.map((post, i) => (
-            <motion.article
-              key={post.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.08 }}
-            >
-              <Link
-                to={`/blog/${post.id}`}
-                className="group block rounded-xl overflow-hidden bg-card card-shadow hover:card-shadow-hover transition-all hover:-translate-y-1"
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder={locale === "pt" ? "Buscar artigos..." : "Search articles..."}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {cats.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  activeCategory === cat
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                }`}
               >
-                <div className="aspect-[16/10] overflow-hidden bg-muted">
+                {cat}
+              </button>
+            ))}
+          </div>
+        </motion.div>
+
+        {filteredPosts.length === 0 && (
+          <div className="text-center py-20">
+            <p className="text-muted-foreground text-lg">
+              {locale === "pt" ? "Nenhum artigo encontrado." : "No articles found."}
+            </p>
+          </div>
+        )}
+
+        {/* Featured Post */}
+        {featured && (
+          <motion.article
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="group mb-12"
+          >
+            <Link to={`/blog/${featured.id}`} className="block rounded-2xl overflow-hidden bg-card card-shadow hover:card-shadow-hover transition-all">
+              <div className="grid md:grid-cols-2">
+                <div className="aspect-[16/10] md:aspect-auto overflow-hidden">
                   <img
-                    src={post.image}
-                    alt={locale === "pt" ? post.title : post.titleEn}
+                    src={featured.image}
+                    alt={locale === "pt" ? featured.title : featured.titleEn}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     loading="lazy"
                   />
                 </div>
-                <div className="p-4">
-                  <Badge className="mb-2 bg-accent/10 text-accent border-0 text-xs">
-                    {locale === "pt" ? post.category : post.categoryEn}
+                <div className="p-6 md:p-10 flex flex-col justify-center">
+                  <Badge className="w-fit mb-3 bg-accent/10 text-accent border-0">
+                    <Tag className="h-3 w-3 mr-1" />
+                    {locale === "pt" ? featured.category : featured.categoryEn}
                   </Badge>
-                  <h3 className="font-display font-bold text-card-foreground mb-2 group-hover:text-primary transition-colors line-clamp-2">
-                    {locale === "pt" ? post.title : post.titleEn}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                    {locale === "pt" ? post.excerpt : post.excerptEn}
+                  <h2 className="font-display text-2xl md:text-3xl font-bold text-card-foreground mb-3 group-hover:text-primary transition-colors">
+                    {locale === "pt" ? featured.title : featured.titleEn}
+                  </h2>
+                  <p className="text-muted-foreground mb-4 leading-relaxed">
+                    {locale === "pt" ? featured.excerpt : featured.excerptEn}
                   </p>
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      {new Date(post.date).toLocaleDateString(locale === "pt" ? "pt-BR" : "en-US", { day: "numeric", month: "short" })}
+                      <Calendar className="h-3.5 w-3.5" />
+                      {new Date(featured.date).toLocaleDateString(locale === "pt" ? "pt-BR" : "en-US", { day: "numeric", month: "short", year: "numeric" })}
                     </span>
-                    <span className="flex items-center gap-1 text-primary font-medium">
-                      {locale === "pt" ? "Ler mais" : "Read more"} <ArrowRight className="h-3 w-3" />
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-3.5 w-3.5" />
+                      {featured.readTime} min
                     </span>
                   </div>
                 </div>
-              </Link>
-            </motion.article>
-          ))}
-        </div>
+              </div>
+            </Link>
+          </motion.article>
+        )}
+
+        {/* Grid */}
+        {rest.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {rest.map((post, i) => (
+              <motion.article
+                key={post.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.08 }}
+              >
+                <Link
+                  to={`/blog/${post.id}`}
+                  className="group block rounded-xl overflow-hidden bg-card card-shadow hover:card-shadow-hover transition-all hover:-translate-y-1"
+                >
+                  <div className="aspect-[16/10] overflow-hidden bg-muted">
+                    <img
+                      src={post.image}
+                      alt={locale === "pt" ? post.title : post.titleEn}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <Badge className="mb-2 bg-accent/10 text-accent border-0 text-xs">
+                      {locale === "pt" ? post.category : post.categoryEn}
+                    </Badge>
+                    <h3 className="font-display font-bold text-card-foreground mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                      {locale === "pt" ? post.title : post.titleEn}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                      {locale === "pt" ? post.excerpt : post.excerptEn}
+                    </p>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        {new Date(post.date).toLocaleDateString(locale === "pt" ? "pt-BR" : "en-US", { day: "numeric", month: "short" })}
+                      </span>
+                      <span className="flex items-center gap-1 text-primary font-medium">
+                        {locale === "pt" ? "Ler mais" : "Read more"} <ArrowRight className="h-3 w-3" />
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              </motion.article>
+            ))}
+          </div>
+        )}
       </div>
 
       <Footer />
