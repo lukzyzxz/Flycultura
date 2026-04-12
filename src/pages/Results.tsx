@@ -57,7 +57,7 @@ const Results = () => {
       "los angeles": "LAX.AIRPORT", "lax": "LAX.AIRPORT", "indio": "LAX.AIRPORT", "california": "LAX.AIRPORT",
       "paris": "CDG.AIRPORT", "cdg": "CDG.AIRPORT",
       "londres": "LHR.AIRPORT", "london": "LHR.AIRPORT", "lhr": "LHR.AIRPORT",
-      "tokyo": "NRT.AIRPORT", "tóquio": "NRT.AIRPORT", "nrt": "NRT.AIRPORT",
+      "tokyo": "NRT.AIRPORT", "tóquio": "NRT.AIRPORT", "nrt": "NRT.AIRPORT", "japão": "NRT.AIRPORT", "japan": "NRT.AIRPORT",
       "roma": "FCO.AIRPORT", "rome": "FCO.AIRPORT", "fco": "FCO.AIRPORT",
       "barcelona": "BCN.AIRPORT", "bcn": "BCN.AIRPORT",
       "dubai": "DXB.AIRPORT", "dxb": "DXB.AIRPORT",
@@ -79,6 +79,8 @@ const Results = () => {
       "amsterdam": "AMS.AIRPORT", "ams": "AMS.AIRPORT",
       "bangkok": "BKK.AIRPORT", "bkk": "BKK.AIRPORT",
       "singapore": "SIN.AIRPORT", "cingapura": "SIN.AIRPORT", "sin": "SIN.AIRPORT",
+      "india": "DEL.AIRPORT", "índia": "DEL.AIRPORT", "delhi": "DEL.AIRPORT", "nova deli": "DEL.AIRPORT", "new delhi": "DEL.AIRPORT", "del": "DEL.AIRPORT",
+      "mumbai": "BOM.AIRPORT", "bom": "BOM.AIRPORT",
     };
     for (const [key, code] of Object.entries(airportMap)) {
       if (lower.includes(key)) return code;
@@ -249,12 +251,14 @@ const Results = () => {
                   className="flex flex-col md:flex-row items-center gap-4 p-4 rounded-xl bg-card card-shadow"
                 >
                   <div className="flex items-center gap-3 md:w-1/4">
-                    {flight.logo && <img src={flight.logo} alt={flight.airline} className="h-8 w-8 object-contain" />}
+                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <Plane className="h-4 w-4 text-primary" />
+                    </div>
                     <span className="font-medium text-card-foreground">{flight.airline}</span>
                   </div>
                   <div className="flex-1 flex items-center gap-4 text-sm text-muted-foreground">
                     <div className="text-center">
-                      <p className="font-bold text-card-foreground">{flight.departure ? new Date(flight.departure).toLocaleTimeString(locale === "pt" ? "pt-BR" : "en-US", { hour: "2-digit", minute: "2-digit" }) : "--"}</p>
+                      <p className="font-bold text-card-foreground">{flight.departure || "--"}</p>
                       <p className="text-xs">{flight.origin}</p>
                     </div>
                     <div className="flex-1 flex flex-col items-center">
@@ -265,7 +269,7 @@ const Results = () => {
                       <p className="text-xs">{flight.stops === 0 ? (locale === "pt" ? "Direto" : "Direct") : `${flight.stops} ${locale === "pt" ? "parada" : "stop"}${flight.stops > 1 ? "s" : ""}`}</p>
                     </div>
                     <div className="text-center">
-                      <p className="font-bold text-card-foreground">{flight.arrival ? new Date(flight.arrival).toLocaleTimeString(locale === "pt" ? "pt-BR" : "en-US", { hour: "2-digit", minute: "2-digit" }) : "--"}</p>
+                      <p className="font-bold text-card-foreground">{flight.arrival || "--"}</p>
                       <p className="text-xs">{flight.destination}</p>
                     </div>
                   </div>

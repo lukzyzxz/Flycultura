@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { eventPackages } from "@/lib/events-data";
 import { useCart, CartProduct } from "@/contexts/CartContext";
 import { useI18n } from "@/lib/i18n";
@@ -13,9 +13,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { searchFlights, FlightResult } from "@/lib/api";
+import { generateReviews } from "@/lib/generated-reviews";
 import { useState } from "react";
 import {
-  Plane, Hotel, Ticket, Car, ArrowLeft, ShoppingCart, Check, MapPin, Calendar, Star, Heart, Loader2, RefreshCw,
+  Plane, Hotel, Ticket, Car, ArrowLeft, ShoppingCart, Check, MapPin, Calendar, Star, Heart, Loader2, RefreshCw, MessageCircle,
 } from "lucide-react";
 
 const PackageDetail = () => {
@@ -255,12 +256,14 @@ const PackageDetail = () => {
                         onClick={() => handleSelectFlight(flight)}
                       >
                         <div className="flex items-center gap-2 sm:w-1/4">
-                          {flight.logo && <img src={flight.logo} alt={flight.airline} className="h-6 w-6 object-contain" />}
+                          <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                            <Plane className="h-3 w-3 text-primary" />
+                          </div>
                           <span className="text-sm font-medium text-card-foreground">{flight.airline}</span>
                         </div>
                         <div className="flex-1 flex items-center gap-3 text-xs text-muted-foreground">
                           <span className="font-semibold text-card-foreground">
-                            {flight.departure ? new Date(flight.departure).toLocaleTimeString(locale === "pt" ? "pt-BR" : "en-US", { hour: "2-digit", minute: "2-digit" }) : "--"}
+                            {flight.departure || "--"}
                           </span>
                           <div className="flex-1 text-center">
                             <span>{flight.duration}</span>
@@ -268,7 +271,7 @@ const PackageDetail = () => {
                             <span>{flight.stops === 0 ? (locale === "pt" ? "Direto" : "Direct") : `${flight.stops} ${locale === "pt" ? "parada(s)" : "stop(s)"}`}</span>
                           </div>
                           <span className="font-semibold text-card-foreground">
-                            {flight.arrival ? new Date(flight.arrival).toLocaleTimeString(locale === "pt" ? "pt-BR" : "en-US", { hour: "2-digit", minute: "2-digit" }) : "--"}
+                            {flight.arrival || "--"}
                           </span>
                         </div>
                         <div className="flex items-center gap-3">
@@ -394,10 +397,76 @@ const PackageDetail = () => {
             </motion.div>
           </div>
         </div>
+        {/* Reviews Section */}
+        <ReviewsSection packageId={pkg.id} locale={locale} />
       </div>
 
       <Footer />
     </div>
+  );
+};
+
+const ReviewsSection = ({ packageId, locale }: { packageId: string; locale: string }) => {
+  const reviews = useMemo(() => generateReviews(packageId, 6), [packageId]);
+  const avgRating = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.4 }}
+      className="mt-12"
+    >
+      <div className="flex items-center gap-3 mb-6">
+        <MessageCircle className="h-6 w-6 text-primary" />
+        <h2 className="font-display text-2xl font-bold text-foreground">
+          {locale === "pt" ? "Avaliações dos Viajantes" : "Traveler Reviews"}
+        </h2>
+        <div className="flex items-center gap-1 ml-auto">
+          <Star className="h-5 w-5 fill-current text-accent" />
+          <span className="text-lg font-bold text-foreground">{avgRating.toFixed(1)}</span>
+          <span className="text-sm text-muted-foreground">({reviews.length} {locale === "pt" ? "avaliações" : "reviews"})</span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {reviews.map((review, i) => (
+          <motion.div
+            key={review.id}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: i * 0.05 }}
+            className="p-4 rounded-xl bg-card card-shadow"
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <img
+                src={review.avatar}
+                alt={review.name}
+                className="h-10 w-10 rounded-full object-cover"
+              />
+              <div className="flex-1">
+                <p className="font-medium text-card-foreground text-sm">{review.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {new Date(review.date).toLocaleDateString(locale === "pt" ? "pt-BR" : "en-US", { day: "numeric", month: "short", year: "numeric" })}
+                </p>
+              </div>
+              <div className="flex gap-0.5">
+                {Array.from({ length: 5 }).map((_, si) => (
+                  <Star
+                    key={si}
+                    className={`h-3.5 w-3.5 ${si < review.rating ? "fill-current text-accent" : "text-muted-foreground/30"}`}
+                  />
+                ))}
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {locale === "pt" ? review.comment : review.commentEn}
+            </p>
+          </motion.div>
+        ))}
+      </div>
+    </motion.div>
   );
 };
 
