@@ -1,21 +1,21 @@
 import { FlightResult } from "@/lib/api";
 
 const airlines = [
-  { name: "LATAM Airlines", logo: "https://logos-world.net/wp-content/uploads/2023/02/LATAM-Airlines-Logo.png" },
-  { name: "GOL", logo: "https://logos-world.net/wp-content/uploads/2023/01/GOL-Logo.png" },
-  { name: "Azul", logo: "https://logos-world.net/wp-content/uploads/2023/01/Azul-Logo.png" },
-  { name: "American Airlines", logo: "https://logos-world.net/wp-content/uploads/2022/01/American-Airlines-Logo.png" },
-  { name: "Delta Airlines", logo: "https://logos-world.net/wp-content/uploads/2023/01/Delta-Air-Lines-Logo.png" },
-  { name: "United Airlines", logo: "https://logos-world.net/wp-content/uploads/2023/01/United-Airlines-Logo.png" },
-  { name: "Emirates", logo: "https://logos-world.net/wp-content/uploads/2023/01/Emirates-Logo.png" },
-  { name: "Air France", logo: "https://logos-world.net/wp-content/uploads/2023/01/Air-France-Logo.png" },
-  { name: "British Airways", logo: "https://logos-world.net/wp-content/uploads/2023/01/British-Airways-Logo.png" },
-  { name: "Lufthansa", logo: "https://logos-world.net/wp-content/uploads/2023/01/Lufthansa-Logo.png" },
-  { name: "Turkish Airlines", logo: "https://logos-world.net/wp-content/uploads/2023/01/Turkish-Airlines-Logo.png" },
-  { name: "Qatar Airways", logo: "https://logos-world.net/wp-content/uploads/2023/01/Qatar-Airways-Logo.png" },
-  { name: "KLM", logo: "https://logos-world.net/wp-content/uploads/2023/01/KLM-Logo.png" },
-  { name: "Iberia", logo: "https://logos-world.net/wp-content/uploads/2023/01/Iberia-Logo.png" },
-  { name: "TAP Portugal", logo: "https://logos-world.net/wp-content/uploads/2023/01/TAP-Air-Portugal-Logo.png" },
+  { name: "LATAM Airlines", logo: "" },
+  { name: "GOL", logo: "" },
+  { name: "Azul", logo: "" },
+  { name: "American Airlines", logo: "" },
+  { name: "Delta Airlines", logo: "" },
+  { name: "United Airlines", logo: "" },
+  { name: "Emirates", logo: "" },
+  { name: "Air France", logo: "" },
+  { name: "British Airways", logo: "" },
+  { name: "Lufthansa", logo: "" },
+  { name: "Turkish Airlines", logo: "" },
+  { name: "Qatar Airways", logo: "" },
+  { name: "KLM", logo: "" },
+  { name: "Iberia", logo: "" },
+  { name: "TAP Portugal", logo: "" },
 ];
 
 const cityNames: Record<string, string> = {
