@@ -106,6 +106,7 @@ const Checkout = () => {
     setStep("processing");
 
     // Save order to database
+    const orderId = `FC${new Date().getFullYear()}-${String(Math.floor(Math.random() * 10000)).padStart(4, "0")}`;
     try {
       await supabase.from("user_orders").insert({
         user_id: user.id,
@@ -121,6 +122,29 @@ const Checkout = () => {
       });
     } catch {
       // Continue even if save fails
+    }
+
+    // Send confirmation email
+    try {
+      await supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "purchase-confirmation",
+          recipientEmail: user.email,
+          templateData: {
+            customerName: user.user_metadata?.full_name || user.email?.split("@")[0] || "Viajante",
+            orderId,
+            items: items.map((i) => ({
+              name: i.product.name,
+              price: i.product.price,
+              quantity: i.quantity,
+            })),
+            totalPrice,
+            purchaseDate: new Date().toLocaleDateString("pt-BR"),
+          },
+        },
+      });
+    } catch {
+      // Continue even if email fails
     }
 
     // Simulate payment processing
