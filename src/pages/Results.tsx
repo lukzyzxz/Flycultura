@@ -249,7 +249,9 @@ const Results = () => {
                   className="flex flex-col md:flex-row items-center gap-4 p-4 rounded-xl bg-card card-shadow"
                 >
                   <div className="flex items-center gap-3 md:w-1/4">
-                    {flight.logo && <img src={flight.logo} alt={flight.airline} className="h-8 w-8 object-contain" />}
+                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <Plane className="h-4 w-4 text-primary" />
+                    </div>
                     <span className="font-medium text-card-foreground">{flight.airline}</span>
                   </div>
                   <div className="flex-1 flex items-center gap-4 text-sm text-muted-foreground">

@@ -256,7 +256,9 @@ const PackageDetail = () => {
                         onClick={() => handleSelectFlight(flight)}
                       >
                         <div className="flex items-center gap-2 sm:w-1/4">
-                          {flight.logo && <img src={flight.logo} alt={flight.airline} className="h-6 w-6 object-contain" />}
+                          <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                            <Plane className="h-3 w-3 text-primary" />
+                          </div>
                           <span className="text-sm font-medium text-card-foreground">{flight.airline}</span>
                         </div>
                         <div className="flex-1 flex items-center gap-3 text-xs text-muted-foreground">
