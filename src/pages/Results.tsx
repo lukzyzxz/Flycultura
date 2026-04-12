@@ -254,7 +254,7 @@ const Results = () => {
                   </div>
                   <div className="flex-1 flex items-center gap-4 text-sm text-muted-foreground">
                     <div className="text-center">
-                      <p className="font-bold text-card-foreground">{flight.departure ? new Date(flight.departure).toLocaleTimeString(locale === "pt" ? "pt-BR" : "en-US", { hour: "2-digit", minute: "2-digit" }) : "--"}</p>
+                      <p className="font-bold text-card-foreground">{flight.departure || "--"}</p>
                       <p className="text-xs">{flight.origin}</p>
                     </div>
                     <div className="flex-1 flex flex-col items-center">
@@ -265,7 +265,7 @@ const Results = () => {
                       <p className="text-xs">{flight.stops === 0 ? (locale === "pt" ? "Direto" : "Direct") : `${flight.stops} ${locale === "pt" ? "parada" : "stop"}${flight.stops > 1 ? "s" : ""}`}</p>
                     </div>
                     <div className="text-center">
-                      <p className="font-bold text-card-foreground">{flight.arrival ? new Date(flight.arrival).toLocaleTimeString(locale === "pt" ? "pt-BR" : "en-US", { hour: "2-digit", minute: "2-digit" }) : "--"}</p>
+                      <p className="font-bold text-card-foreground">{flight.arrival || "--"}</p>
                       <p className="text-xs">{flight.destination}</p>
                     </div>
                   </div>
