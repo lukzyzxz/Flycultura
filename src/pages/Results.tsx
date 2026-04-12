@@ -79,6 +79,8 @@ const Results = () => {
       "amsterdam": "AMS.AIRPORT", "ams": "AMS.AIRPORT",
       "bangkok": "BKK.AIRPORT", "bkk": "BKK.AIRPORT",
       "singapore": "SIN.AIRPORT", "cingapura": "SIN.AIRPORT", "sin": "SIN.AIRPORT",
+      "india": "DEL.AIRPORT", "índia": "DEL.AIRPORT", "delhi": "DEL.AIRPORT", "nova deli": "DEL.AIRPORT", "new delhi": "DEL.AIRPORT", "del": "DEL.AIRPORT",
+      "mumbai": "BOM.AIRPORT", "bom": "BOM.AIRPORT",
     };
     for (const [key, code] of Object.entries(airportMap)) {
       if (lower.includes(key)) return code;
