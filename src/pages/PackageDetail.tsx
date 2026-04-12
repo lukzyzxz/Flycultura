@@ -261,7 +261,7 @@ const PackageDetail = () => {
                         </div>
                         <div className="flex-1 flex items-center gap-3 text-xs text-muted-foreground">
                           <span className="font-semibold text-card-foreground">
-                            {flight.departure ? new Date(flight.departure).toLocaleTimeString(locale === "pt" ? "pt-BR" : "en-US", { hour: "2-digit", minute: "2-digit" }) : "--"}
+                            {flight.departure || "--"}
                           </span>
                           <div className="flex-1 text-center">
                             <span>{flight.duration}</span>
@@ -269,7 +269,7 @@ const PackageDetail = () => {
                             <span>{flight.stops === 0 ? (locale === "pt" ? "Direto" : "Direct") : `${flight.stops} ${locale === "pt" ? "parada(s)" : "stop(s)"}`}</span>
                           </div>
                           <span className="font-semibold text-card-foreground">
-                            {flight.arrival ? new Date(flight.arrival).toLocaleTimeString(locale === "pt" ? "pt-BR" : "en-US", { hour: "2-digit", minute: "2-digit" }) : "--"}
+                            {flight.arrival || "--"}
                           </span>
                         </div>
                         <div className="flex items-center gap-3">
