@@ -124,28 +124,7 @@ const Checkout = () => {
       // Continue even if save fails
     }
 
-    // Send confirmation email
-    try {
-      await supabase.functions.invoke("send-transactional-email", {
-        body: {
-          templateName: "purchase-confirmation",
-          recipientEmail: user.email,
-          templateData: {
-            customerName: user.user_metadata?.full_name || user.email?.split("@")[0] || "Viajante",
-            orderId,
-            items: items.map((i) => ({
-              name: i.product.name,
-              price: i.product.price,
-              quantity: i.quantity,
-            })),
-            totalPrice,
-            purchaseDate: new Date().toLocaleDateString("pt-BR"),
-          },
-        },
-      });
-    } catch {
-      // Continue even if email fails
-    }
+
 
     // Simulate payment processing
     await new Promise((res) => setTimeout(res, 2500));
