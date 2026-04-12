@@ -57,7 +57,7 @@ const Results = () => {
       "los angeles": "LAX.AIRPORT", "lax": "LAX.AIRPORT", "indio": "LAX.AIRPORT", "california": "LAX.AIRPORT",
       "paris": "CDG.AIRPORT", "cdg": "CDG.AIRPORT",
       "londres": "LHR.AIRPORT", "london": "LHR.AIRPORT", "lhr": "LHR.AIRPORT",
-      "tokyo": "NRT.AIRPORT", "tóquio": "NRT.AIRPORT", "nrt": "NRT.AIRPORT",
+      "tokyo": "NRT.AIRPORT", "tóquio": "NRT.AIRPORT", "nrt": "NRT.AIRPORT", "japão": "NRT.AIRPORT", "japan": "NRT.AIRPORT",
       "roma": "FCO.AIRPORT", "rome": "FCO.AIRPORT", "fco": "FCO.AIRPORT",
       "barcelona": "BCN.AIRPORT", "bcn": "BCN.AIRPORT",
       "dubai": "DXB.AIRPORT", "dxb": "DXB.AIRPORT",
