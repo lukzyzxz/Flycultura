@@ -100,17 +100,43 @@ const Auth = () => {
   };
 
   const handleGoogleSignIn = async () => {
+    // Detect if we're running inside an iframe (Lovable preview)
+    const inIframe = (() => {
+      try { return window.self !== window.top; } catch { return true; }
+    })();
+
+    if (inIframe) {
+      // Google OAuth blocks sign-in inside iframes for security.
+      // Open the same auth page in a new tab where it can complete the redirect flow.
+      const target = `${window.location.origin}${window.location.pathname}${window.location.search}`;
+      window.open(target, "_blank", "noopener,noreferrer");
+      toast({
+        title: "Abrindo login em nova aba",
+        description: "O Google bloqueia login dentro do preview. Conclua o login na nova aba e volte aqui.",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
       });
       if (result.error) {
-        toast({ title: "Error", description: String(result.error), variant: "destructive" });
+        toast({
+          title: "Erro no login com Google",
+          description: String(result.error),
+          variant: "destructive",
+        });
+        setLoading(false);
       }
+      // On success the browser redirects — no need to clear loading.
     } catch (err: any) {
-      toast({ title: "Error", description: err?.message || String(err), variant: "destructive" });
-    } finally {
+      toast({
+        title: "Erro no login com Google",
+        description: err?.message || String(err),
+        variant: "destructive",
+      });
       setLoading(false);
     }
   };
