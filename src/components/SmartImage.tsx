@@ -1,5 +1,6 @@
 import { useState, useEffect, ImgHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
+import { logImageError } from "@/lib/imageErrorLog";
 
 export type SmartImageCategory = "event" | "destination" | "deal" | "blog" | "generic";
 
@@ -47,6 +48,12 @@ const SmartImage = ({
 
   const handleError = () => {
     if (errorStage === 0) {
+      // Log the original broken URL once before swapping to fallback
+      logImageError({
+        src,
+        category,
+        page: typeof window !== "undefined" ? window.location.pathname : "unknown",
+      });
       setErrorStage(1);
       setCurrentSrc(FALLBACKS[category]);
     } else if (errorStage === 1) {
@@ -56,9 +63,12 @@ const SmartImage = ({
   };
 
   return (
-    <div className={cn("relative w-full h-full", wrapperClassName)}>
+    <div className={cn("relative w-full h-full overflow-hidden", wrapperClassName)}>
       {showSkeleton && !loaded && (
-        <div className="absolute inset-0 bg-muted animate-pulse" aria-hidden="true" />
+        <div
+          className="absolute inset-0 bg-gradient-to-br from-muted via-muted/60 to-muted animate-pulse"
+          aria-hidden="true"
+        />
       )}
       <img
         {...rest}
@@ -69,8 +79,8 @@ const SmartImage = ({
         onError={handleError}
         className={cn(
           className,
-          "transition-opacity duration-300",
-          loaded ? "opacity-100" : "opacity-0"
+          "transition-all duration-500 ease-out",
+          loaded ? "opacity-100 blur-0 scale-100" : "opacity-0 blur-md scale-105"
         )}
       />
     </div>
