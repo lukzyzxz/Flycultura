@@ -3,6 +3,7 @@ import { Clock, ArrowRight } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { Link } from "react-router-dom";
+import SmartImage, { SmartImageCategory } from "@/components/SmartImage";
 
 const RecentlyViewed = () => {
   const { locale } = useI18n();
