@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plane, Mail, Lock, User, Eye, EyeOff } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -26,10 +26,18 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const { signIn, signUp, resetPassword } = useAuth();
+  const { signIn, signUp, resetPassword, user, loading: authLoading } = useAuth();
   const { t } = useI18n();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Auto-redirect when user becomes authenticated (e.g. after OAuth callback)
+  useEffect(() => {
+    if (user && !authLoading) {
+      const redirectTo = new URLSearchParams(window.location.search).get("redirect") || "/";
+      navigate(redirectTo, { replace: true });
+    }
+  }, [user, authLoading, navigate]);
 
   const getSchema = () => {
     const base = z.object({
@@ -103,7 +111,7 @@ const Auth = () => {
     setLoading(true);
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+        redirect_uri: window.location.origin + "/auth",
       });
       if (result.error) {
         toast({
