@@ -1,5 +1,5 @@
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
-import { Star, ArrowLeft, Plane, Hotel as HotelIcon, Loader2, ShoppingCart } from "lucide-react";
+import { Star, ArrowLeft, Plane, Hotel as HotelIcon, Loader2, ShoppingCart, SearchX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Footer from "@/components/Footer";
@@ -48,12 +48,22 @@ const Results = () => {
     .sort((a, b) => (1 - b.price / b.originalPrice) - (1 - a.price / a.originalPrice))
     .slice(0, 6);
 
-  // Filter matching destinations
+  // Filter matching destinations — strict: only return matches when there's a query
   const matchingDestinations = destinations.filter((d) => {
     if (!query) return true;
     const searchTerms = [d.name.toLowerCase(), d.country.toLowerCase(), ...d.tags];
     return searchTerms.some((term) => term.includes(query) || query.includes(term));
   });
+  const queryHasStrictDestinationMatch =
+    !!query &&
+    destinations.some((d) => {
+      const terms = [d.name.toLowerCase(), d.country.toLowerCase(), ...d.tags];
+      return terms.some((term) => term.includes(query) || query.includes(term));
+    });
+
+  // True if the user typed a destination but nothing matched
+  const noMatchAtAll =
+    !!query && matchingPackages.length === 0 && !queryHasStrictDestinationMatch;
 
   // Resolve airport codes for flight search
   const resolveAirportCode = (input: string, fallback?: string): string => {
