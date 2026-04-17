@@ -1,69 +1,50 @@
 
-O usuário diz que mesmo no site publicado (`blue-sky-trips.lovable.app`), após clicar em Google e escolher a conta, ele é redirecionado para a home mas sem estar logado.
 
-Os logs de auth mostram CLARAMENTE logins Google bem-sucedidos (status 200) com `actor_username: lukzynzx@gmail.com` em `2026-04-17T18:43:05Z` no domínio `blue-sky-trips.lovable.app`. Ou seja: **o backend recebe e aceita o login com sucesso**. O problema está no lado do cliente — a sessão é estabelecida no servidor mas não persiste/é detectada na aba de retorno.
+## Root cause identificado
 
-## Hipóteses
+**O `src/integrations/supabase/client.ts` NÃO seta `detectSessionInUrl`.** Por padrão do supabase-js é `true`, mas vou confirmar olhando o fluxo Lovable:
 
-1. **`redirect_uri: window.location.origin`** envia o usuário pra `/` (home), não pra `/auth`. Quando volta, o `lovable.auth` não consegue processar o callback porque o código de processamento OAuth está só no `Auth.tsx` (via `handleGoogleSignIn`). Mas o callback do Lovable Cloud é no path `/~oauth/callback` interceptado pelo proxy worker — então deveria funcionar em qualquer rota.
+O `lovable.auth.signInWithOAuth` (em `src/integrations/lovable/index.ts`) tem dois caminhos:
+1. **Redirect flow** (`result.redirected = true`) → navegador vai pro Google e VOLTA. Nesse caso, ninguém chama `setSession` no retorno.
+2. **Token flow** (síncrono) → chama `supabase.auth.setSession(result.tokens)`.
 
-2. **Sessão não é detectada após retorno** — o `AuthContext` chama `supabase.auth.getSession()` e `onAuthStateChange`. Se o token vier via fragment `#` da URL após callback, o supabase-js detecta automaticamente. Mas se o callback do Lovable retorna tokens via uma forma que `setSession` precisa ser chamado manualmente (como faz o `lovable/index.ts` na linha `await supabase.auth.setSession(result.tokens)`), ENTÃO o problema é que essa linha só executa quando `signInWithOAuth` é chamado E retorna tokens diretamente — mas no fluxo normal (`result.redirected = true`), o navegador é redirecionado pro Google e VOLTA pra home, não pra `Auth.tsx`. Então `signInWithOAuth` nunca é re-chamado no retorno → tokens nunca passam por `setSession`.
+Como o Google sempre usa redirect, caímos no caso 1. O Lovable proxy worker processa `/~oauth/callback` e redireciona pro `redirect_uri`. Mas os tokens NÃO vêm via fragment `#access_token=...` no formato que o supabase-js detecta automaticamente — eles vêm via cookie/storage do broker oauth.lovable.app, ou via query param customizado que SOMENTE o `lovableAuth` sabe processar.
 
-   **Esse é provavelmente o root cause.** O Lovable Cloud auth, quando faz redirect flow, precisa que o callback seja processado em algum lugar. Mas como `redirect_uri: window.location.origin` aponta pra `/` (home/Index.tsx), nada lá processa o retorno OAuth.
+**Conclusão**: o `lovableAuth` precisa ter chance de processar o callback DEPOIS do redirect. Mas hoje só é chamado quando o usuário clica no botão. No retorno do OAuth, ninguém invoca o handler.
 
-3. **Solução**: mudar `redirect_uri` para apontar de volta pra `/auth` (onde o handler do `lovable.auth` pode processar), OU adicionar uma chamada de processamento de callback no boot da app (no `AuthContext`).
+## Solução
 
-## Verificação a fazer
+Adicionar processamento do callback OAuth no boot da app (no `AuthContext`). O `@lovable.dev/cloud-auth-js` tem um método (que vou confirmar) tipo `lovableAuth.handleCallback()` ou similar, OU precisamos detectar parâmetros `?code=...` / `#tokens` na URL e processar.
 
-Preciso confirmar olhando o código do `lovable/index.ts` (já tenho — ele só chama `setSession` no retorno síncrono de `signInWithOAuth`, não tem um handler de callback automático).
+Vou:
 
-Olhando a doc do Lovable Cloud OAuth: o proxy intercepta `/~oauth/callback` e processa tokens. Após processar, redireciona pro `redirect_uri`. Os tokens vêm provavelmente no hash `#access_token=...` — e o `supabase-js` com `detectSessionInUrl` (default true) deveria pegar.
+### 1. Inspecionar o pacote `@lovable.dev/cloud-auth-js`
+Ler `node_modules/@lovable.dev/cloud-auth-js` para descobrir API real (handleRedirect, getSessionFromUrl, etc).
 
-Mas o `supabase/client.ts` atual NÃO seta `detectSessionInUrl: true` explicitamente — embora seja default true, se algo quebrou esse default... vou verificar isso na investigação.
+### 2. Adicionar handler no AuthContext (após investigação)
+No `useEffect` do `AuthProvider`, ANTES de `getSession`:
+- Detectar se URL tem indicadores de callback OAuth (`?code=`, `#access_token`, ou flag específica do Lovable)
+- Se sim, chamar o método de processamento do `lovableAuth`
+- Aí sim chamar `getSession` + setup de `onAuthStateChange`
 
-## Plano de implementação
-
-### 1. Investigar no client.ts a config do auth
-Confirmar que `detectSessionInUrl` está implícito ou precisa ser explicitado. Não vou editar `client.ts` (proibido), mas se o problema for ali, preciso de outra rota.
-
-### 2. Mudar redirect_uri para `/auth`
-Em `src/pages/Auth.tsx`, alterar:
-```ts
-redirect_uri: window.location.origin + "/auth"
-```
-Assim o retorno OAuth cai na própria página `Auth.tsx`. Quando carrega, o `AuthContext` já tem `onAuthStateChange` ativo — se os tokens vierem via fragment `#`, o supabase-js detecta e dispara `SIGNED_IN`. O `Auth.tsx` precisa então redirecionar pra home quando `user` ficar disponível.
-
-### 3. Adicionar redirect automático no Auth.tsx quando logado
-```ts
-useEffect(() => {
-  if (user && !loading) {
-    const redirectTo = new URLSearchParams(window.location.search).get("redirect") || "/";
-    navigate(redirectTo, { replace: true });
-  }
-}, [user, loading]);
-```
-
-### 4. Adicionar log de debug temporário
-Pra confirmar que `onAuthStateChange` dispara no retorno do OAuth, adicionar `console.log` no `AuthContext` (apenas dev).
-
-## Arquivos a modificar
-- `src/pages/Auth.tsx` — mudar `redirect_uri` pra `/auth` + adicionar useEffect de redirect quando user estiver presente
-- (opcional) `src/contexts/AuthContext.tsx` — adicionar console.log temporário pra debug
-
-## Diagrama
+### 3. Manter `redirect_uri` em `/auth`
+A página Auth.tsx fica como está (com useEffect de redirect quando user aparece). Combinado com o handler global do AuthContext, o fluxo fica:
 
 ```text
-ANTES (quebrado):
-Click Google → redirect Google → /~oauth/callback (proxy)
-  → redirect to "/" (home)
-  → Index.tsx renderiza, ninguém processa callback
-  → tokens podem estar em #fragment mas usuário não vê nada
-
-DEPOIS (corrigido):
-Click Google → redirect Google → /~oauth/callback (proxy)
-  → redirect to "/auth"
-  → Auth.tsx renderiza
-  → supabase-js detecta tokens em #fragment automaticamente
-  → onAuthStateChange dispara SIGNED_IN
-  → useEffect detecta user, navega pra "/" (ou ?redirect=)
+Click Google → /~oauth/callback (proxy)
+  → redireciona pra /auth?code=... (ou similar)
+  → AuthProvider boot: detecta callback, processa via lovableAuth
+  → setSession → onAuthStateChange dispara SIGNED_IN
+  → Auth.tsx useEffect detecta user → navega pra "/"
 ```
+
+## Arquivos a modificar
+- `src/contexts/AuthContext.tsx` — adicionar handler de callback OAuth no boot
+- (possivelmente) `src/integrations/lovable/index.ts` — expor método de processamento de callback se necessário
+
+## Próximos passos quando aprovado
+1. Ler código do pacote `@lovable.dev/cloud-auth-js` pra descobrir API real de callback
+2. Implementar handler conforme API descoberta
+3. Adicionar `console.log` temporário pro debug confirmar o fluxo
+4. Pedir pro usuário testar e enviar logs do console
+
