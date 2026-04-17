@@ -189,7 +189,7 @@ const DiscoverySections = () => {
                   {!loaded ? (
                     <Skeleton className="w-full h-full" />
                   ) : (
-                    <img src={deal.image} alt={locale === "pt" ? deal.title : deal.titleEn} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                    <SmartImage src={deal.image} alt={locale === "pt" ? deal.title : deal.titleEn} category="deal" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   )}
                   <Badge className="absolute top-2.5 left-2.5 bg-accent text-accent-foreground border-0 text-xs">
                     {Math.round((1 - deal.price / deal.originalPrice) * 100)}% {t("deals.off")}
