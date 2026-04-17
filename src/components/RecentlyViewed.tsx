@@ -45,11 +45,11 @@ const RecentlyViewed = () => {
               >
                 <Link to={href} className="group block w-40">
                   <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-muted mb-2">
-                    <img
+                    <SmartImage
                       src={item.image}
                       alt={item.name}
+                      category={(item.type === "destination" ? "destination" : item.type === "event" ? "event" : "deal") as SmartImageCategory}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      loading="lazy"
                     />
                   </div>
                   <p className="text-sm font-medium text-foreground line-clamp-1 group-hover:text-primary transition-colors">
