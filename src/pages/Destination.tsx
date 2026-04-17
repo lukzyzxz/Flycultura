@@ -8,6 +8,7 @@ import { destinationDetails, destinations } from "@/lib/data";
 import { motion } from "framer-motion";
 import { useI18n } from "@/lib/i18n";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
+import SmartImage from "@/components/SmartImage";
 
 const Destination = () => {
   const { slug } = useParams();
@@ -36,7 +37,7 @@ const Destination = () => {
   return (
     <div className="min-h-screen">
       <div className="relative h-[50vh] min-h-[320px]">
-        <img src={detail.image} alt={detail.name} className="w-full h-full object-cover" />
+        <SmartImage src={detail.image} alt={detail.name} category="destination" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 container pb-8">
           <Link to="/" className="inline-flex items-center gap-2 text-sm text-primary-foreground/70 hover:text-primary-foreground mb-4">

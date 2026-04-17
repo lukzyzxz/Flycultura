@@ -2,6 +2,7 @@ import { Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useI18n } from "@/lib/i18n";
+import SmartImage from "@/components/SmartImage";
 
 interface DestinationCardProps {
   name: string;
@@ -22,7 +23,7 @@ const DestinationCard = ({ name, country, image, price, rating, slug }: Destinat
         className="block group rounded-xl overflow-hidden bg-card card-shadow hover:card-shadow-hover transition-shadow"
       >
         <div className="aspect-[4/3] overflow-hidden">
-          <img src={image} alt={name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          <SmartImage src={image} alt={name} category="destination" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
         </div>
         <div className="p-4">
           <div className="flex items-center justify-between mb-1">

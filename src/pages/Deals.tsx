@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { useI18n } from "@/lib/i18n";
 import { useCart, CartProduct } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
+import SmartImage from "@/components/SmartImage";
 
 const Deals = () => {
   const { t, locale } = useI18n();
@@ -52,7 +53,7 @@ const Deals = () => {
               className="group rounded-xl overflow-hidden bg-card card-shadow hover:card-shadow-hover transition-shadow"
             >
               <div className="relative aspect-[3/2] overflow-hidden">
-                <img src={deal.image} alt={locale === "pt" ? deal.title : deal.titleEn} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <SmartImage src={deal.image} alt={locale === "pt" ? deal.title : deal.titleEn} category="deal" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <Badge className="absolute top-3 left-3 bg-accent text-accent-foreground border-0">{locale === "pt" ? deal.badge : deal.badgeEn}</Badge>
               </div>
               <div className="p-4">

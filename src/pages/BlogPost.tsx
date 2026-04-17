@@ -4,6 +4,7 @@ import { Calendar, Clock, ArrowLeft, Tag, MapPin, CheckCircle } from "lucide-rea
 import { useI18n } from "@/lib/i18n";
 import { Badge } from "@/components/ui/badge";
 import Footer from "@/components/Footer";
+import SmartImage from "@/components/SmartImage";
 
 interface BlogArticle {
   id: string;
@@ -310,9 +311,10 @@ const BlogPost = () => {
     <div className="min-h-screen">
       {/* Hero */}
       <div className="relative h-[50vh] min-h-[400px] overflow-hidden">
-        <img
+        <SmartImage
           src={article.image}
           alt={title}
+          category="blog"
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
@@ -381,7 +383,7 @@ const BlogPost = () => {
                   transition={{ delay: 0.3 + i * 0.1 }}
                   className="rounded-xl overflow-hidden aspect-[3/2]"
                 >
-                  <img src={img} alt="" className="w-full h-full object-cover" loading="lazy" />
+                  <SmartImage src={img} alt="" category="blog" className="w-full h-full object-cover" />
                 </motion.div>
               ))}
             </div>
