@@ -10,6 +10,7 @@ import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { eventPackages } from "@/lib/events-data";
 import { Link } from "react-router-dom";
 import { useMemo } from "react";
+import SmartImage from "@/components/SmartImage";
 
 const ForYouSection = () => {
   const { locale } = useI18n();
