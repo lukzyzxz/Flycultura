@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { useI18n } from "@/lib/i18n";
 import { useQuery } from "@tanstack/react-query";
+import SmartImage from "@/components/SmartImage";
 
 const Results = () => {
   const [searchParams] = useSearchParams();
@@ -195,7 +196,7 @@ const Results = () => {
                 >
                   <Link to={`/packages/${pkg.id}`}>
                     <div className="relative aspect-[16/9] overflow-hidden bg-muted">
-                      <img src={pkg.image} alt={locale === "pt" ? pkg.event : pkg.eventEn} className="w-full h-full object-cover" />
+                      <SmartImage src={pkg.image} alt={locale === "pt" ? pkg.event : pkg.eventEn} category="event" className="w-full h-full object-cover" />
                       <Badge className="absolute top-3 left-3 bg-accent text-accent-foreground border-0">{pkg.badge}</Badge>
                     </div>
                   </Link>
@@ -302,7 +303,7 @@ const Results = () => {
                 >
                   <div className="aspect-[4/3] overflow-hidden bg-muted">
                     {hotel.image ? (
-                      <img src={hotel.image} alt={hotel.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      <SmartImage src={hotel.image} alt={hotel.name} category="destination" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center"><HotelIcon className="h-10 w-10 text-muted-foreground" /></div>
                     )}
@@ -366,7 +367,7 @@ const FallbackDestinations = ({ matchingDestinations }: { matchingDestinations?:
           className="group rounded-xl overflow-hidden bg-card card-shadow hover:card-shadow-hover transition-shadow"
         >
           <div className="aspect-[4/3] overflow-hidden">
-            <img src={d.image} alt={d.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+            <SmartImage src={d.image} alt={d.name} category="destination" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
           </div>
           <div className="p-4">
             <div className="flex items-center justify-between mb-1">

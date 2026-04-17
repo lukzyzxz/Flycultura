@@ -6,6 +6,7 @@ import { useI18n } from "@/lib/i18n";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import Footer from "@/components/Footer";
+import SmartImage from "@/components/SmartImage";
 
 const blogPosts = [
   {
@@ -201,11 +202,11 @@ const Blog = () => {
             <Link to={`/blog/${featured.id}`} className="block rounded-2xl overflow-hidden bg-card card-shadow hover:card-shadow-hover transition-all">
               <div className="grid md:grid-cols-2">
                 <div className="aspect-[16/10] md:aspect-auto overflow-hidden">
-                  <img
+                  <SmartImage
                     src={featured.image}
                     alt={locale === "pt" ? featured.title : featured.titleEn}
+                    category="blog"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
                   />
                 </div>
                 <div className="p-6 md:p-10 flex flex-col justify-center">
@@ -251,11 +252,11 @@ const Blog = () => {
                   className="group block rounded-xl overflow-hidden bg-card card-shadow hover:card-shadow-hover transition-all hover:-translate-y-1"
                 >
                   <div className="aspect-[16/10] overflow-hidden bg-muted">
-                    <img
+                    <SmartImage
                       src={post.image}
                       alt={locale === "pt" ? post.title : post.titleEn}
+                      category="blog"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      loading="lazy"
                     />
                   </div>
                   <div className="p-4">

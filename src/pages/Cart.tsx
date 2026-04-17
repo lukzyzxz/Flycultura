@@ -9,6 +9,7 @@ import { Trash2, Plus, Minus, ShoppingCart, ArrowRight, Clock, ShieldCheck, Tag,
 import { Link, useNavigate } from "react-router-dom";
 import { eventPackages } from "@/lib/events-data";
 import { useState } from "react";
+import SmartImage from "@/components/SmartImage";
 
 const Cart = () => {
   const { items, removeItem, updateQuantity, totalPrice, clearCart } = useCart();
@@ -72,8 +73,8 @@ const Cart = () => {
                 transition={{ delay: i * 0.05 }}
                 className="flex gap-4 rounded-xl bg-card card-shadow p-4 hover:card-shadow-hover transition-shadow"
               >
-                <div className="shrink-0">
-                  <img src={item.product.image} alt={item.product.name} className="w-28 h-20 object-cover rounded-lg" />
+                <div className="shrink-0 w-28 h-20">
+                  <SmartImage src={item.product.image} alt={item.product.name} category={item.product.type === "event" ? "event" : "deal"} className="w-full h-full object-cover rounded-lg" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-display font-bold text-card-foreground truncate">{item.product.name}</h3>
@@ -160,7 +161,7 @@ const Cart = () => {
                       animate={{ opacity: 1, y: 0 }}
                       className="rounded-lg bg-muted/50 p-3 flex gap-3 items-center"
                     >
-                      <img src={pkg.image} alt={locale === "pt" ? pkg.event : pkg.eventEn} className="w-16 h-12 rounded-md object-cover shrink-0" />
+                      <div className="w-16 h-12 shrink-0"><SmartImage src={pkg.image} alt={locale === "pt" ? pkg.event : pkg.eventEn} category="event" className="w-full h-full rounded-md object-cover" /></div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-medium text-foreground line-clamp-1">{locale === "pt" ? pkg.event : pkg.eventEn}</p>
                         <p className="text-xs text-primary font-bold">R$ {pkg.price.toLocaleString("pt-BR")}</p>
