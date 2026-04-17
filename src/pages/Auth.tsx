@@ -106,22 +106,10 @@ const Auth = () => {
         redirect_uri: window.location.origin,
       });
       if (result.error) {
-        const isPreview = window.location.hostname.includes("lovable.app") &&
-          window.location.hostname.startsWith("id-preview");
-        toast({
-          title: "Não foi possível entrar com Google",
-          description: isPreview
-            ? "O login Google às vezes não funciona no preview. Tente abrir o site publicado ou use email + senha."
-            : String(result.error),
-          variant: "destructive",
-        });
+        toast({ title: "Error", description: String(result.error), variant: "destructive" });
       }
     } catch (err: any) {
-      toast({
-        title: "Não foi possível entrar com Google",
-        description: err?.message || "Tente novamente em alguns segundos.",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: err?.message || String(err), variant: "destructive" });
     } finally {
       setLoading(false);
     }
