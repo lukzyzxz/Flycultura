@@ -11,6 +11,7 @@ import { deals } from "@/lib/data";
 import { Link, useNavigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useEffect } from "react";
+import SmartImage from "@/components/SmartImage";
 
 const DiscoverySections = () => {
   const { t, locale } = useI18n();
