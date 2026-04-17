@@ -133,9 +133,10 @@ const EventPackages = () => {
             >
               <Link to={`/packages/${pkg.id}`}>
                 <div className="relative aspect-[16/9] overflow-hidden bg-muted">
-                  <img
+                  <SmartImage
                     src={pkg.image}
                     alt={locale === "pt" ? pkg.event : pkg.eventEn}
+                    category="event"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   <Badge className="absolute top-3 left-3 bg-accent text-accent-foreground border-0 text-sm">
