@@ -11,6 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import SmartImage from "@/components/SmartImage";
 
 const categories = [
   { id: "all", labelPt: "Todos", labelEn: "All" },
