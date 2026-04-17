@@ -2,6 +2,7 @@ import { Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useI18n } from "@/lib/i18n";
+import SmartImage from "@/components/SmartImage";
 
 interface DestinationCardProps {
   name: string;
