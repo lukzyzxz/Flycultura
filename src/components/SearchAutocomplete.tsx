@@ -81,7 +81,7 @@ const SearchAutocomplete = ({ value, onChange, placeholder }: Props) => {
       <MapPin
         className={cn(
           "absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 z-10 transition-colors",
-          isUnknown ? "text-orange-500" : "text-muted-foreground",
+          isUnknown ? "text-warning" : "text-muted-foreground",
         )}
       />
       <Input
@@ -93,17 +93,17 @@ const SearchAutocomplete = ({ value, onChange, placeholder }: Props) => {
         aria-invalid={isUnknown || undefined}
         className={cn(
           "pl-9",
-          isUnknown && "border-orange-500 focus-visible:ring-orange-500/40 pr-9",
+          isUnknown && "border-warning focus-visible:ring-warning/40 pr-9",
         )}
       />
       {isUnknown && (
         <AlertTriangle
-          className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-orange-500 z-10"
+          className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-warning z-10"
           aria-label={locale === "pt" ? "Destino não encontrado" : "Destination not found"}
         />
       )}
       {isUnknown && !open && (
-        <p className="mt-1 text-xs text-orange-600 flex items-center gap-1">
+        <p className="mt-1 text-xs text-warning flex items-center gap-1">
           <AlertTriangle className="h-3 w-3" />
           {locale === "pt"
             ? "Não temos esse destino — mostraremos ofertas em destaque."
