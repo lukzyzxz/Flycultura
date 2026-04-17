@@ -1,48 +1,88 @@
 
-Plano simples e focado: adicionar fallback automático para imagens quebradas em todo o site, exibindo um placeholder temático baseado na categoria do conteúdo.
 
-## Abordagem
+## Plano de implementação
 
-Criar um componente reutilizável `<SmartImage />` que envolve a tag `<img>` nativa e:
-1. Detecta erro de carregamento via `onError`
-2. Substitui por um placeholder temático (Unsplash) baseado em uma prop `category` (ex: "event", "destination", "blog", "deal", "generic")
-3. Mostra um skeleton animado enquanto carrega
-4. Se o próprio fallback falhar, usa `/placeholder.svg` como último recurso
+### 1. Erro Google Login
+Os logs do servidor mostram **logins Google bem-sucedidos (status 200)** no domínio publicado (`blue-sky-trips.lovable.app`). O erro acontece tipicamente no ambiente de **preview**, onde o redirect funciona diferente. Não há bug no código — vou reforçar mensagens de erro no `Auth.tsx` para mostrar instrução clara ao usuário e orientar uso da URL publicada. Sem alterar lógica OAuth.
 
-## Arquivos a criar/modificar
+### 2. Scroll-to-top em mudança de rota
+Criar componente `src/components/ScrollToTop.tsx` que escuta `useLocation()` e chama `window.scrollTo(0, 0)` em cada mudança. Adicionar dentro do `<BrowserRouter>` em `App.tsx`.
 
-**Criar:**
-- `src/components/SmartImage.tsx` — componente com lógica de fallback, skeleton e categorias temáticas
+### 3. Remover eventos passados
+Em `src/lib/events-data.ts`, há 1 pacote com `date: "Junho 2025"` (Coachella linha 547-549). Vou:
+- Adicionar campo `eventDate: string` (ISO `YYYY-MM`) em cada pacote para checagem confiável
+- Filtrar pacotes passados em `EventPackages.tsx`, `Results.tsx`, `ForYouSection.tsx`, `DiscoverySections.tsx`, `Index.tsx`
+- Helper `isEventUpcoming(eventDate)` em `src/lib/events-data.ts`
 
-**Modificar (substituir `<img>` por `<SmartImage>`):**
-- `src/components/DestinationCard.tsx` (category="destination")
-- `src/components/RecentlyViewed.tsx` (category dinâmica conforme item.type)
-- `src/components/ForYouSection.tsx` (category="event")
-- `src/components/DiscoverySections.tsx` (category="event" / "deal")
-- `src/pages/EventPackages.tsx` (category="event")
-- `src/pages/PackageDetail.tsx` (category="event")
-- `src/pages/Destination.tsx` (category="destination")
-- `src/pages/Deals.tsx` (category="deal")
-- `src/pages/Blog.tsx` + `src/pages/BlogPost.tsx` (category="blog")
-- `src/pages/Cart.tsx` e `src/pages/Results.tsx` (category conforme item)
+### 4. Validações de busca (`HeroSearch.tsx` + `Results.tsx`)
 
-## Mapa de placeholders temáticos (Unsplash)
+**a) Bloquear datas passadas:**
+- Adicionar `min={today}` no `<Input type="date">`
+- Validar antes do `navigate()`; se passada → `toast` de erro
+
+**b) Origem/destino não encontrado:**
+- Em `Results.tsx`, quando `matchingPackages.length === 0` E `matchingDestinations.length === 0`, mostrar bloco "Não encontrado" + carrossel de "Outras ofertas" (top 6 pacotes upcoming)
+
+**c) Campo passageiros — substituir input livre por stepper:**
+Trocar `<Input>` de "1 adulto" por componente custom com botões `−` / `+` e display do número. Min = 1, Max = 9. Estado `adults: number`. Passar como query param `&adults=N`.
 
 ```text
-event       → photo-1429962714451-bb934ecdc4ec  (multidão em festival)
-destination → photo-1488646953014-85cb44e25828  (paisagem mundo)
-deal        → photo-1488646953014-85cb44e25828  (viagem genérica)
-blog        → photo-1455390582262-044cdead277a  (laptop/escrita)
-generic     → /placeholder.svg                   (último recurso)
+[ −  ]  1 adulto  [ + ]
 ```
 
-## Comportamento do componente
+### 5. Itens já abordados em mensagens anteriores
+- **Imagens / fallback temático**: já implementado pelo `SmartImage.tsx`. Vou apenas adicionar:
+  - Lazy loading nativo (`loading="lazy"`) já existe no SmartImage ✓
+  - **Blur-up placeholder**: trocar skeleton por um `bg-gradient` sutil + filtro `blur-sm` que some no `onLoad`
+  - **IntersectionObserver**: o atributo `loading="lazy"` nativo já cobre isso eficientemente; não vou adicionar JS extra para evitar complexidade
+
+### 6. Página de admin de logs de fallback
+Criar:
+- `src/lib/imageErrorLog.ts` — singleton em `localStorage` que registra `{ src, category, timestamp, page }` quando `SmartImage` cai em fallback
+- Modificar `SmartImage.tsx` para chamar o logger no `handleError`
+- `src/pages/AdminImageLog.tsx` — lista todos os erros com tabela (data, URL quebrada, página, categoria) + botão "Limpar log"
+- Rota `/admin/image-log` em `App.tsx` (sem auth gate — apenas dev tool)
+
+### Arquivos a modificar/criar
 
 ```text
-[loading]   → skeleton animado (bg-muted animate-pulse)
-[loaded]    → exibe imagem original
-[error #1]  → troca src para placeholder temático da categoria
-[error #2]  → troca src para /placeholder.svg local
+CRIAR:
+  src/components/ScrollToTop.tsx
+  src/components/PassengerStepper.tsx
+  src/lib/imageErrorLog.ts
+  src/pages/AdminImageLog.tsx
+
+MODIFICAR:
+  src/App.tsx                  → ScrollToTop + rota admin
+  src/components/HeroSearch.tsx → date min, stepper, adults state
+  src/components/SmartImage.tsx → blur-up + log de erros
+  src/lib/events-data.ts       → +eventDate, helper isEventUpcoming, remover/datar Coachella
+  src/pages/Results.tsx        → filtro upcoming, "não encontrado" + ofertas
+  src/pages/EventPackages.tsx  → filtro upcoming
+  src/components/ForYouSection.tsx → filtro upcoming
+  src/components/DiscoverySections.tsx → filtro upcoming
 ```
 
-A troca usa `useState` para `currentSrc` e `hasErrored` para evitar loops infinitos.
+### Comportamento final do campo passageiros
+
+```text
+┌─────────────────────────────┐
+│ 👥  [−]   1 adulto   [+]    │
+└─────────────────────────────┘
+   • Mínimo 1, máximo 9
+   • Não aceita texto
+   • Botão − desabilitado em 1
+   • Botão + desabilitado em 9
+```
+
+### Comportamento "não encontrado" em Results
+
+```text
+┌─────────────────────────────────────┐
+│  🔍  Nada encontrado para "xyz"      │
+│  Tente outro destino ou veja        │
+│  ofertas em destaque abaixo ↓       │
+└─────────────────────────────────────┘
+[carrossel de 6 pacotes upcoming]
+```
+
