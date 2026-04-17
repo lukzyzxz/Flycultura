@@ -49,7 +49,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     let mounted = true;
 
     // 1. Set up listener FIRST (synchronous callback — no awaits inside!)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
+      console.log("[AuthCtx] event:", event, "user:", newSession?.user?.email ?? null);
       if (!mounted) return;
       setSession(newSession);
       setUser(newSession?.user ?? null);
