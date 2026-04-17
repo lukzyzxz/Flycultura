@@ -34,8 +34,10 @@ const Auth = () => {
 
   // Auto-redirect once authenticated (covers OAuth callback + email/password success)
   useEffect(() => {
-    if (!authLoading && user) {
+    console.log("[Auth page] state:", { authLoading, hasUser: !!user, email: user?.email });
+    if (user) {
       const redirectTo = new URLSearchParams(window.location.search).get("redirect") || "/";
+      console.log("[Auth page] redirecting to:", redirectTo);
       navigate(redirectTo, { replace: true });
     }
   }, [user, authLoading, navigate]);
@@ -94,12 +96,19 @@ const Auth = () => {
         toast({ title: t("auth.signUpSuccess") });
         switchMode("signin");
       } else {
+        console.log("[Auth page] signIn submit:", values.email);
         const { error } = await signIn(values.email, values.password);
-        if (error) throw error;
-        // navigation handled by useEffect once user state updates
+        if (error) {
+          console.error("[Auth page] signIn error:", error);
+          throw error;
+        }
+        console.log("[Auth page] signIn ok, navigating now");
+        const redirectTo = new URLSearchParams(window.location.search).get("redirect") || "/";
+        navigate(redirectTo, { replace: true });
       }
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      console.error("[Auth page] submit caught:", err);
+      toast({ title: "Erro ao entrar", description: err?.message || String(err), variant: "destructive" });
     } finally {
       setLoading(false);
     }
