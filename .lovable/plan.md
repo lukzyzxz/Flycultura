@@ -1,50 +1,68 @@
 
 
-## Root cause identificado
+## Diagnóstico
 
-**O `src/integrations/supabase/client.ts` NÃO seta `detectSessionInUrl`.** Por padrão do supabase-js é `true`, mas vou confirmar olhando o fluxo Lovable:
+**O que SABEMOS pelos logs:**
+- Login Google **funciona no backend**: `lukzynzx@gmail.com` autenticado às 19:04 hoje (status 200).
+- Login email/senha usa `supabase.auth.signInWithPassword` direto — não tem motivo técnico pra falhar a menos que o build esteja quebrado.
+- Build atual: **failed** (sem detalhes específicos no erro).
 
-O `lovable.auth.signInWithOAuth` (em `src/integrations/lovable/index.ts`) tem dois caminhos:
-1. **Redirect flow** (`result.redirected = true`) → navegador vai pro Google e VOLTA. Nesse caso, ninguém chama `setSession` no retorno.
-2. **Token flow** (síncrono) → chama `supabase.auth.setSession(result.tokens)`.
+**Provável causa do build quebrado:** uma edição anterior pode ter deixado import/sintaxe inválida em algum arquivo tocado. O `AuthContext.tsx` e `Auth.tsx` em si parecem OK.
 
-Como o Google sempre usa redirect, caímos no caso 1. O Lovable proxy worker processa `/~oauth/callback` e redireciona pro `redirect_uri`. Mas os tokens NÃO vêm via fragment `#access_token=...` no formato que o supabase-js detecta automaticamente — eles vêm via cookie/storage do broker oauth.lovable.app, ou via query param customizado que SOMENTE o `lovableAuth` sabe processar.
+**Causa do "Google não loga"** (já investigada antes): o Lovable OAuth broker às vezes devolve tokens em forma que o `supabase-js` não detecta sozinho — daí o handler defensivo que adicionei no AuthContext.
 
-**Conclusão**: o `lovableAuth` precisa ter chance de processar o callback DEPOIS do redirect. Mas hoje só é chamado quando o usuário clica no botão. No retorno do OAuth, ninguém invoca o handler.
+## Decisão: Reset cirúrgico (NÃO precisa apagar banco)
 
-## Solução
+**Não vou resetar o banco.** Os dados de `profiles`, `user_orders`, `user_favorites` etc. são valiosos e o trigger `handle_new_user` está OK. O usuário `lukzynzx@gmail.com` já existe no banco com sucesso.
 
-Adicionar processamento do callback OAuth no boot da app (no `AuthContext`). O `@lovable.dev/cloud-auth-js` tem um método (que vou confirmar) tipo `lovableAuth.handleCallback()` ou similar, OU precisamos detectar parâmetros `?code=...` / `#tokens` na URL e processar.
+**Vou refazer apenas a camada client-side de auth**, voltando ao padrão mais simples e robusto recomendado pela Lovable:
 
-Vou:
+### Plano de implementação (modo default)
 
-### 1. Inspecionar o pacote `@lovable.dev/cloud-auth-js`
-Ler `node_modules/@lovable.dev/cloud-auth-js` para descobrir API real (handleRedirect, getSessionFromUrl, etc).
+1. **Reescrever `src/contexts/AuthContext.tsx`** do zero, padrão canônico:
+   - `onAuthStateChange` PRIMEIRO, `getSession` DEPOIS (evita race condition)
+   - Sem nenhum await dentro do callback (evita deadlock)
+   - Handler defensivo SIMPLES para tokens em query string OU fragment hash (`#access_token=...`)
+   - Usa flag `mounted` pra evitar setState após unmount
+   - Mantém API igual (`signIn`, `signUp`, `signOut`, `resetPassword`) para não quebrar componentes que consomem
 
-### 2. Adicionar handler no AuthContext (após investigação)
-No `useEffect` do `AuthProvider`, ANTES de `getSession`:
-- Detectar se URL tem indicadores de callback OAuth (`?code=`, `#access_token`, ou flag específica do Lovable)
-- Se sim, chamar o método de processamento do `lovableAuth`
-- Aí sim chamar `getSession` + setup de `onAuthStateChange`
+2. **Reescrever `src/pages/Auth.tsx`** simplificado:
+   - Mantém visual atual (Google button, formulário PT/EN, modes signin/signup/reset)
+   - `redirect_uri: window.location.origin + "/auth"` para que callback caia aqui
+   - `useEffect` que redireciona pra home (ou `?redirect=`) quando `user` aparece
+   - Remove código duplicado/morto
 
-### 3. Manter `redirect_uri` em `/auth`
-A página Auth.tsx fica como está (com useEffect de redirect quando user aparece). Combinado com o handler global do AuthContext, o fluxo fica:
+3. **Manter `src/pages/ResetPassword.tsx`** como está (já funcional).
+
+4. **Não tocar em**:
+   - `src/integrations/supabase/client.ts` (proibido)
+   - `src/integrations/lovable/index.ts` (auto-gerado)
+   - `src/integrations/supabase/types.ts` (auto-gerado)
+   - Banco de dados (mantém todos os usuários e dados)
+
+5. **Verificar build** — se ainda falhar após o reset, pedir o erro detalhado.
+
+### Fluxo esperado após o reset
 
 ```text
-Click Google → /~oauth/callback (proxy)
-  → redireciona pra /auth?code=... (ou similar)
-  → AuthProvider boot: detecta callback, processa via lovableAuth
-  → setSession → onAuthStateChange dispara SIGNED_IN
-  → Auth.tsx useEffect detecta user → navega pra "/"
+EMAIL/SENHA:
+form submit → supabase.auth.signInWithPassword → onAuthStateChange("SIGNED_IN")
+  → AuthContext.user atualiza → Auth.tsx useEffect → navigate("/")
+
+GOOGLE:
+click → lovable.auth.signInWithOAuth("google", redirect_uri:"/auth")
+  → redirect Google → /~oauth/callback (proxy Lovable)
+  → redireciona pra /auth (com tokens em hash OU query)
+  → AuthContext detecta no boot → setSession → SIGNED_IN
+  → Auth.tsx useEffect → navigate("/")
 ```
 
-## Arquivos a modificar
-- `src/contexts/AuthContext.tsx` — adicionar handler de callback OAuth no boot
-- (possivelmente) `src/integrations/lovable/index.ts` — expor método de processamento de callback se necessário
+### Arquivos modificados
+- `src/contexts/AuthContext.tsx` (reescrito)
+- `src/pages/Auth.tsx` (reescrito, mesmo visual)
 
-## Próximos passos quando aprovado
-1. Ler código do pacote `@lovable.dev/cloud-auth-js` pra descobrir API real de callback
-2. Implementar handler conforme API descoberta
-3. Adicionar `console.log` temporário pro debug confirmar o fluxo
-4. Pedir pro usuário testar e enviar logs do console
+### Garantias
+- Banco intacto, usuários existentes continuam funcionando
+- API pública do `useAuth()` igual — outros componentes (`Profile`, `Navbar`, `Cart`, etc.) não quebram
+- Build deve voltar a passar
 
