@@ -135,13 +135,16 @@ const HeroSearch = () => {
                 <SearchAutocomplete value={from} onChange={setFrom} placeholder={t("hero.from")} />
                 <SearchAutocomplete value={to} onChange={setTo} placeholder={t("hero.to")} />
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input type="date" className="pl-9" />
+                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                  <Input
+                    type="date"
+                    className="pl-9"
+                    value={date}
+                    min={today}
+                    onChange={(e) => setDate(e.target.value)}
+                  />
                 </div>
-                <div className="relative">
-                  <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder={t("hero.passengers")} defaultValue={t("hero.1adult")} className="pl-9" />
-                </div>
+                <PassengerStepper value={adults} onChange={setAdults} />
               </div>
 
               {/* Quick filters — toggle style, don't set destination */}
