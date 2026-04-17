@@ -14,54 +14,62 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+/**
+ * Defensive: if OAuth tokens come back as query params (?access_token=...&refresh_token=...)
+ * — Lovable broker variant — set the session manually since supabase-js only auto-detects
+ * fragment (#) tokens.
+ */
+const consumeQueryTokens = async () => {
+  if (typeof window === "undefined") return;
+  const params = new URLSearchParams(window.location.search);
+  const access_token = params.get("access_token");
+  const refresh_token = params.get("refresh_token");
+  if (!access_token || !refresh_token) return;
+
+  try {
+    await supabase.auth.setSession({ access_token, refresh_token });
+  } catch (e) {
+    console.error("[Auth] setSession from query failed:", e);
+  }
+
+  // Clean URL
+  const url = new URL(window.location.href);
+  ["access_token", "refresh_token", "expires_in", "expires_at", "token_type", "provider_token"].forEach(
+    (k) => url.searchParams.delete(k)
+  );
+  window.history.replaceState({}, "", url.toString());
+};
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Debug: confirm auth boot in published site
-    console.log("[Auth] boot — url:", window.location.href);
+    let mounted = true;
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("[Auth] event:", event, "user:", session?.user?.email ?? null);
-      setSession(session);
-      setUser(session?.user ?? null);
+    // 1. Set up listener FIRST (synchronous callback — no awaits inside!)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      if (!mounted) return;
+      setSession(newSession);
+      setUser(newSession?.user ?? null);
       setLoading(false);
     });
 
-    // Defensive: if tokens arrive as query params (?access_token=...&refresh_token=...)
-    // — Lovable OAuth broker variant — set the session manually since supabase-js
-    // only auto-detects fragment (#) tokens.
-    const params = new URLSearchParams(window.location.search);
-    const access_token = params.get("access_token");
-    const refresh_token = params.get("refresh_token");
+    // 2. THEN check for existing session (and process query-token callbacks)
+    (async () => {
+      await consumeQueryTokens();
+      const { data: { session: existing } } = await supabase.auth.getSession();
+      if (!mounted) return;
+      setSession(existing);
+      setUser(existing?.user ?? null);
+      setLoading(false);
+    })();
 
-    if (access_token && refresh_token) {
-      console.log("[Auth] detected tokens in query — setting session");
-      supabase.auth.setSession({ access_token, refresh_token }).then(({ data, error }) => {
-        if (error) console.error("[Auth] setSession error:", error);
-        else console.log("[Auth] setSession ok:", data.user?.email);
-        // Clean URL
-        const url = new URL(window.location.href);
-        url.searchParams.delete("access_token");
-        url.searchParams.delete("refresh_token");
-        url.searchParams.delete("expires_in");
-        url.searchParams.delete("expires_at");
-        url.searchParams.delete("token_type");
-        url.searchParams.delete("provider_token");
-        window.history.replaceState({}, "", url.toString());
-      });
-    } else {
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        console.log("[Auth] getSession:", session?.user?.email ?? "none");
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      });
-    }
-
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
@@ -75,7 +83,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       password,
       options: {
         data: { full_name: fullName },
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo: `${window.location.origin}/`,
       },
     });
     return { error: error as Error | null };

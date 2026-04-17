@@ -1,4 +1,4 @@
-// Auth page — handles sign in, sign up, password reset and Google OAuth callback
+// Auth page — sign in, sign up, password reset and Google OAuth
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plane, Mail, Lock, User, Eye, EyeOff } from "lucide-react";
@@ -32,9 +32,9 @@ const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Auto-redirect when user becomes authenticated (e.g. after OAuth callback)
+  // Auto-redirect once authenticated (covers OAuth callback + email/password success)
   useEffect(() => {
-    if (user && !authLoading) {
+    if (!authLoading && user) {
       const redirectTo = new URLSearchParams(window.location.search).get("redirect") || "/";
       navigate(redirectTo, { replace: true });
     }
@@ -96,10 +96,7 @@ const Auth = () => {
       } else {
         const { error } = await signIn(values.email, values.password);
         if (error) throw error;
-        const params = new URLSearchParams(window.location.search);
-        const redirectTo = params.get("redirect") || "/";
-        // Use replace to avoid auth page in history
-        navigate(redirectTo, { replace: true });
+        // navigation handled by useEffect once user state updates
       }
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -112,7 +109,7 @@ const Auth = () => {
     setLoading(true);
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin + "/auth",
+        redirect_uri: `${window.location.origin}/auth`,
       });
       if (result.error) {
         toast({
@@ -121,7 +118,9 @@ const Auth = () => {
           variant: "destructive",
         });
         setLoading(false);
+        return;
       }
+      // If redirected, browser navigates away; if tokens returned, useEffect handles redirect
     } catch (err: any) {
       toast({
         title: "Erro no login com Google",
@@ -170,7 +169,6 @@ const Auth = () => {
             {mode === "reset" ? t("auth.resetSub") : mode === "signup" ? t("auth.createSub") : t("auth.welcomeSub")}
           </p>
 
-          {/* Google Sign In */}
           {mode !== "reset" && (
             <div className="mb-6">
               <Button
