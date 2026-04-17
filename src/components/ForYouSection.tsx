@@ -24,19 +24,20 @@ const ForYouSection = () => {
 
     // Get categories/tags from recently viewed items
     const viewedIds = new Set(recentItems.map((r) => r.id));
-    const viewedPkgs = eventPackages.filter((p) => viewedIds.has(p.id));
+    const upcoming = eventPackages.filter((p) => isEventUpcoming(p));
+    const viewedPkgs = upcoming.filter((p) => viewedIds.has(p.id));
     const viewedCategories = new Set(viewedPkgs.map((p) => p.category));
     const viewedCountries = new Set(viewedPkgs.map((p) => p.country));
 
     // Recommend packages in same categories/countries but not already viewed
-    let recs = eventPackages.filter(
+    let recs = upcoming.filter(
       (p) => !viewedIds.has(p.id) && (viewedCategories.has(p.category) || viewedCountries.has(p.country))
     );
 
     // If not enough, fill with popular ones
     if (recs.length < 4) {
       const recIds = new Set(recs.map((r) => r.id));
-      const extras = eventPackages.filter((p) => !viewedIds.has(p.id) && !recIds.has(p.id));
+      const extras = upcoming.filter((p) => !viewedIds.has(p.id) && !recIds.has(p.id));
       recs = [...recs, ...extras].slice(0, 4);
     }
 
