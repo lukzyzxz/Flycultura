@@ -1,10 +1,10 @@
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
-import { Star, ArrowLeft, Plane, Hotel as HotelIcon, Loader2, ShoppingCart } from "lucide-react";
+import { Star, ArrowLeft, Plane, Hotel as HotelIcon, Loader2, ShoppingCart, SearchX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Footer from "@/components/Footer";
 import { destinations } from "@/lib/data";
-import { eventPackages } from "@/lib/events-data";
+import { eventPackages, isEventUpcoming } from "@/lib/events-data";
 import { searchFlights, searchHotels, FlightResult, HotelResult } from "@/lib/api";
 import { useCart, CartProduct } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -26,8 +26,11 @@ const Results = () => {
   const to = searchParams.get("to") || "";
   const query = to.toLowerCase().trim();
 
+  // Only consider upcoming packages
+  const upcomingPackages = eventPackages.filter((p) => isEventUpcoming(p));
+
   // Filter matching event packages based on search
-  const matchingPackages = eventPackages.filter((pkg) => {
+  const matchingPackages = upcomingPackages.filter((pkg) => {
     if (!query) return false;
     const searchTerms = [
       pkg.location.toLowerCase(),
@@ -40,12 +43,27 @@ const Results = () => {
     return searchTerms.some((term) => term.includes(query) || query.includes(term));
   });
 
-  // Filter matching destinations
+  // Featured upcoming packages used as fallback when nothing matches
+  const featuredOffers = [...upcomingPackages]
+    .sort((a, b) => (1 - b.price / b.originalPrice) - (1 - a.price / a.originalPrice))
+    .slice(0, 6);
+
+  // Filter matching destinations — strict: only return matches when there's a query
   const matchingDestinations = destinations.filter((d) => {
     if (!query) return true;
     const searchTerms = [d.name.toLowerCase(), d.country.toLowerCase(), ...d.tags];
     return searchTerms.some((term) => term.includes(query) || query.includes(term));
   });
+  const queryHasStrictDestinationMatch =
+    !!query &&
+    destinations.some((d) => {
+      const terms = [d.name.toLowerCase(), d.country.toLowerCase(), ...d.tags];
+      return terms.some((term) => term.includes(query) || query.includes(term));
+    });
+
+  // True if the user typed a destination but nothing matched
+  const noMatchAtAll =
+    !!query && matchingPackages.length === 0 && !queryHasStrictDestinationMatch;
 
   // Resolve airport codes for flight search
   const resolveAirportCode = (input: string, fallback?: string): string => {
@@ -179,6 +197,73 @@ const Results = () => {
       </div>
 
       <div className="container py-10">
+        {/* Not found block — shown when query has zero matches */}
+        {noMatchAtAll && (
+          <div className="mb-10">
+            <div className="rounded-xl border border-dashed border-border bg-muted/30 p-8 text-center">
+              <SearchX className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+              <h2 className="font-display text-xl font-bold text-foreground mb-2">
+                {locale === "pt"
+                  ? `Nada encontrado para "${to}"`
+                  : `Nothing found for "${to}"`}
+              </h2>
+              <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                {locale === "pt"
+                  ? "Tente outro destino ou origem. Enquanto isso, confira nossas ofertas em destaque abaixo."
+                  : "Try a different destination or origin. Meanwhile, check out our featured offers below."}
+              </p>
+            </div>
+
+            <h3 className="font-display text-lg font-bold text-foreground mt-8 mb-4">
+              {locale === "pt" ? "✨ Ofertas em destaque" : "✨ Featured offers"}
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {featuredOffers.map((pkg, i) => (
+                <motion.div
+                  key={pkg.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="rounded-xl overflow-hidden bg-card card-shadow"
+                >
+                  <Link to={`/packages/${pkg.id}`}>
+                    <div className="relative aspect-[16/9] overflow-hidden bg-muted">
+                      <SmartImage
+                        src={pkg.image}
+                        alt={locale === "pt" ? pkg.event : pkg.eventEn}
+                        category="event"
+                        className="w-full h-full object-cover"
+                      />
+                      <Badge className="absolute top-3 left-3 bg-accent text-accent-foreground border-0">
+                        {pkg.badge}
+                      </Badge>
+                    </div>
+                  </Link>
+                  <div className="p-4">
+                    <Link to={`/packages/${pkg.id}`}>
+                      <h4 className="font-display font-bold text-card-foreground mb-1 hover:text-primary transition-colors">
+                        {locale === "pt" ? pkg.event : pkg.eventEn}
+                      </h4>
+                    </Link>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      {pkg.location} — {locale === "pt" ? pkg.date : pkg.dateEn}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-lg font-bold text-primary">
+                        R$ {pkg.price.toLocaleString("pt-BR")}
+                      </span>
+                      <Button size="sm" onClick={() => handleAddPackage(pkg)} className="gap-1">
+                        <ShoppingCart className="h-3.5 w-3.5" />
+                        {t("cart.addToCart")}
+                      </Button>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Matching Event Packages */}
         {matchingPackages.length > 0 && (
           <div className="mb-10">

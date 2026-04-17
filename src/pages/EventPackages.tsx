@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import Footer from "@/components/Footer";
-import { eventPackages } from "@/lib/events-data";
+import { eventPackages, isEventUpcoming } from "@/lib/events-data";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Plane, Hotel, Ticket, Car, ExternalLink, Heart, Filter } from "lucide-react";
@@ -67,7 +67,8 @@ const EventPackages = () => {
     onError: () => toast({ title: locale === "pt" ? "Faça login para favoritar" : "Sign in to favorite", variant: "destructive" }),
   });
 
-  let filtered = category === "all" ? [...eventPackages] : eventPackages.filter((p) => p.category === category);
+  const upcoming = eventPackages.filter((p) => isEventUpcoming(p));
+  let filtered = category === "all" ? [...upcoming] : upcoming.filter((p) => p.category === category);
 
   if (sort === "price-asc") filtered.sort((a, b) => a.price - b.price);
   else if (sort === "price-desc") filtered.sort((a, b) => b.price - a.price);

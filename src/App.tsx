@@ -26,7 +26,9 @@ import Auth from "./pages/Auth.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import Profile from "./pages/Profile.tsx";
 import Unsubscribe from "./pages/Unsubscribe.tsx";
+import AdminImageLog from "./pages/AdminImageLog.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import ScrollToTop from "./components/ScrollToTop.tsx";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +41,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
+              <ScrollToTop />
               <Navbar />
               <Routes>
                 <Route path="/" element={<Index />} />
@@ -60,6 +63,7 @@ const App = () => (
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/unsubscribe" element={<Unsubscribe />} />
+                <Route path="/admin/image-log" element={<AdminImageLog />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>

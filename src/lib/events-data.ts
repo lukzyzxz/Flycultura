@@ -798,3 +798,54 @@ export const eventPackages: EventPackage[] = [
     tags: ["vendimia", "vinho", "argentina", "mendoza", "cultura", "wine", "culture"],
   },
 ];
+
+// ============================================================
+// Upcoming-event helpers
+// ============================================================
+
+const PT_MONTHS: Record<string, number> = {
+  janeiro: 0, fevereiro: 1, março: 2, marco: 2, abril: 3, maio: 4, junho: 5,
+  julho: 6, agosto: 7, setembro: 8, outubro: 9, novembro: 10, dezembro: 11,
+};
+
+/**
+ * Parses a Portuguese date string (e.g. "Junho 2026", "Setembro-Outubro 2026",
+ * "Março-Abril 2027") into the LAST day of the LAST month mentioned. The event
+ * is considered upcoming until the end of that month.
+ */
+function parseEventEndDate(dateStr: string): Date | null {
+  const lower = dateStr.toLowerCase();
+  const yearMatch = lower.match(/\b(20\d{2})\b/);
+  if (!yearMatch) return null;
+  const year = parseInt(yearMatch[1], 10);
+
+  // Collect all month names found, in order
+  const months: number[] = [];
+  for (const [name, idx] of Object.entries(PT_MONTHS)) {
+    let from = 0;
+    while (true) {
+      const i = lower.indexOf(name, from);
+      if (i === -1) break;
+      months.push(idx);
+      from = i + name.length;
+    }
+  }
+
+  // Use the last month if any, otherwise December
+  const monthIdx = months.length > 0 ? months[months.length - 1] : 11;
+  // Last day of that month
+  return new Date(year, monthIdx + 1, 0, 23, 59, 59);
+}
+
+/** True if the event has not yet ended. */
+export function isEventUpcoming(pkg: EventPackage, now: Date = new Date()): boolean {
+  const end = parseEventEndDate(pkg.date);
+  if (!end) return true; // be permissive if parsing fails
+  return end.getTime() >= now.getTime();
+}
+
+/** Filter helper: returns only upcoming packages. */
+export function getUpcomingPackages(): EventPackage[] {
+  return eventPackages.filter((p) => isEventUpcoming(p));
+}
+

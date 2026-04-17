@@ -6,7 +6,7 @@ import { useI18n } from "@/lib/i18n";
 import { useCart, CartProduct } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { eventPackages } from "@/lib/events-data";
+import { eventPackages, isEventUpcoming } from "@/lib/events-data";
 import { deals } from "@/lib/data";
 import { Link, useNavigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,13 +26,15 @@ const DiscoverySections = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  const upcomingPkgs = eventPackages.filter((p) => isEventUpcoming(p));
+
   // "Em alta" — most popular (highest discount)
-  const trending = [...eventPackages]
+  const trending = [...upcomingPkgs]
     .sort((a, b) => (1 - b.price / b.originalPrice) - (1 - a.price / a.originalPrice))
     .slice(0, 4);
 
   // "Baratos agora" — cheapest packages
-  const cheapNow = [...eventPackages]
+  const cheapNow = [...upcomingPkgs]
     .sort((a, b) => a.price - b.price)
     .slice(0, 4);
 
