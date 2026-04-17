@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Footer from "@/components/Footer";
 import { destinations } from "@/lib/data";
-import { eventPackages } from "@/lib/events-data";
+import { eventPackages, isEventUpcoming } from "@/lib/events-data";
 import { searchFlights, searchHotels, FlightResult, HotelResult } from "@/lib/api";
 import { useCart, CartProduct } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -26,8 +26,11 @@ const Results = () => {
   const to = searchParams.get("to") || "";
   const query = to.toLowerCase().trim();
 
+  // Only consider upcoming packages
+  const upcomingPackages = eventPackages.filter((p) => isEventUpcoming(p));
+
   // Filter matching event packages based on search
-  const matchingPackages = eventPackages.filter((pkg) => {
+  const matchingPackages = upcomingPackages.filter((pkg) => {
     if (!query) return false;
     const searchTerms = [
       pkg.location.toLowerCase(),
@@ -39,6 +42,11 @@ const Results = () => {
     ];
     return searchTerms.some((term) => term.includes(query) || query.includes(term));
   });
+
+  // Featured upcoming packages used as fallback when nothing matches
+  const featuredOffers = [...upcomingPackages]
+    .sort((a, b) => (1 - b.price / b.originalPrice) - (1 - a.price / a.originalPrice))
+    .slice(0, 6);
 
   // Filter matching destinations
   const matchingDestinations = destinations.filter((d) => {
