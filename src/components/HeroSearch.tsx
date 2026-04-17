@@ -1,21 +1,28 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plane, Hotel, Package, Ship, Search, Calendar, Users, Sparkles } from "lucide-react";
+import { Plane, Hotel, Package, Ship, Search, Calendar, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import { useI18n } from "@/lib/i18n";
+import { useToast } from "@/hooks/use-toast";
 import SearchAutocomplete from "@/components/SearchAutocomplete";
 import TripPlannerModal from "@/components/TripPlannerModal";
+import PassengerStepper from "@/components/PassengerStepper";
 
 const HeroSearch = () => {
   const [activeTab, setActiveTab] = useState("flights");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
+  const [date, setDate] = useState("");
+  const [adults, setAdults] = useState(1);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [plannerOpen, setPlannerOpen] = useState(false);
   const navigate = useNavigate();
   const { t, locale } = useI18n();
+  const { toast } = useToast();
+
+  const today = new Date().toISOString().split("T")[0];
 
   const tabs = [
     { id: "flights", label: t("hero.flights"), icon: Plane },
@@ -29,8 +36,23 @@ const HeroSearch = () => {
     : ["Budget", "Luxury", "Adventure", "Family", "Beach", "Cultural"];
 
   const handleSearch = () => {
+    // Validate date is not in the past
+    if (date && date < today) {
+      toast({
+        title: locale === "pt" ? "Data inválida" : "Invalid date",
+        description:
+          locale === "pt"
+            ? "Selecione uma data igual ou posterior a hoje."
+            : "Please pick a date today or later.",
+        variant: "destructive",
+      });
+      return;
+    }
     const filterParam = activeFilter ? `&filter=${activeFilter}` : "";
-    navigate(`/results?type=${activeTab}&from=${from}&to=${to}${filterParam}`);
+    const dateParam = date ? `&date=${date}` : "";
+    navigate(
+      `/results?type=${activeTab}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&adults=${adults}${dateParam}${filterParam}`,
+    );
   };
 
   const handleFilterClick = (f: string) => {
