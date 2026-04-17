@@ -7,7 +7,7 @@ import { useCart, CartProduct } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
-import { eventPackages } from "@/lib/events-data";
+import { eventPackages, isEventUpcoming } from "@/lib/events-data";
 import { Link } from "react-router-dom";
 import { useMemo } from "react";
 import SmartImage from "@/components/SmartImage";

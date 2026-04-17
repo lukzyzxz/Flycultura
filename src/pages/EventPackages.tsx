@@ -67,7 +67,7 @@ const EventPackages = () => {
     onError: () => toast({ title: locale === "pt" ? "Faça login para favoritar" : "Sign in to favorite", variant: "destructive" }),
   });
 
-  const upcoming = eventPackages.filter(isEventUpcoming);
+  const upcoming = eventPackages.filter((p) => isEventUpcoming(p));
   let filtered = category === "all" ? [...upcoming] : upcoming.filter((p) => p.category === category);
 
   if (sort === "price-asc") filtered.sort((a, b) => a.price - b.price);
