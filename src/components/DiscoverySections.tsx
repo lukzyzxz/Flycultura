@@ -110,7 +110,7 @@ const DiscoverySections = () => {
           {!loaded ? (
             <Skeleton className="w-full h-full" />
           ) : (
-            <img src={pkg.image} alt={locale === "pt" ? pkg.event : pkg.eventEn} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+            <SmartImage src={pkg.image} alt={locale === "pt" ? pkg.event : pkg.eventEn} category="event" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
           )}
           <Badge className="absolute top-2.5 left-2.5 bg-accent text-accent-foreground border-0 text-xs">{pkg.badge}</Badge>
         </div>
