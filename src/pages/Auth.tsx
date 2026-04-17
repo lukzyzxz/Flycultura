@@ -1,3 +1,4 @@
+// Auth page — handles sign in, sign up, password reset and Google OAuth callback
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plane, Mail, Lock, User, Eye, EyeOff } from "lucide-react";
