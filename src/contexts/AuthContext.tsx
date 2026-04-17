@@ -20,17 +20,46 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    // Debug: confirm auth boot in published site
+    console.log("[Auth] boot — url:", window.location.href);
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("[Auth] event:", event, "user:", session?.user?.email ?? null);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    // Defensive: if tokens arrive as query params (?access_token=...&refresh_token=...)
+    // — Lovable OAuth broker variant — set the session manually since supabase-js
+    // only auto-detects fragment (#) tokens.
+    const params = new URLSearchParams(window.location.search);
+    const access_token = params.get("access_token");
+    const refresh_token = params.get("refresh_token");
+
+    if (access_token && refresh_token) {
+      console.log("[Auth] detected tokens in query — setting session");
+      supabase.auth.setSession({ access_token, refresh_token }).then(({ data, error }) => {
+        if (error) console.error("[Auth] setSession error:", error);
+        else console.log("[Auth] setSession ok:", data.user?.email);
+        // Clean URL
+        const url = new URL(window.location.href);
+        url.searchParams.delete("access_token");
+        url.searchParams.delete("refresh_token");
+        url.searchParams.delete("expires_in");
+        url.searchParams.delete("expires_at");
+        url.searchParams.delete("token_type");
+        url.searchParams.delete("provider_token");
+        window.history.replaceState({}, "", url.toString());
+      });
+    } else {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        console.log("[Auth] getSession:", session?.user?.email ?? "none");
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+      });
+    }
 
     return () => subscription.unsubscribe();
   }, []);
