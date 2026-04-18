@@ -122,15 +122,14 @@ const Results = () => {
     staleTime: 5 * 60 * 1000,
   });
 
-  const hotelsQuery = useQuery({
-    queryKey: ["hotels", to],
-    queryFn: () => searchHotels({ dest_id: to || "20088325" }),
-    enabled: type === "hotels",
-    staleTime: 5 * 60 * 1000,
-  });
+  // Hotels — local catalog filtered by destination query (only cities with packages)
+  const hotelResults: Hotel[] = type === "hotels" ? searchHotelsByQuery(to) : [];
 
-  const isLoading = (type === "flights" && flightsQuery.isLoading) || (type === "hotels" && hotelsQuery.isLoading);
-  const isError = (type === "flights" && flightsQuery.isError) || (type === "hotels" && hotelsQuery.isError);
+  // Cruises — local catalog filtered by destination query
+  const cruiseResults: Cruise[] = type === "cruises" ? searchCruises(to) : [];
+
+  const isLoading = type === "flights" && flightsQuery.isLoading;
+  const isError = type === "flights" && flightsQuery.isError;
 
   const handleAddFlight = (flight: FlightResult) => {
     if (!user) { navigate(`/auth?redirect=/results?${searchParams.toString()}`); return; }
