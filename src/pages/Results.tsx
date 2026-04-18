@@ -1,11 +1,13 @@
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
-import { Star, ArrowLeft, Plane, Hotel as HotelIcon, Loader2, ShoppingCart, SearchX } from "lucide-react";
+import { Star, ArrowLeft, Plane, Hotel as HotelIcon, Loader2, ShoppingCart, SearchX, Ship, MapPin, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Footer from "@/components/Footer";
 import { destinations } from "@/lib/data";
 import { eventPackages, isEventUpcoming } from "@/lib/events-data";
-import { searchFlights, searchHotels, FlightResult, HotelResult } from "@/lib/api";
+import { searchFlights, FlightResult } from "@/lib/api";
+import { searchHotelsByQuery, Hotel } from "@/lib/hotels-data";
+import { searchCruises, Cruise } from "@/lib/cruises-data";
 import { useCart, CartProduct } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
