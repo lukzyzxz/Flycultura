@@ -333,7 +333,7 @@ const Results = () => {
         {isError && (
           <div className="text-center py-20">
             <p className="text-destructive mb-4">{locale === "pt" ? "Erro ao buscar resultados. Tente novamente." : "Error fetching results. Try again."}</p>
-            <Button onClick={() => type === "flights" ? flightsQuery.refetch() : hotelsQuery.refetch()}>
+            <Button onClick={() => flightsQuery.refetch()}>
               {locale === "pt" ? "Tentar novamente" : "Try again"}
             </Button>
           </div>
@@ -389,11 +389,19 @@ const Results = () => {
           </div>
         )}
 
-        {/* Hotel results */}
-        {type === "hotels" && !isLoading && !isError && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {(hotelsQuery.data?.length ?? 0) > 0 ? (
-              hotelsQuery.data!.map((hotel, i) => (
+        {/* Hotel results — local catalog (cities with packages) */}
+        {type === "hotels" && (
+          <>
+            <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
+              <HotelIcon className="h-4 w-4" />
+              <span>
+                {hotelResults.length}{" "}
+                {locale === "pt" ? "hotéis disponíveis" : "hotels available"}
+                {to && ` ${locale === "pt" ? "para" : "for"} "${to}"`}
+              </span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {hotelResults.map((hotel, i) => (
                 <motion.div
                   key={hotel.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -401,22 +409,40 @@ const Results = () => {
                   transition={{ delay: i * 0.05 }}
                   className="group rounded-xl overflow-hidden bg-card card-shadow hover:card-shadow-hover transition-shadow"
                 >
-                  <div className="aspect-[4/3] overflow-hidden bg-muted">
-                    {hotel.image ? (
-                      <SmartImage src={hotel.image} alt={hotel.name} category="destination" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center"><HotelIcon className="h-10 w-10 text-muted-foreground" /></div>
+                  <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+                    <SmartImage src={hotel.image} alt={hotel.name} category="destination" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    {hotel.originalPrice > hotel.pricePerNight && (
+                      <Badge className="absolute top-3 left-3 bg-accent text-accent-foreground border-0">
+                        -{Math.round((1 - hotel.pricePerNight / hotel.originalPrice) * 100)}%
+                      </Badge>
                     )}
                   </div>
                   <div className="p-4">
                     <h3 className="font-display font-bold text-card-foreground mb-1 line-clamp-1">{hotel.name}</h3>
-                    {hotel.address && <p className="text-xs text-muted-foreground mb-1">{hotel.address}</p>}
-                    <div className="flex items-center gap-1 mb-3">
-                      <Star className="h-3.5 w-3.5 fill-current text-accent" />
-                      <span className="text-xs font-medium text-accent">{hotel.rating || "–"}</span>
+                    <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      {locale === "pt" ? hotel.city : hotel.cityEn}, {locale === "pt" ? hotel.country : hotel.countryEn}
+                    </p>
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="flex items-center gap-1">
+                        <Star className="h-3.5 w-3.5 fill-current text-accent" />
+                        <span className="text-xs font-medium text-accent">{hotel.rating}</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">• {hotel.reviewScore}</span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-lg font-bold text-primary">R$ {hotel.price.toLocaleString("pt-BR")}</span>
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {(locale === "pt" ? hotel.amenities : hotel.amenitiesEn).slice(0, 3).map((a) => (
+                        <span key={a} className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{a}</span>
+                      ))}
+                    </div>
+                    <div className="flex items-end justify-between">
+                      <div>
+                        {hotel.originalPrice > hotel.pricePerNight && (
+                          <p className="text-xs text-muted-foreground line-through">R$ {hotel.originalPrice.toLocaleString("pt-BR")}</p>
+                        )}
+                        <span className="text-lg font-bold text-primary">R$ {hotel.pricePerNight.toLocaleString("pt-BR")}</span>
+                        <span className="text-xs text-muted-foreground"> /{locale === "pt" ? "noite" : "night"}</span>
+                      </div>
                       <Button size="sm" onClick={() => handleAddHotel(hotel)} className="gap-1">
                         <ShoppingCart className="h-3.5 w-3.5" />
                         {locale === "pt" ? "Reservar" : "Book"}
@@ -424,15 +450,83 @@ const Results = () => {
                     </div>
                   </div>
                 </motion.div>
-              ))
-            ) : (
-              matchingPackages.length === 0 && <FallbackDestinations matchingDestinations={matchingDestinations} />
-            )}
-          </div>
+              ))}
+            </div>
+          </>
         )}
 
-        {/* Fallback for packages/cruises */}
-        {type !== "flights" && type !== "hotels" && matchingPackages.length === 0 && (
+        {/* Cruise results — local catalog with real cruise photos */}
+        {type === "cruises" && (
+          <>
+            <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
+              <Ship className="h-4 w-4" />
+              <span>
+                {cruiseResults.length}{" "}
+                {locale === "pt" ? "cruzeiros disponíveis" : "cruises available"}
+                {to && ` ${locale === "pt" ? "para" : "for"} "${to}"`}
+              </span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {cruiseResults.map((cruise, i) => (
+                <motion.div
+                  key={cruise.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="group rounded-xl overflow-hidden bg-card card-shadow hover:card-shadow-hover transition-shadow"
+                >
+                  <div className="relative aspect-[16/10] overflow-hidden bg-muted">
+                    <SmartImage src={cruise.image} alt={locale === "pt" ? cruise.name : cruise.nameEn} category="destination" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground border-0 gap-1">
+                      <Ship className="h-3 w-3" />
+                      {cruise.duration} {locale === "pt" ? "noites" : "nights"}
+                    </Badge>
+                    {cruise.originalPrice > cruise.price && (
+                      <Badge className="absolute top-3 right-3 bg-accent text-accent-foreground border-0">
+                        -{Math.round((1 - cruise.price / cruise.originalPrice) * 100)}%
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <p className="text-xs text-muted-foreground mb-1">{cruise.cruiseLine} • {cruise.ship}</p>
+                    <h3 className="font-display font-bold text-card-foreground mb-2 line-clamp-1">
+                      {locale === "pt" ? cruise.name : cruise.nameEn}
+                    </h3>
+                    <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                      <MapPin className="h-3 w-3 shrink-0" />
+                      <span className="line-clamp-1">
+                        {(locale === "pt" ? cruise.itinerary : cruise.itineraryEn).join(" → ")}
+                      </span>
+                    </p>
+                    <p className="text-xs text-muted-foreground mb-3 flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      {locale === "pt" ? cruise.date : cruise.dateEn}
+                    </p>
+                    <div className="flex items-center gap-1 mb-3">
+                      <Star className="h-3.5 w-3.5 fill-current text-accent" />
+                      <span className="text-xs font-medium text-accent">{cruise.rating}</span>
+                    </div>
+                    <div className="flex items-end justify-between">
+                      <div>
+                        {cruise.originalPrice > cruise.price && (
+                          <p className="text-xs text-muted-foreground line-through">R$ {cruise.originalPrice.toLocaleString("pt-BR")}</p>
+                        )}
+                        <span className="text-lg font-bold text-primary">R$ {cruise.price.toLocaleString("pt-BR")}</span>
+                      </div>
+                      <Button size="sm" onClick={() => handleAddCruise(cruise)} className="gap-1">
+                        <ShoppingCart className="h-3.5 w-3.5" />
+                        {locale === "pt" ? "Reservar" : "Book"}
+                      </Button>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Fallback for packages only */}
+        {type === "packages" && matchingPackages.length === 0 && (
           <FallbackDestinations matchingDestinations={matchingDestinations} />
         )}
 
