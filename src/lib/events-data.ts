@@ -1,3 +1,14 @@
+import olympics2028Img from "@/assets/events/olympics-2028.png";
+import f1Interlagos2026Img from "@/assets/events/f1-interlagos-2026.png";
+import f1Monaco2026Img from "@/assets/events/f1-monaco-2026.png";
+import carnivalRio2027Img from "@/assets/events/carnival-rio-2027.png";
+import oktoberfest2026Img from "@/assets/events/oktoberfest-2026.png";
+import cannes2027Img from "@/assets/events/cannes-2027.png";
+import diaMuertos2026Img from "@/assets/events/dia-muertos-2026.png";
+import holiIndia2027Img from "@/assets/events/holi-india-2027.png";
+import tomorrowland2026Img from "@/assets/events/tomorrowland-2026.png";
+import vendimia2027Img from "@/assets/events/vendimia-2027.png";
+
 export interface EventPackage {
   id: string;
   event: string;
@@ -202,7 +213,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "US",
     date: "Julho 2028",
     dateEn: "July 2028",
-    image: "https://images.unsplash.com/photo-1587614382346-4ec70e388b28?w=800&h=500&fit=crop",
+    image: olympics2028Img,
     price: 22690,
     originalPrice: 34290,
     badge: "🏅 Olimpíadas",
@@ -231,7 +242,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "MC",
     date: "Maio 2026",
     dateEn: "May 2026",
-    image: "https://images.unsplash.com/photo-1541447270888-83e8494f9c08?w=800&h=500&fit=crop",
+    image: f1Monaco2026Img,
     price: 25290,
     originalPrice: 36990,
     badge: "🏎️ Fórmula 1",
@@ -258,7 +269,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "BR",
     date: "Novembro 2026",
     dateEn: "November 2026",
-    image: "https://images.unsplash.com/photo-1504817343863-5092a923803e?w=800&h=500&fit=crop",
+    image: f1Interlagos2026Img,
     price: 4990,
     originalPrice: 7990,
     badge: "🏎️ Fórmula 1",
@@ -374,7 +385,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "BR",
     date: "Fevereiro 2027",
     dateEn: "February 2027",
-    image: "https://images.unsplash.com/photo-1518310383802-640c2de311b2?w=800&h=500&fit=crop",
+    image: carnivalRio2027Img,
     price: 4990,
     originalPrice: 7490,
     badge: "🎭 Carnaval",
@@ -577,7 +588,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "DE",
     date: "Setembro-Outubro 2026",
     dateEn: "September-October 2026",
-    image: "https://images.unsplash.com/photo-1572883454114-1cf0031ede2a?w=800&h=500&fit=crop",
+    image: oktoberfest2026Img,
     price: 12990,
     originalPrice: 18990,
     badge: "🍺 Festival",
@@ -606,7 +617,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "FR",
     date: "Maio 2027",
     dateEn: "May 2027",
-    image: "https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=800&h=500&fit=crop",
+    image: cannes2027Img,
     price: 19990,
     originalPrice: 29990,
     badge: "🎬 Cinema",
@@ -635,7 +646,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "MX",
     date: "Outubro-Novembro 2026",
     dateEn: "October-November 2026",
-    image: "https://images.unsplash.com/photo-1509721434272-b79147e0e708?w=800&h=500&fit=crop",
+    image: diaMuertos2026Img,
     price: 8990,
     originalPrice: 13490,
     badge: "💀 Cultural",
@@ -664,7 +675,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "IN",
     date: "Março 2027",
     dateEn: "March 2027",
-    image: "https://images.unsplash.com/photo-1576089172869-4f5f6f315620?w=800&h=500&fit=crop",
+    image: holiIndia2027Img,
     price: 15990,
     originalPrice: 23990,
     badge: "🎨 Festival",
@@ -751,7 +762,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "BE",
     date: "Julho 2026",
     dateEn: "July 2026",
-    image: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800&h=500&fit=crop",
+    image: tomorrowland2026Img,
     price: 16990,
     originalPrice: 24990,
     badge: "🎶 Festival",
@@ -780,7 +791,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "AR",
     date: "Março 2027",
     dateEn: "March 2027",
-    image: "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=800&h=500&fit=crop",
+    image: vendimia2027Img,
     price: 6990,
     originalPrice: 10490,
     badge: "🍷 Cultural",
