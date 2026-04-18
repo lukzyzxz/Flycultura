@@ -145,15 +145,29 @@ const Results = () => {
     toast({ title: t("cart.added"), description: product.name });
   };
 
-  const handleAddHotel = (hotel: HotelResult) => {
+  const handleAddHotel = (hotel: Hotel) => {
     if (!user) { navigate(`/auth?redirect=/results?${searchParams.toString()}`); return; }
     const product: CartProduct = {
       id: `hotel-${hotel.id}`,
       type: "hotel",
       name: hotel.name,
-      image: hotel.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop",
-      price: hotel.price,
-      description: hotel.address || "",
+      image: hotel.image,
+      price: hotel.pricePerNight,
+      description: `${locale === "pt" ? hotel.city : hotel.cityEn} — ${hotel.address}`,
+    };
+    addItem(product);
+    toast({ title: t("cart.added"), description: product.name });
+  };
+
+  const handleAddCruise = (cruise: Cruise) => {
+    if (!user) { navigate(`/auth?redirect=/results?${searchParams.toString()}`); return; }
+    const product: CartProduct = {
+      id: `cruise-${cruise.id}`,
+      type: "hotel", // reuse existing cart type
+      name: `${cruise.cruiseLine} — ${locale === "pt" ? cruise.name : cruise.nameEn}`,
+      image: cruise.image,
+      price: cruise.price,
+      description: `${cruise.duration} ${locale === "pt" ? "noites" : "nights"} • ${locale === "pt" ? cruise.date : cruise.dateEn}`,
     };
     addItem(product);
     toast({ title: t("cart.added"), description: product.name });
