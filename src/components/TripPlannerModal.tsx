@@ -44,6 +44,7 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
   const [customInterest, setCustomInterest] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState("");
+  const [destError, setDestError] = useState("");
 
   const prefOptions = locale === "pt" ? prefOptionsPt : prefOptionsEn;
 
@@ -61,12 +62,21 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
   const handleGenerate = async () => {
     setLoading(true);
     setResult("");
+    setDestError("");
     try {
       const { data, error } = await supabase.functions.invoke("generate-itinerary", {
         body: { destination, days: parseInt(dates) || 7, interests: preferences.join(", "), budget, locale },
       });
 
       if (error) throw error;
+
+      // Backend rejected the destination as invalid — show inline error and go back to step 0
+      if (data?.valid === false) {
+        setDestError(data.message || (locale === "pt" ? "Destino inválido." : "Invalid destination."));
+        setStep(0);
+        return;
+      }
+
       const raw = data?.itinerary || (locale === "pt" ? "Erro ao gerar plano." : "Error generating plan.");
       setResult(stripMarkdown(raw));
       setStep(3);
@@ -86,6 +96,7 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
     setPreferences([]);
     setCustomInterest("");
     setResult("");
+    setDestError("");
   };
 
   if (!open) return null;
