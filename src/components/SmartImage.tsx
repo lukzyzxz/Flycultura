@@ -24,6 +24,8 @@ interface SmartImageProps extends ImgHTMLAttributes<HTMLImageElement> {
   category?: SmartImageCategory;
   wrapperClassName?: string;
   showSkeleton?: boolean;
+  /** When true, eagerly load and prioritize (use for above-the-fold hero images). */
+  priority?: boolean;
 }
 
 const SmartImage = ({
@@ -33,7 +35,8 @@ const SmartImage = ({
   className,
   wrapperClassName,
   showSkeleton = true,
-  loading = "lazy",
+  loading,
+  priority = false,
   ...rest
 }: SmartImageProps) => {
   const [currentSrc, setCurrentSrc] = useState(src);
@@ -48,7 +51,6 @@ const SmartImage = ({
 
   const handleError = () => {
     if (errorStage === 0) {
-      // Log the original broken URL once before swapping to fallback
       logImageError({
         src,
         category,
@@ -62,11 +64,13 @@ const SmartImage = ({
     }
   };
 
+  const effectiveLoading = loading ?? (priority ? "eager" : "lazy");
+
   return (
     <div className={cn("relative w-full h-full overflow-hidden", wrapperClassName)}>
       {showSkeleton && !loaded && (
         <div
-          className="absolute inset-0 bg-gradient-to-br from-muted via-muted/60 to-muted animate-pulse"
+          className="absolute inset-0 bg-muted animate-pulse"
           aria-hidden="true"
         />
       )}
@@ -74,13 +78,16 @@ const SmartImage = ({
         {...rest}
         src={currentSrc}
         alt={alt}
-        loading={loading}
+        loading={effectiveLoading}
+        decoding="async"
+        // @ts-expect-error – fetchpriority is valid HTML but not in React types yet
+        fetchpriority={priority ? "high" : "auto"}
         onLoad={() => setLoaded(true)}
         onError={handleError}
         className={cn(
           className,
-          "transition-all duration-500 ease-out",
-          loaded ? "opacity-100 blur-0 scale-100" : "opacity-0 blur-md scale-105"
+          "transition-opacity duration-300 ease-out",
+          loaded ? "opacity-100" : "opacity-0",
         )}
       />
     </div>
