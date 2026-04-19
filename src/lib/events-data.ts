@@ -11,6 +11,7 @@ import vendimia2027Img from "@/assets/events/vendimia-2027.png";
 import wcTorontoImg from "@/assets/events/wc-toronto.png";
 import wcNyGroupImg from "@/assets/events/wc-ny-group.png";
 import wcMexicoImg from "@/assets/events/wc-mexico.png";
+import wcMiamiImg from "@/assets/events/wc-miami.png";
 
 export interface EventPackage {
   id: string;
@@ -79,7 +80,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "US",
     date: "Junho 2026",
     dateEn: "June 2026",
-    image: "https://images.unsplash.com/photo-1556056504-5c7696c4c28d?w=800&h=500&fit=crop",
+    image: wcMiamiImg,
     price: 16990,
     originalPrice: 25490,
     badge: "⚽ Copa do Mundo",
