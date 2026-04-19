@@ -8,6 +8,9 @@ import diaMuertos2026Img from "@/assets/events/dia-muertos-2026.png";
 import holiIndia2027Img from "@/assets/events/holi-india-2027.png";
 import tomorrowland2026Img from "@/assets/events/tomorrowland-2026.png";
 import vendimia2027Img from "@/assets/events/vendimia-2027.png";
+import wcTorontoImg from "@/assets/events/wc-toronto.png";
+import wcNyGroupImg from "@/assets/events/wc-ny-group.png";
+import wcMexicoImg from "@/assets/events/wc-mexico.png";
 
 export interface EventPackage {
   id: string;
@@ -49,7 +52,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "US",
     date: "Junho 2026",
     dateEn: "June 2026",
-    image: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=800&h=500&fit=crop",
+    image: wcNyGroupImg,
     price: 18490,
     originalPrice: 27990,
     badge: "⚽ Copa do Mundo",
@@ -130,7 +133,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "MX",
     date: "Junho 2026",
     dateEn: "June 2026",
-    image: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=800&h=500&fit=crop",
+    image: wcMexicoImg,
     price: 12990,
     originalPrice: 19490,
     badge: "⚽ Copa do Mundo",
@@ -157,7 +160,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "CA",
     date: "Junho 2026",
     dateEn: "June 2026",
-    image: "https://images.unsplash.com/photo-1517927033932-b3d18e61fb3a?w=800&h=500&fit=crop",
+    image: wcTorontoImg,
     price: 17490,
     originalPrice: 26290,
     badge: "⚽ Copa do Mundo",
