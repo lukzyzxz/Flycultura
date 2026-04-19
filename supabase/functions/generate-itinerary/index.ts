@@ -20,6 +20,68 @@ serve(async (req) => {
 
     const isPt = locale === "pt";
 
+    // === STEP 1: Quick destination validation ===
+    const trimmed = (destination || "").trim();
+    const heuristicInvalid =
+      trimmed.length < 2 ||
+      trimmed.length > 80 ||
+      !/[a-zA-ZÀ-ÿ]/.test(trimmed) ||
+      /(.)\1{4,}/.test(trimmed) ||
+      /^[^a-zA-ZÀ-ÿ\s]+$/.test(trimmed);
+
+    if (heuristicInvalid) {
+      return new Response(
+        JSON.stringify({
+          valid: false,
+          message: isPt
+            ? `"${trimmed || "(vazio)"}" não parece ser um destino válido. Por favor, digite o nome de uma cidade, país ou região real.`
+            : `"${trimmed || "(empty)"}" doesn't look like a valid destination. Please enter a real city, country, or region.`,
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // AI verification with the cheapest/fastest model
+    try {
+      const validationResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${lovableApiKey}`,
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash-lite",
+          messages: [
+            {
+              role: "system",
+              content:
+                "You are a strict geography validator. The user gives a destination string. Reply with EXACTLY one word: VALID if it is a real city, country, region, island, landmark, or recognizable travel destination on Earth (in any language). Reply INVALID otherwise (gibberish, fictional places, random text, products, people's names with no geographic meaning). No explanations. Only VALID or INVALID.",
+            },
+            { role: "user", content: trimmed },
+          ],
+          max_tokens: 5,
+        }),
+      });
+
+      if (validationResponse.ok) {
+        const vData = await validationResponse.json();
+        const verdict = (vData.choices?.[0]?.message?.content || "").trim().toUpperCase();
+        if (verdict.startsWith("INVALID")) {
+          return new Response(
+            JSON.stringify({
+              valid: false,
+              message: isPt
+                ? `Não conseguimos identificar "${trimmed}" como um destino real. Verifique a grafia ou tente outro lugar.`
+                : `We couldn't identify "${trimmed}" as a real destination. Please check the spelling or try another place.`,
+            }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
+      }
+    } catch {
+      // If validation call fails, fall through and try generating anyway
+    }
+
     const systemPrompt = isPt
       ? `Você é um consultor de viagens premium da FlyCultura. Crie roteiros detalhados, práticos e profissionais.
 Regras OBRIGATÓRIAS de formatação:

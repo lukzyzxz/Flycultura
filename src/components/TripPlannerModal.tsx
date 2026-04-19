@@ -44,6 +44,7 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
   const [customInterest, setCustomInterest] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState("");
+  const [destError, setDestError] = useState("");
 
   const prefOptions = locale === "pt" ? prefOptionsPt : prefOptionsEn;
 
@@ -61,12 +62,21 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
   const handleGenerate = async () => {
     setLoading(true);
     setResult("");
+    setDestError("");
     try {
       const { data, error } = await supabase.functions.invoke("generate-itinerary", {
         body: { destination, days: parseInt(dates) || 7, interests: preferences.join(", "), budget, locale },
       });
 
       if (error) throw error;
+
+      // Backend rejected the destination as invalid — show inline error and go back to step 0
+      if (data?.valid === false) {
+        setDestError(data.message || (locale === "pt" ? "Destino inválido." : "Invalid destination."));
+        setStep(0);
+        return;
+      }
+
       const raw = data?.itinerary || (locale === "pt" ? "Erro ao gerar plano." : "Error generating plan.");
       setResult(stripMarkdown(raw));
       setStep(3);
@@ -86,6 +96,7 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
     setPreferences([]);
     setCustomInterest("");
     setResult("");
+    setDestError("");
   };
 
   if (!open) return null;
@@ -139,9 +150,19 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
                   <Input
                     placeholder={locale === "pt" ? "Ex: Paris, Tokyo, Rio de Janeiro..." : "E.g.: Paris, Tokyo, Rio de Janeiro..."}
                     value={destination}
-                    onChange={(e) => setDestination(e.target.value)}
-                    className="text-base"
+                    onChange={(e) => {
+                      setDestination(e.target.value);
+                      if (destError) setDestError("");
+                    }}
+                    aria-invalid={!!destError}
+                    className={`text-base ${destError ? "border-destructive focus-visible:ring-destructive/40" : ""}`}
                   />
+                  {destError && (
+                    <p className="mt-1.5 text-xs text-destructive flex items-start gap-1">
+                      <span aria-hidden>⚠️</span>
+                      <span>{destError}</span>
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="text-sm font-medium text-foreground mb-2 block">
