@@ -150,9 +150,19 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
                   <Input
                     placeholder={locale === "pt" ? "Ex: Paris, Tokyo, Rio de Janeiro..." : "E.g.: Paris, Tokyo, Rio de Janeiro..."}
                     value={destination}
-                    onChange={(e) => setDestination(e.target.value)}
-                    className="text-base"
+                    onChange={(e) => {
+                      setDestination(e.target.value);
+                      if (destError) setDestError("");
+                    }}
+                    aria-invalid={!!destError}
+                    className={`text-base ${destError ? "border-destructive focus-visible:ring-destructive/40" : ""}`}
                   />
+                  {destError && (
+                    <p className="mt-1.5 text-xs text-destructive flex items-start gap-1">
+                      <span aria-hidden>⚠️</span>
+                      <span>{destError}</span>
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="text-sm font-medium text-foreground mb-2 block">
