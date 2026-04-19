@@ -79,7 +79,8 @@ export function generateReviews(packageId: string, count: number = 6): Review[] 
     usedComments.add(commentIdx);
 
     const template = commentTemplates[commentIdx];
-    const rating = rand() > 0.3 ? 5 : rand() > 0.4 ? 4 : 3;
+    // Only 4 or 5 stars (mostly 5)
+    const rating = rand() > 0.25 ? 5 : 4;
     const daysAgo = Math.floor(rand() * 90) + 1;
     const date = new Date(Date.now() - daysAgo * 86400000).toISOString().split("T")[0];
 
