@@ -627,6 +627,21 @@ const Checkout = () => {
                   : `${t("checkout.confirm")} • R$ ${finalTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
               </Button>
 
+              <div className="flex items-start gap-2">
+                <Checkbox
+                  id="accept-terms"
+                  checked={acceptedTerms}
+                  onCheckedChange={(c) => setAcceptedTerms(c === true)}
+                  className="mt-0.5"
+                />
+                <Label htmlFor="accept-terms" className="text-sm font-normal text-muted-foreground leading-snug cursor-pointer">
+                  {t("checkout.acceptTerms")}{" "}
+                  <Link to="/terms" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">
+                    {t("checkout.termsLink")}
+                  </Link>
+                </Label>
+              </div>
+
               <div className="flex items-center justify-center gap-2 pt-1">
                 <span className="text-[10px] text-muted-foreground">{t("checkout.acceptedCards")}:</span>
                 <BrandLogo brand="visa" />
