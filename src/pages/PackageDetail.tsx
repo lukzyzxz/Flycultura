@@ -248,13 +248,37 @@ const PackageDetail = () => {
 
             {/* Real Flight Prices Section */}
             <motion.div id="flights-section" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-              <h2 className="font-display text-xl font-bold text-foreground mb-3 flex items-center gap-2">
-                <Plane className="h-5 w-5 text-primary" />
-                {locale === "pt" ? "Voos Disponíveis" : "Available Flights"}
-                <span className="text-sm font-normal text-muted-foreground">
-                  ({pkg.flight.from} → {pkg.location})
-                </span>
-              </h2>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                <h2 className="font-display text-xl font-bold text-foreground flex items-center gap-2">
+                  <Plane className="h-5 w-5 text-primary" />
+                  {locale === "pt" ? "Seu Voo" : "Your Flight"}
+                </h2>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                    {locale === "pt" ? "Saindo de:" : "Departing from:"}
+                  </span>
+                  <Select
+                    value={originCode}
+                    onValueChange={(v) => { setOriginCode(v); setHomeAirport(v); }}
+                  >
+                    <SelectTrigger className="h-9 w-[200px] text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {AIRPORT_OPTIONS.map((a) => (
+                        <SelectItem key={a.code} value={a.code}>
+                          {a.city} ({a.code})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mb-3">
+                {locale === "pt"
+                  ? "✓ O voo mais barato já está incluído no pacote. Faça upgrade pagando apenas a diferença."
+                  : "✓ The cheapest flight is already included in the package. Upgrade by paying only the difference."}
+              </p>
 
               {flightQuery.isLoading && (
                 <div className="flex items-center gap-3 py-6 text-muted-foreground">
@@ -267,23 +291,30 @@ const PackageDetail = () => {
                 <div className="space-y-3">
                   {flightQuery.data.slice(0, 5).map((flight) => {
                     const isSelected = selectedFlight?.id === flight.id;
+                    const isCheapest = cheapestFlight?.id === flight.id;
+                    const upgradeDiff = cheapestFlight ? Math.max(0, flight.price - cheapestFlight.price) : 0;
                     return (
                       <div
                         key={flight.id}
-                        className={`flex flex-col sm:flex-row items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                        className={`flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
                           isSelected
                             ? "bg-primary/10 border-primary ring-1 ring-primary/30"
                             : "bg-muted/50 border-border/50 hover:border-primary/30"
                         }`}
                         onClick={() => handleSelectFlight(flight)}
                       >
-                        <div className="flex items-center gap-2 sm:w-1/4">
+                        <div className="flex items-center gap-2 sm:w-1/4 w-full">
                           <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                             <Plane className="h-3 w-3 text-primary" />
                           </div>
-                          <span className="text-sm font-medium text-card-foreground">{flight.airline}</span>
+                          <span className="text-sm font-medium text-card-foreground truncate">{flight.airline}</span>
+                          {isCheapest && (
+                            <Badge variant="secondary" className="text-[10px] ml-auto sm:ml-0">
+                              {locale === "pt" ? "Incluso" : "Included"}
+                            </Badge>
+                          )}
                         </div>
-                        <div className="flex-1 flex items-center gap-3 text-xs text-muted-foreground">
+                        <div className="flex-1 flex items-center gap-3 text-xs text-muted-foreground w-full">
                           <span className="font-semibold text-card-foreground">
                             {flight.departure || "--"}
                           </span>
@@ -296,23 +327,27 @@ const PackageDetail = () => {
                             {flight.arrival || "--"}
                           </span>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <span className="text-lg font-bold text-primary">R$ {flight.price.toLocaleString("pt-BR")}</span>
+                        <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+                          <span className="text-base sm:text-lg font-bold text-primary whitespace-nowrap">
+                            {isCheapest
+                              ? (locale === "pt" ? "Grátis" : "Free")
+                              : `+ R$ ${upgradeDiff.toLocaleString("pt-BR")}`}
+                          </span>
                           <Button
                             size="sm"
                             variant={isSelected ? "default" : "outline"}
                             onClick={(e) => { e.stopPropagation(); handleSelectFlight(flight); }}
-                            className="gap-1"
+                            className="gap-1 shrink-0"
                           >
                             {isSelected ? (
                               <>
                                 <Check className="h-3.5 w-3.5" />
-                                {locale === "pt" ? "Selecionado" : "Selected"}
+                                <span className="hidden sm:inline">{locale === "pt" ? "Selecionado" : "Selected"}</span>
                               </>
                             ) : (
                               <>
                                 <Plane className="h-3.5 w-3.5" />
-                                {locale === "pt" ? "Selecionar" : "Select"}
+                                <span className="hidden sm:inline">{locale === "pt" ? "Selecionar" : "Select"}</span>
                               </>
                             )}
                           </Button>
