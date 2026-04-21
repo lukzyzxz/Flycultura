@@ -195,7 +195,7 @@ const PackageDetail = () => {
               <h2 className="font-display text-xl font-bold text-foreground mb-3">{t("events.includes")}</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
-                  { icon: Plane, label: `${pkg.flight.airline} — ${pkg.flight.from}` },
+                  { icon: Plane, label: `${locale === "pt" ? "Voo de" : "Flight from"} ${getAirportLabel(originCode)}` },
                   { icon: Hotel, label: `${pkg.accommodation.type} — ${pkg.accommodation.name}` },
                   { icon: Ticket, label: `${pkg.tickets.type} — ${pkg.tickets.section}` },
                   { icon: Car, label: `${t("events.transfer")} — ${pkg.accommodation.distance}` },
