@@ -32,8 +32,10 @@ const withUnsplashWidth = (url: string, w: number) => {
   try {
     const u = new URL(url);
     u.searchParams.set("w", String(w));
-    u.searchParams.set("q", u.searchParams.get("q") ?? "70");
+    // Lower quality = much smaller files, still looks great for cards
+    u.searchParams.set("q", u.searchParams.get("q") ?? "60");
     u.searchParams.set("auto", "format");
+    u.searchParams.set("fit", u.searchParams.get("fit") ?? "crop");
     return u.toString();
   } catch {
     return url;
@@ -106,7 +108,7 @@ const SmartImage = ({
   const useResponsive = isUnsplash(currentSrc);
   const responsiveSrcSet = useResponsive ? buildSrcSet(currentSrc) : undefined;
   const responsiveSrc = useResponsive
-    ? withUnsplashWidth(currentSrc, priority ? 900 : 600)
+    ? withUnsplashWidth(currentSrc, priority ? 900 : 400)
     : currentSrc;
 
   return (
@@ -131,7 +133,7 @@ const SmartImage = ({
         onError={handleError}
         className={cn(
           className,
-          "transition-opacity duration-300 ease-out",
+          "transition-opacity duration-200 ease-out",
           loaded ? "opacity-100" : "opacity-0",
         )}
       />
