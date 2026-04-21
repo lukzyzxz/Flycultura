@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { motion } from "framer-motion";
 import { CreditCard, Lock, CheckCircle, ArrowLeft, ShieldCheck, AlertCircle, QrCode, Barcode, Copy, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -16,16 +15,20 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 type PaymentMethod = "card" | "pix" | "boleto";
-type CardBrand = "visa" | "mastercard" | "amex" | "elo" | "hipercard" | "unknown";
+type CardBrand = "visa" | "mastercard" | "amex" | "elo" | "hipercard" | "diners" | "discover" | "aura" | "unknown";
 
 // Detect card brand from number
 const detectBrand = (num: string): CardBrand => {
   const n = num.replace(/\D/g, "");
-  if (/^4/.test(n)) return "visa";
-  if (/^(5[1-5]|2[2-7])/.test(n)) return "mastercard";
-  if (/^3[47]/.test(n)) return "amex";
+  // Brazilian-issued brands first (more specific BIN ranges)
   if (/^(4011|4312|4389|4514|5041|5066|5067|509|6277|6362|6363|650|6516|6550)/.test(n)) return "elo";
   if (/^(606282|3841)/.test(n)) return "hipercard";
+  if (/^50/.test(n)) return "aura";
+  if (/^3(0[0-5]|095|6|8|9)/.test(n)) return "diners";
+  if (/^(6011|65|64[4-9]|622)/.test(n)) return "discover";
+  if (/^3[47]/.test(n)) return "amex";
+  if (/^(5[1-5]|2[2-7])/.test(n)) return "mastercard";
+  if (/^4/.test(n)) return "visa";
   return "unknown";
 };
 
@@ -65,6 +68,9 @@ const BrandLogo = ({ brand, active }: { brand: CardBrand; active?: boolean }) =>
     amex: { bg: "bg-[#006FCF]", text: "text-white", label: "AMEX" },
     elo: { bg: "bg-foreground", text: "text-background", label: "ELO" },
     hipercard: { bg: "bg-[#B3131B]", text: "text-white", label: "HIPER" },
+    diners: { bg: "bg-[#0079BE]", text: "text-white", label: "DINERS" },
+    discover: { bg: "bg-[#FF6000]", text: "text-white", label: "DISC" },
+    aura: { bg: "bg-[#1F3A93]", text: "text-white", label: "AURA" },
     unknown: { bg: "bg-muted", text: "text-muted-foreground", label: "····" },
   };
   const s = styles[brand];
@@ -90,7 +96,6 @@ const Checkout = () => {
   const [installments, setInstallments] = useState(1);
   const [processingStep, setProcessingStep] = useState(0);
   const [transactionId, setTransactionId] = useState("");
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [form, setForm] = useState({
     cardName: "",
     cardNumber: "",
@@ -189,7 +194,7 @@ const Checkout = () => {
     isCpfValid;
 
   const isValid =
-    (method === "card" ? isCardFormValid : isCpfValid) && acceptedTerms;
+    method === "card" ? isCardFormValid : isCpfValid;
 
   const finalTotal =
     method === "card"
@@ -627,28 +632,16 @@ const Checkout = () => {
                   : `${t("checkout.confirm")} • R$ ${finalTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
               </Button>
 
-              <div className="flex items-start gap-2">
-                <Checkbox
-                  id="accept-terms"
-                  checked={acceptedTerms}
-                  onCheckedChange={(c) => setAcceptedTerms(c === true)}
-                  className="mt-0.5"
-                />
-                <Label htmlFor="accept-terms" className="text-sm font-normal text-muted-foreground leading-snug cursor-pointer">
-                  {t("checkout.acceptTerms")}{" "}
-                  <Link to="/terms" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">
-                    {t("checkout.termsLink")}
-                  </Link>
-                </Label>
-              </div>
-
-              <div className="flex items-center justify-center gap-2 pt-1">
+              <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
                 <span className="text-[10px] text-muted-foreground">{t("checkout.acceptedCards")}:</span>
                 <BrandLogo brand="visa" />
                 <BrandLogo brand="mastercard" />
-                <BrandLogo brand="amex" />
                 <BrandLogo brand="elo" />
                 <BrandLogo brand="hipercard" />
+                <BrandLogo brand="amex" />
+                <BrandLogo brand="diners" />
+                <BrandLogo brand="discover" />
+                <BrandLogo brand="aura" />
               </div>
 
               <p className="text-xs text-muted-foreground text-center">
