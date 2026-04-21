@@ -391,22 +391,25 @@ const PackageDetail = () => {
               </div>
               <div>
                 <span className="text-sm text-muted-foreground line-through">
-                  R$ {pkg.originalPrice.toLocaleString("pt-BR")}
+                  R$ {(pkg.originalPrice + flightUpgradeCost).toLocaleString("pt-BR")}
                 </span>
                 <div className="flex items-baseline gap-1">
                   <span className="text-3xl font-bold text-primary">
-                    R$ {pkg.price.toLocaleString("pt-BR")}
+                    R$ {finalPrice.toLocaleString("pt-BR")}
                   </span>
                   <span className="text-sm text-muted-foreground">{t("events.perPerson")}</span>
                 </div>
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  ✈ {locale === "pt" ? "Voo já incluso no pacote" : "Flight already included"}
+                </p>
               </div>
 
-              {/* Selected flight price */}
-              {selectedFlight && (
+              {/* Selected flight info */}
+              {selectedFlight && cheapestFlight && (
                 <div className="rounded-lg bg-primary/5 p-3 border border-primary/20">
                   <div className="flex items-center justify-between mb-1">
                     <p className="text-xs text-muted-foreground">
-                      ✈️ {locale === "pt" ? "Voo incluído" : "Included flight"}
+                      ✈️ {locale === "pt" ? "Voo selecionado" : "Selected flight"}
                     </p>
                     <a
                       href="#flights-section"
@@ -417,7 +420,16 @@ const PackageDetail = () => {
                     </a>
                   </div>
                   <p className="text-sm font-semibold text-card-foreground">
-                    {selectedFlight.airline} — <span className="text-primary">+ R$ {selectedFlight.price.toLocaleString("pt-BR")}</span>
+                    {selectedFlight.airline}
+                    {" — "}
+                    <span className="text-primary">
+                      {flightUpgradeCost === 0
+                        ? (locale === "pt" ? "Incluso" : "Included")
+                        : `+ R$ ${flightUpgradeCost.toLocaleString("pt-BR")} ${locale === "pt" ? "upgrade" : "upgrade"}`}
+                    </span>
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-1">
+                    {getAirportLabel(originCode)} → {pkg.location}
                   </p>
                 </div>
               )}
@@ -428,20 +440,20 @@ const PackageDetail = () => {
                 </div>
               )}
 
-              {/* Total with flight */}
-              {selectedFlight && (
+              {/* Total breakdown when there is an upgrade */}
+              {flightUpgradeCost > 0 && (
                 <div className="rounded-lg bg-accent/10 p-3 border border-accent/20">
                   <div className="flex justify-between text-sm text-muted-foreground">
-                    <span>{locale === "pt" ? "Pacote" : "Package"}</span>
+                    <span>{locale === "pt" ? "Pacote (com voo)" : "Package (with flight)"}</span>
                     <span>R$ {pkg.price.toLocaleString("pt-BR")}</span>
                   </div>
                   <div className="flex justify-between text-sm text-muted-foreground">
-                    <span>{locale === "pt" ? "Voo" : "Flight"}</span>
-                    <span>R$ {selectedFlight.price.toLocaleString("pt-BR")}</span>
+                    <span>{locale === "pt" ? "Upgrade de voo" : "Flight upgrade"}</span>
+                    <span>+ R$ {flightUpgradeCost.toLocaleString("pt-BR")}</span>
                   </div>
                   <div className="border-t border-border mt-2 pt-2 flex justify-between">
                     <span className="font-bold text-foreground">Total</span>
-                    <span className="font-bold text-primary text-lg">R$ {(pkg.price + selectedFlight.price).toLocaleString("pt-BR")}</span>
+                    <span className="font-bold text-primary text-lg">R$ {finalPrice.toLocaleString("pt-BR")}</span>
                   </div>
                 </div>
               )}
