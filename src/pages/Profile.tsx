@@ -8,10 +8,14 @@ import { eventPackages } from "@/lib/events-data";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { motion } from "framer-motion";
-import { User, Heart, ShoppingBag, Settings, LogOut, MapPin, Calendar, Trophy, Flame, Star } from "lucide-react";
+import { User, Heart, ShoppingBag, Settings, LogOut, MapPin, Calendar, Trophy, Flame, Star, Plane } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
+import { AIRPORT_OPTIONS, getHomeAirport, setHomeAirport } from "@/lib/userOrigin";
 
 const Profile = () => {
   const { user, signOut, loading } = useAuth();
@@ -19,6 +23,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"orders" | "favorites" | "settings">("orders");
   const { items: recentItems } = useRecentlyViewed();
+  const [homeAirport, setHomeAirportState] = useState<string>(() => getHomeAirport());
 
   useEffect(() => {
     if (!loading && !user) navigate("/auth");
