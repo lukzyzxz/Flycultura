@@ -196,7 +196,7 @@ const Checkout = () => {
     isCpfValid;
 
   const isValid =
-    method === "card" ? isCardFormValid : isCpfValid;
+    (method === "card" ? isCardFormValid : isCpfValid) && acceptedTerms;
 
   const finalTotal =
     method === "card"
