@@ -392,6 +392,8 @@ const translations = {
     "checkout.paidWith": "Pago com",
     "checkout.viewOrders": "Ver meus pedidos",
     "checkout.acceptedCards": "Cartões aceitos",
+    "checkout.acceptTerms": "Li e aceito os",
+    "checkout.termsLink": "Termos de Uso",
 
     // Guide
     "guide.title": "Guia de Viagem",
