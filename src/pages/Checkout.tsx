@@ -632,13 +632,16 @@ const Checkout = () => {
                   : `${t("checkout.confirm")} • R$ ${finalTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
               </Button>
 
-              <div className="flex items-center justify-center gap-2 pt-1">
+              <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
                 <span className="text-[10px] text-muted-foreground">{t("checkout.acceptedCards")}:</span>
                 <BrandLogo brand="visa" />
                 <BrandLogo brand="mastercard" />
-                <BrandLogo brand="amex" />
                 <BrandLogo brand="elo" />
                 <BrandLogo brand="hipercard" />
+                <BrandLogo brand="amex" />
+                <BrandLogo brand="diners" />
+                <BrandLogo brand="discover" />
+                <BrandLogo brand="aura" />
               </div>
 
               <p className="text-xs text-muted-foreground text-center">
