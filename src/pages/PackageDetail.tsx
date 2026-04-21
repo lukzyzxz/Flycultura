@@ -32,6 +32,14 @@ const PackageDetail = () => {
   const queryClient = useQueryClient();
   const { addItem: addRecent } = useRecentlyViewed();
   const [selectedFlight, setSelectedFlight] = useState<FlightResult | null>(null);
+  const [originCode, setOriginCode] = useState<string>(() => getHomeAirport());
+
+  // Sync if user updates home airport elsewhere
+  useEffect(() => {
+    const onChange = () => setOriginCode(getHomeAirport());
+    window.addEventListener("home-airport-changed", onChange);
+    return () => window.removeEventListener("home-airport-changed", onChange);
+  }, []);
 
   const pkg = eventPackages.find((p) => p.id === id);
 
@@ -41,14 +49,14 @@ const PackageDetail = () => {
     }
   }, [id]);
 
-  // Fetch real flight prices for this package's route
+  // Fetch real flight prices for this package's route, using user's origin
   const flightQuery = useQuery({
-    queryKey: ["package-flights", pkg?.flight.fromCode, pkg?.flight.toCode],
+    queryKey: ["package-flights", originCode, pkg?.flight.toCode],
     queryFn: () => searchFlights({
-      from: `${pkg!.flight.fromCode}.AIRPORT`,
+      from: `${originCode}.AIRPORT`,
       to: `${pkg!.flight.toCode}.AIRPORT`,
     }),
-    enabled: !!pkg && pkg.flight.fromCode !== pkg.flight.toCode,
+    enabled: !!pkg && originCode !== pkg.flight.toCode,
     staleTime: 10 * 60 * 1000,
   });
 
@@ -56,12 +64,14 @@ const PackageDetail = () => {
     ? flightQuery.data.reduce((min, f) => f.price < min.price ? f : min, flightQuery.data[0])
     : null;
 
-  // Auto-select cheapest flight when data loads
+  // Auto-select cheapest flight when data loads or origin changes
   useEffect(() => {
-    if (cheapestFlight && !selectedFlight) {
+    if (cheapestFlight) {
       setSelectedFlight(cheapestFlight);
     }
-  }, [cheapestFlight?.id]);
+    // Reset selected flight when origin changes so we don't keep stale price
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cheapestFlight?.id, originCode]);
 
   const { data: isFavorite = false } = useQuery({
     queryKey: ["favorite", user?.id, id],
