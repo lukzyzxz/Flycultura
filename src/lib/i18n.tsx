@@ -366,6 +366,13 @@ export const I18nProvider = ({ children }: { children: ReactNode }) => {
     () => (localStorage.getItem("locale") as Locale) || "pt"
   );
 
+  // Keep <html lang> in sync with the active locale (WCAG 3.1.1)
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.documentElement.lang = locale === "pt" ? "pt-BR" : "en";
+    }
+  }, [locale]);
+
   const setLocale = useCallback((l: Locale) => {
     setLocaleState(l);
     localStorage.setItem("locale", l);
