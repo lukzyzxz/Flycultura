@@ -9,8 +9,6 @@ import { useToast } from "@/hooks/use-toast";
 import { eventPackages, isEventUpcoming } from "@/lib/events-data";
 import { deals } from "@/lib/data";
 import { Link, useNavigate } from "react-router-dom";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useState, useEffect } from "react";
 import SmartImage from "@/components/SmartImage";
 
 const DiscoverySections = () => {
@@ -19,12 +17,6 @@ const DiscoverySections = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setLoaded(true), 400);
-    return () => clearTimeout(timer);
-  }, []);
 
   const upcomingPkgs = eventPackages.filter((p) => isEventUpcoming(p));
 
