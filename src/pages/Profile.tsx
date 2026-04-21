@@ -42,6 +42,8 @@ const Profile = () => {
       return data || [];
     },
     enabled: !!user,
+    staleTime: 0,
+    refetchOnMount: "always",
   });
 
   const { data: profile } = useQuery({
