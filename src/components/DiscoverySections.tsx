@@ -9,8 +9,6 @@ import { useToast } from "@/hooks/use-toast";
 import { eventPackages, isEventUpcoming } from "@/lib/events-data";
 import { deals } from "@/lib/data";
 import { Link, useNavigate } from "react-router-dom";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useState, useEffect } from "react";
 import SmartImage from "@/components/SmartImage";
 
 const DiscoverySections = () => {
@@ -19,12 +17,6 @@ const DiscoverySections = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setLoaded(true), 400);
-    return () => clearTimeout(timer);
-  }, []);
 
   const upcomingPkgs = eventPackages.filter((p) => isEventUpcoming(p));
 
@@ -109,11 +101,7 @@ const DiscoverySections = () => {
     >
       <Link to={`/packages/${pkg.id}`}>
         <div className="relative aspect-[16/10] overflow-hidden bg-muted">
-          {!loaded ? (
-            <Skeleton className="w-full h-full" />
-          ) : (
-            <SmartImage src={pkg.image} alt={locale === "pt" ? pkg.event : pkg.eventEn} category="event" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-          )}
+          <SmartImage src={pkg.image} alt={locale === "pt" ? pkg.event : pkg.eventEn} category="event" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
           <Badge className="absolute top-2.5 left-2.5 bg-accent text-accent-foreground border-0 text-xs">{pkg.badge}</Badge>
         </div>
       </Link>
@@ -188,11 +176,7 @@ const DiscoverySections = () => {
                 className="group rounded-xl overflow-hidden bg-card card-shadow hover:card-shadow-hover transition-all hover:-translate-y-1"
               >
                 <div className="relative aspect-[16/10] overflow-hidden bg-muted">
-                  {!loaded ? (
-                    <Skeleton className="w-full h-full" />
-                  ) : (
-                    <SmartImage src={deal.image} alt={locale === "pt" ? deal.title : deal.titleEn} category="deal" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  )}
+                  <SmartImage src={deal.image} alt={locale === "pt" ? deal.title : deal.titleEn} category="deal" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   <Badge className="absolute top-2.5 left-2.5 bg-accent text-accent-foreground border-0 text-xs">
                     {Math.round((1 - deal.price / deal.originalPrice) * 100)}% {t("deals.off")}
                   </Badge>
