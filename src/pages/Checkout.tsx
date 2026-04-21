@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { motion } from "framer-motion";
 import { CreditCard, Lock, CheckCircle, ArrowLeft, ShieldCheck, AlertCircle, QrCode, Barcode, Copy, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -89,6 +90,7 @@ const Checkout = () => {
   const [installments, setInstallments] = useState(1);
   const [processingStep, setProcessingStep] = useState(0);
   const [transactionId, setTransactionId] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [form, setForm] = useState({
     cardName: "",
     cardNumber: "",
@@ -187,7 +189,7 @@ const Checkout = () => {
     isCpfValid;
 
   const isValid =
-    method === "card" ? isCardFormValid : isCpfValid;
+    (method === "card" ? isCardFormValid : isCpfValid) && acceptedTerms;
 
   const finalTotal =
     method === "card"
