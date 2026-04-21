@@ -40,7 +40,7 @@ const SmartImage = ({
   ...rest
 }: SmartImageProps) => {
   // Dev-time warning: catch missing alt early (WCAG 1.1.1)
-  if (process.env.NODE_ENV !== "production" && alt === undefined) {
+  if (import.meta.env.DEV && alt === undefined) {
     // eslint-disable-next-line no-console
     console.warn(
       "[SmartImage] Missing `alt` prop. Use alt=\"\" only for purely decorative images.",
