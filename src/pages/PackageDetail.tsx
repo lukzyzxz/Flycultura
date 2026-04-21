@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { eventPackages } from "@/lib/events-data";
 import { useCart, CartProduct } from "@/contexts/CartContext";
 import { useI18n } from "@/lib/i18n";
@@ -14,7 +14,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { searchFlights, FlightResult } from "@/lib/api";
 import { generateReviews } from "@/lib/generated-reviews";
-import { useState } from "react";
+import { AIRPORT_OPTIONS, getHomeAirport, setHomeAirport, getAirportLabel } from "@/lib/userOrigin";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import {
   Plane, Hotel, Ticket, Car, ArrowLeft, ShoppingCart, Check, MapPin, Calendar, Star, Heart, Loader2, RefreshCw, MessageCircle,
 } from "lucide-react";
