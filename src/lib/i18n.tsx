@@ -188,6 +188,8 @@ const translations = {
     "checkout.paidWith": "Paid with",
     "checkout.viewOrders": "View my orders",
     "checkout.acceptedCards": "Accepted cards",
+    "checkout.acceptTerms": "I have read and accept the",
+    "checkout.termsLink": "Terms of Use",
 
     // Guide
     "guide.title": "Travel Guide",
