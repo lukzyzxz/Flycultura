@@ -185,18 +185,22 @@ const DiscoverySections = () => {
                     {Math.round((1 - deal.price / deal.originalPrice) * 100)}% {t("deals.off")}
                   </Badge>
                 </div>
-                <div className="p-3.5">
+                <div className="p-3 sm:p-3.5">
                   <h4 className="font-display font-bold text-card-foreground text-sm mb-0.5 line-clamp-1">
                     {locale === "pt" ? deal.title : deal.titleEn}
                   </h4>
                   <p className="text-xs text-muted-foreground mb-2 line-clamp-1">{locale === "pt" ? deal.description : deal.descriptionEn}</p>
-                  <div className="flex items-center gap-2 mb-2.5">
+                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0 mb-2.5">
                     <span className="text-base font-bold text-primary">R$ {deal.price.toLocaleString("pt-BR")}</span>
                     <span className="text-xs text-muted-foreground line-through">R$ {deal.originalPrice.toLocaleString("pt-BR")}</span>
                   </div>
-                  <Button size="sm" className="w-full gap-1.5 text-xs h-8" onClick={() => handleAddDeal(deal)}>
-                    <ShoppingCart className="h-3.5 w-3.5" />
-                    {t("cart.addToCart")}
+                  <Button
+                    size="sm"
+                    className="w-full gap-1.5 text-[11px] sm:text-xs h-8 px-2 whitespace-normal leading-tight"
+                    onClick={() => handleAddDeal(deal)}
+                  >
+                    <ShoppingCart className="h-3.5 w-3.5 shrink-0" />
+                    <span className="truncate">{t("cart.addToCart")}</span>
                   </Button>
                 </div>
               </motion.div>
