@@ -8,10 +8,14 @@ import { eventPackages } from "@/lib/events-data";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { motion } from "framer-motion";
-import { User, Heart, ShoppingBag, Settings, LogOut, MapPin, Calendar, Trophy, Flame, Star } from "lucide-react";
+import { User, Heart, ShoppingBag, Settings, LogOut, MapPin, Calendar, Trophy, Flame, Star, Plane } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
+import { AIRPORT_OPTIONS, getHomeAirport, setHomeAirport } from "@/lib/userOrigin";
 
 const Profile = () => {
   const { user, signOut, loading } = useAuth();
@@ -19,6 +23,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"orders" | "favorites" | "settings">("orders");
   const { items: recentItems } = useRecentlyViewed();
+  const [homeAirport, setHomeAirportState] = useState<string>(() => getHomeAirport());
 
   useEffect(() => {
     if (!loading && !user) navigate("/auth");
@@ -245,6 +250,34 @@ const Profile = () => {
                 <div className="flex justify-between"><span className="text-muted-foreground">Email</span><span className="text-foreground">{user.email}</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">{locale === "pt" ? "Membro desde" : "Member since"}</span><span className="text-foreground">{new Date(user.created_at).toLocaleDateString(locale === "pt" ? "pt-BR" : "en-US")}</span></div>
               </div>
+            </div>
+            <div className="rounded-xl bg-card card-shadow p-6 space-y-4">
+              <div className="flex items-center gap-2">
+                <Plane className="h-4 w-4 text-primary" />
+                <h3 className="font-display font-bold text-card-foreground">
+                  {locale === "pt" ? "Aeroporto de Origem" : "Home Airport"}
+                </h3>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {locale === "pt"
+                  ? "Usado como ponto de partida padrão dos voos nos pacotes."
+                  : "Used as the default departure point for package flights."}
+              </p>
+              <Select
+                value={homeAirport}
+                onValueChange={(v) => { setHomeAirportState(v); setHomeAirport(v); }}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {AIRPORT_OPTIONS.map((a) => (
+                    <SelectItem key={a.code} value={a.code}>
+                      {a.city} ({a.code})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <Button variant="destructive" onClick={handleSignOut} className="w-full gap-2"><LogOut className="h-4 w-4" />{t("nav.signOut")}</Button>
           </div>

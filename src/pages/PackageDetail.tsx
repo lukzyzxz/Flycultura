@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { eventPackages } from "@/lib/events-data";
 import { useCart, CartProduct } from "@/contexts/CartContext";
 import { useI18n } from "@/lib/i18n";
@@ -14,7 +14,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { searchFlights, FlightResult } from "@/lib/api";
 import { generateReviews } from "@/lib/generated-reviews";
-import { useState } from "react";
+import { AIRPORT_OPTIONS, getHomeAirport, setHomeAirport, getAirportLabel } from "@/lib/userOrigin";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import {
   Plane, Hotel, Ticket, Car, ArrowLeft, ShoppingCart, Check, MapPin, Calendar, Star, Heart, Loader2, RefreshCw, MessageCircle,
 } from "lucide-react";
@@ -29,6 +32,14 @@ const PackageDetail = () => {
   const queryClient = useQueryClient();
   const { addItem: addRecent } = useRecentlyViewed();
   const [selectedFlight, setSelectedFlight] = useState<FlightResult | null>(null);
+  const [originCode, setOriginCode] = useState<string>(() => getHomeAirport());
+
+  // Sync if user updates home airport elsewhere
+  useEffect(() => {
+    const onChange = () => setOriginCode(getHomeAirport());
+    window.addEventListener("home-airport-changed", onChange);
+    return () => window.removeEventListener("home-airport-changed", onChange);
+  }, []);
 
   const pkg = eventPackages.find((p) => p.id === id);
 
@@ -38,14 +49,14 @@ const PackageDetail = () => {
     }
   }, [id]);
 
-  // Fetch real flight prices for this package's route
+  // Fetch real flight prices for this package's route, using user's origin
   const flightQuery = useQuery({
-    queryKey: ["package-flights", pkg?.flight.fromCode, pkg?.flight.toCode],
+    queryKey: ["package-flights", originCode, pkg?.flight.toCode],
     queryFn: () => searchFlights({
-      from: `${pkg!.flight.fromCode}.AIRPORT`,
+      from: `${originCode}.AIRPORT`,
       to: `${pkg!.flight.toCode}.AIRPORT`,
     }),
-    enabled: !!pkg && pkg.flight.fromCode !== pkg.flight.toCode,
+    enabled: !!pkg && originCode !== pkg.flight.toCode,
     staleTime: 10 * 60 * 1000,
   });
 
@@ -53,12 +64,14 @@ const PackageDetail = () => {
     ? flightQuery.data.reduce((min, f) => f.price < min.price ? f : min, flightQuery.data[0])
     : null;
 
-  // Auto-select cheapest flight when data loads
+  // Auto-select cheapest flight when data loads or origin changes
   useEffect(() => {
-    if (cheapestFlight && !selectedFlight) {
+    if (cheapestFlight) {
       setSelectedFlight(cheapestFlight);
     }
-  }, [cheapestFlight?.id]);
+    // Reset selected flight when origin changes so we don't keep stale price
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cheapestFlight?.id, originCode]);
 
   const { data: isFavorite = false } = useQuery({
     queryKey: ["favorite", user?.id, id],
@@ -103,20 +116,28 @@ const PackageDetail = () => {
 
   const navigate = useNavigate();
 
+  // ---- Pricing model ----
+  // pkg.price = full package price WITH the cheapest flight already included (free upgrade)
+  // If user picks a different flight, they pay only the *difference* vs. cheapest.
+  const flightUpgradeCost =
+    selectedFlight && cheapestFlight && selectedFlight.id !== cheapestFlight.id
+      ? Math.max(0, selectedFlight.price - cheapestFlight.price)
+      : 0;
+  const finalPrice = pkg.price + flightUpgradeCost;
+
   const handleAddToCart = () => {
     if (!user) {
       navigate(`/auth?redirect=/packages/${pkg.id}`);
       return;
     }
     const activeFlight = selectedFlight || cheapestFlight;
-    const totalPrice = activeFlight ? pkg.price + activeFlight.price : pkg.price;
-    const flightInfo = activeFlight ? ` + ${activeFlight.airline}` : "";
+    const flightInfo = activeFlight ? ` ✈ ${activeFlight.airline}` : "";
     const product: CartProduct = {
       id: activeFlight ? `${pkg.id}__flight-${activeFlight.id}` : pkg.id,
       type: "event",
       name: `${locale === "pt" ? pkg.event : pkg.eventEn}${flightInfo}`,
       image: pkg.image,
-      price: totalPrice,
+      price: finalPrice,
       description: `${pkg.location} — ${locale === "pt" ? pkg.date : pkg.dateEn}`,
       meta: { location: pkg.location, date: pkg.date, country: pkg.country },
     };
@@ -174,7 +195,7 @@ const PackageDetail = () => {
               <h2 className="font-display text-xl font-bold text-foreground mb-3">{t("events.includes")}</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
-                  { icon: Plane, label: `${pkg.flight.airline} — ${pkg.flight.from}` },
+                  { icon: Plane, label: `${locale === "pt" ? "Voo de" : "Flight from"} ${getAirportLabel(originCode)}` },
                   { icon: Hotel, label: `${pkg.accommodation.type} — ${pkg.accommodation.name}` },
                   { icon: Ticket, label: `${pkg.tickets.type} — ${pkg.tickets.section}` },
                   { icon: Car, label: `${t("events.transfer")} — ${pkg.accommodation.distance}` },
@@ -227,13 +248,37 @@ const PackageDetail = () => {
 
             {/* Real Flight Prices Section */}
             <motion.div id="flights-section" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-              <h2 className="font-display text-xl font-bold text-foreground mb-3 flex items-center gap-2">
-                <Plane className="h-5 w-5 text-primary" />
-                {locale === "pt" ? "Voos Disponíveis" : "Available Flights"}
-                <span className="text-sm font-normal text-muted-foreground">
-                  ({pkg.flight.from} → {pkg.location})
-                </span>
-              </h2>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                <h2 className="font-display text-xl font-bold text-foreground flex items-center gap-2">
+                  <Plane className="h-5 w-5 text-primary" />
+                  {locale === "pt" ? "Seu Voo" : "Your Flight"}
+                </h2>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                    {locale === "pt" ? "Saindo de:" : "Departing from:"}
+                  </span>
+                  <Select
+                    value={originCode}
+                    onValueChange={(v) => { setOriginCode(v); setHomeAirport(v); }}
+                  >
+                    <SelectTrigger className="h-9 w-[200px] text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {AIRPORT_OPTIONS.map((a) => (
+                        <SelectItem key={a.code} value={a.code}>
+                          {a.city} ({a.code})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mb-3">
+                {locale === "pt"
+                  ? "✓ O voo mais barato já está incluído no pacote. Faça upgrade pagando apenas a diferença."
+                  : "✓ The cheapest flight is already included in the package. Upgrade by paying only the difference."}
+              </p>
 
               {flightQuery.isLoading && (
                 <div className="flex items-center gap-3 py-6 text-muted-foreground">
@@ -246,23 +291,30 @@ const PackageDetail = () => {
                 <div className="space-y-3">
                   {flightQuery.data.slice(0, 5).map((flight) => {
                     const isSelected = selectedFlight?.id === flight.id;
+                    const isCheapest = cheapestFlight?.id === flight.id;
+                    const upgradeDiff = cheapestFlight ? Math.max(0, flight.price - cheapestFlight.price) : 0;
                     return (
                       <div
                         key={flight.id}
-                        className={`flex flex-col sm:flex-row items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                        className={`flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
                           isSelected
                             ? "bg-primary/10 border-primary ring-1 ring-primary/30"
                             : "bg-muted/50 border-border/50 hover:border-primary/30"
                         }`}
                         onClick={() => handleSelectFlight(flight)}
                       >
-                        <div className="flex items-center gap-2 sm:w-1/4">
+                        <div className="flex items-center gap-2 sm:w-1/4 w-full">
                           <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                             <Plane className="h-3 w-3 text-primary" />
                           </div>
-                          <span className="text-sm font-medium text-card-foreground">{flight.airline}</span>
+                          <span className="text-sm font-medium text-card-foreground truncate">{flight.airline}</span>
+                          {isCheapest && (
+                            <Badge variant="secondary" className="text-[10px] ml-auto sm:ml-0">
+                              {locale === "pt" ? "Incluso" : "Included"}
+                            </Badge>
+                          )}
                         </div>
-                        <div className="flex-1 flex items-center gap-3 text-xs text-muted-foreground">
+                        <div className="flex-1 flex items-center gap-3 text-xs text-muted-foreground w-full">
                           <span className="font-semibold text-card-foreground">
                             {flight.departure || "--"}
                           </span>
@@ -275,23 +327,27 @@ const PackageDetail = () => {
                             {flight.arrival || "--"}
                           </span>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <span className="text-lg font-bold text-primary">R$ {flight.price.toLocaleString("pt-BR")}</span>
+                        <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+                          <span className="text-base sm:text-lg font-bold text-primary whitespace-nowrap">
+                            {isCheapest
+                              ? (locale === "pt" ? "Grátis" : "Free")
+                              : `+ R$ ${upgradeDiff.toLocaleString("pt-BR")}`}
+                          </span>
                           <Button
                             size="sm"
                             variant={isSelected ? "default" : "outline"}
                             onClick={(e) => { e.stopPropagation(); handleSelectFlight(flight); }}
-                            className="gap-1"
+                            className="gap-1 shrink-0"
                           >
                             {isSelected ? (
                               <>
                                 <Check className="h-3.5 w-3.5" />
-                                {locale === "pt" ? "Selecionado" : "Selected"}
+                                <span className="hidden sm:inline">{locale === "pt" ? "Selecionado" : "Selected"}</span>
                               </>
                             ) : (
                               <>
                                 <Plane className="h-3.5 w-3.5" />
-                                {locale === "pt" ? "Selecionar" : "Select"}
+                                <span className="hidden sm:inline">{locale === "pt" ? "Selecionar" : "Select"}</span>
                               </>
                             )}
                           </Button>
@@ -335,22 +391,25 @@ const PackageDetail = () => {
               </div>
               <div>
                 <span className="text-sm text-muted-foreground line-through">
-                  R$ {pkg.originalPrice.toLocaleString("pt-BR")}
+                  R$ {(pkg.originalPrice + flightUpgradeCost).toLocaleString("pt-BR")}
                 </span>
                 <div className="flex items-baseline gap-1">
                   <span className="text-3xl font-bold text-primary">
-                    R$ {pkg.price.toLocaleString("pt-BR")}
+                    R$ {finalPrice.toLocaleString("pt-BR")}
                   </span>
                   <span className="text-sm text-muted-foreground">{t("events.perPerson")}</span>
                 </div>
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  ✈ {locale === "pt" ? "Voo já incluso no pacote" : "Flight already included"}
+                </p>
               </div>
 
-              {/* Selected flight price */}
-              {selectedFlight && (
+              {/* Selected flight info */}
+              {selectedFlight && cheapestFlight && (
                 <div className="rounded-lg bg-primary/5 p-3 border border-primary/20">
                   <div className="flex items-center justify-between mb-1">
                     <p className="text-xs text-muted-foreground">
-                      ✈️ {locale === "pt" ? "Voo incluído" : "Included flight"}
+                      ✈️ {locale === "pt" ? "Voo selecionado" : "Selected flight"}
                     </p>
                     <a
                       href="#flights-section"
@@ -361,7 +420,16 @@ const PackageDetail = () => {
                     </a>
                   </div>
                   <p className="text-sm font-semibold text-card-foreground">
-                    {selectedFlight.airline} — <span className="text-primary">+ R$ {selectedFlight.price.toLocaleString("pt-BR")}</span>
+                    {selectedFlight.airline}
+                    {" — "}
+                    <span className="text-primary">
+                      {flightUpgradeCost === 0
+                        ? (locale === "pt" ? "Incluso" : "Included")
+                        : `+ R$ ${flightUpgradeCost.toLocaleString("pt-BR")} ${locale === "pt" ? "upgrade" : "upgrade"}`}
+                    </span>
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-1">
+                    {getAirportLabel(originCode)} → {pkg.location}
                   </p>
                 </div>
               )}
@@ -372,20 +440,20 @@ const PackageDetail = () => {
                 </div>
               )}
 
-              {/* Total with flight */}
-              {selectedFlight && (
+              {/* Total breakdown when there is an upgrade */}
+              {flightUpgradeCost > 0 && (
                 <div className="rounded-lg bg-accent/10 p-3 border border-accent/20">
                   <div className="flex justify-between text-sm text-muted-foreground">
-                    <span>{locale === "pt" ? "Pacote" : "Package"}</span>
+                    <span>{locale === "pt" ? "Pacote (com voo)" : "Package (with flight)"}</span>
                     <span>R$ {pkg.price.toLocaleString("pt-BR")}</span>
                   </div>
                   <div className="flex justify-between text-sm text-muted-foreground">
-                    <span>{locale === "pt" ? "Voo" : "Flight"}</span>
-                    <span>R$ {selectedFlight.price.toLocaleString("pt-BR")}</span>
+                    <span>{locale === "pt" ? "Upgrade de voo" : "Flight upgrade"}</span>
+                    <span>+ R$ {flightUpgradeCost.toLocaleString("pt-BR")}</span>
                   </div>
                   <div className="border-t border-border mt-2 pt-2 flex justify-between">
                     <span className="font-bold text-foreground">Total</span>
-                    <span className="font-bold text-primary text-lg">R$ {(pkg.price + selectedFlight.price).toLocaleString("pt-BR")}</span>
+                    <span className="font-bold text-primary text-lg">R$ {finalPrice.toLocaleString("pt-BR")}</span>
                   </div>
                 </div>
               )}

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { motion } from "framer-motion";
 import { CreditCard, Lock, CheckCircle, ArrowLeft, ShieldCheck, AlertCircle, QrCode, Barcode, Copy, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -96,6 +97,7 @@ const Checkout = () => {
   const [installments, setInstallments] = useState(1);
   const [processingStep, setProcessingStep] = useState(0);
   const [transactionId, setTransactionId] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [form, setForm] = useState({
     cardName: "",
     cardNumber: "",
@@ -194,7 +196,7 @@ const Checkout = () => {
     isCpfValid;
 
   const isValid =
-    method === "card" ? isCardFormValid : isCpfValid;
+    (method === "card" ? isCardFormValid : isCpfValid) && acceptedTerms;
 
   const finalTotal =
     method === "card"
@@ -444,7 +446,7 @@ const Checkout = () => {
                       )}
                     </div>
 
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                       <div>
                         <Label htmlFor="expiry">{t("checkout.expiry")}</Label>
                         <Input
@@ -470,7 +472,7 @@ const Checkout = () => {
                           type="password"
                         />
                       </div>
-                      <div>
+                      <div className="col-span-2 sm:col-span-1">
                         <Label htmlFor="cpf">CPF</Label>
                         <Input
                           id="cpf"
@@ -625,11 +627,39 @@ const Checkout = () => {
                 </div>
               </div>
 
-              <Button type="submit" size="lg" className="w-full gap-2" disabled={!isValid}>
-                <Lock className="h-4 w-4" />
-                {method === "boleto"
-                  ? t("checkout.boletoGenerate")
-                  : `${t("checkout.confirm")} • R$ ${finalTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+              {/* Terms acceptance */}
+              <div className="flex items-start gap-2 pt-2">
+                <Checkbox
+                  id="accept-terms"
+                  checked={acceptedTerms}
+                  onCheckedChange={(c) => setAcceptedTerms(c === true)}
+                  className="mt-0.5"
+                />
+                <Label htmlFor="accept-terms" className="text-xs sm:text-sm text-muted-foreground leading-snug font-normal cursor-pointer">
+                  {t("checkout.acceptTerms")}{" "}
+                  <Link
+                    to="/terms"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary underline hover:text-primary/80"
+                  >
+                    {t("checkout.termsLink")}
+                  </Link>
+                </Label>
+              </div>
+
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full gap-2 h-auto min-h-12 py-3 whitespace-normal text-sm sm:text-base"
+                disabled={!isValid}
+              >
+                <Lock className="h-4 w-4 shrink-0" />
+                <span className="text-center">
+                  {method === "boleto"
+                    ? t("checkout.boletoGenerate")
+                    : `${t("checkout.confirm")} • R$ ${finalTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                </span>
               </Button>
 
               <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
