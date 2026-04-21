@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useCart } from "@/contexts/CartContext";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/contexts/AuthContext";
@@ -119,6 +119,16 @@ const Checkout = () => {
   const cardBrand = useMemo(() => detectBrand(form.cardNumber), [form.cardNumber]);
   const isCardValid = useMemo(() => luhnCheck(form.cardNumber), [form.cardNumber]);
   const isExpiryValid = useMemo(() => validateExpiry(form.expiry), [form.expiry]);
+  // Installment options (interest-free up to 6x, then 1.99% per installment)
+  const installmentOptions = useMemo(() => {
+    const opts: { n: number; value: number; total: number; interestFree: boolean }[] = [];
+    for (let n = 1; n <= 12; n++) {
+      const interestFree = n <= 6;
+      const total = interestFree ? totalPrice : totalPrice * (1 + 0.0199 * (n - 1));
+      opts.push({ n, value: total / n, total, interestFree });
+    }
+    return opts;
+  }, [totalPrice]);
 
   if (!user) {
     navigate("/auth");
@@ -178,17 +188,6 @@ const Checkout = () => {
 
   const isValid =
     method === "card" ? isCardFormValid : isCpfValid;
-
-  // Installment options (interest-free up to 6x, then 1.99% per installment)
-  const installmentOptions = useMemo(() => {
-    const opts: { n: number; value: number; total: number; interestFree: boolean }[] = [];
-    for (let n = 1; n <= 12; n++) {
-      const interestFree = n <= 6;
-      const total = interestFree ? totalPrice : totalPrice * (1 + 0.0199 * (n - 1));
-      opts.push({ n, value: total / n, total, interestFree });
-    }
-    return opts;
-  }, [totalPrice]);
 
   const finalTotal =
     method === "card"
