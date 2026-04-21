@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Star, Quote } from "lucide-react";
+import { Star, Quote, Pause, Play } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
 interface Testimonial {
@@ -131,15 +131,28 @@ const VISIBLE_COUNT = 4;
 const Testimonials = () => {
   const { locale } = useI18n();
   const [page, setPage] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
 
   const totalPages = Math.ceil(allTestimonials.length / VISIBLE_COUNT);
 
+  // Respect prefers-reduced-motion (WCAG 2.3.3 / 2.2.2)
   useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReducedMotion(mq.matches);
+    update();
+    mq.addEventListener?.("change", update);
+    return () => mq.removeEventListener?.("change", update);
+  }, []);
+
+  useEffect(() => {
+    if (paused || reducedMotion) return;
     const id = setInterval(() => {
       setPage((p) => (p + 1) % totalPages);
     }, ROTATION_INTERVAL);
     return () => clearInterval(id);
-  }, [totalPages]);
+  }, [totalPages, paused, reducedMotion]);
 
   const visible = allTestimonials.slice(
     page * VISIBLE_COUNT,
@@ -176,7 +189,11 @@ const Testimonials = () => {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+          aria-live="polite"
+          aria-atomic="false"
+        >
           <AnimatePresence mode="wait">
             {filled.map((t, i) => (
               <motion.div
@@ -187,46 +204,77 @@ const Testimonials = () => {
                 transition={{ duration: 0.4, delay: i * 0.08 }}
                 className="bg-card rounded-xl p-5 card-shadow hover:card-shadow-hover transition-all"
               >
+                <article aria-label={`${t.name}, ${t.location}`}>
                 <div className="flex items-center gap-3 mb-4">
                   <img
                     src={t.avatar}
-                    alt={t.name}
+                    alt=""
                     className="w-11 h-11 rounded-full object-cover"
                     loading="lazy"
+                    aria-hidden="true"
                   />
                   <div>
                     <h4 className="font-display font-bold text-card-foreground text-sm">{t.name}</h4>
                     <p className="text-xs text-muted-foreground">{t.location}</p>
                   </div>
                 </div>
-                <div className="flex gap-0.5 mb-3">
+                <div
+                  className="flex gap-0.5 mb-3"
+                  role="img"
+                  aria-label={locale === "pt" ? "5 de 5 estrelas" : "5 out of 5 stars"}
+                >
                   {Array.from({ length: 5 }).map((_, si) => (
-                    <Star key={si} className="h-3.5 w-3.5 fill-accent text-accent" />
+                    <Star key={si} className="h-3.5 w-3.5 fill-accent text-accent" aria-hidden="true" />
                   ))}
                 </div>
                 <p className="text-sm text-card-foreground/80 mb-3 leading-relaxed">
                   "{locale === "pt" ? t.text : t.textEn}"
                 </p>
                 <span className="text-xs font-medium text-primary">
-                  ✈️ {locale === "pt" ? t.trip : t.tripEn}
+                  <span aria-hidden="true">✈️ </span>
+                  {locale === "pt" ? t.trip : t.tripEn}
                 </span>
+                </article>
               </motion.div>
             ))}
           </AnimatePresence>
         </div>
 
-        {/* Pagination dots */}
-        <div className="flex justify-center gap-2 mt-8">
-          {Array.from({ length: totalPages }).map((_, i) => (
+        {/* Pagination dots + pause toggle */}
+        <div className="flex justify-center items-center gap-3 mt-8">
+          <div
+            role="tablist"
+            aria-label={locale === "pt" ? "Páginas de depoimentos" : "Testimonial pages"}
+            className="flex gap-2"
+          >
+            {Array.from({ length: totalPages }).map((_, i) => (
+              <button
+                key={i}
+                role="tab"
+                aria-selected={i === page}
+                onClick={() => setPage(i)}
+                aria-label={`${locale === "pt" ? "Página" : "Page"} ${i + 1}`}
+                className={`h-2 rounded-full transition-all ${
+                  i === page ? "w-8 bg-primary" : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                }`}
+              />
+            ))}
+          </div>
+          {!reducedMotion && (
             <button
-              key={i}
-              onClick={() => setPage(i)}
-              aria-label={`${locale === "pt" ? "Página" : "Page"} ${i + 1}`}
-              className={`h-2 rounded-full transition-all ${
-                i === page ? "w-8 bg-primary" : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"
-              }`}
-            />
-          ))}
+              type="button"
+              onClick={() => setPaused((p) => !p)}
+              aria-label={
+                paused
+                  ? locale === "pt" ? "Retomar rotação automática" : "Resume auto-rotation"
+                  : locale === "pt" ? "Pausar rotação automática" : "Pause auto-rotation"
+              }
+              aria-pressed={paused}
+              className="ml-2 p-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            >
+              {paused ? <Play className="h-3.5 w-3.5" aria-hidden="true" /> : <Pause className="h-3.5 w-3.5" aria-hidden="true" />}
+            </button>
+          )}
         </div>
       </div>
     </section>

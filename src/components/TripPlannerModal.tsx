@@ -109,6 +109,7 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
         onClick={onClose}
+        role="presentation"
       >
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -117,16 +118,24 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
           transition={{ type: "spring", damping: 25 }}
           className="bg-card rounded-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto card-shadow"
           onClick={(e) => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="trip-planner-title"
         >
           <div className="flex items-center justify-between p-5 border-b border-border">
             <div className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-primary" />
-              <h2 className="font-display text-lg font-bold text-foreground">
+              <Sparkles className="h-5 w-5 text-primary" aria-hidden="true" />
+              <h2 id="trip-planner-title" className="font-display text-lg font-bold text-foreground">
                 {locale === "pt" ? "Planejar Minha Viagem" : "Plan My Trip"}
               </h2>
             </div>
-            <button onClick={() => { onClose(); reset(); }} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
-              <X className="h-5 w-5 text-muted-foreground" />
+            <button
+              onClick={() => { onClose(); reset(); }}
+              className="p-1.5 rounded-lg hover:bg-muted transition-colors"
+              aria-label={locale === "pt" ? "Fechar" : "Close"}
+              type="button"
+            >
+              <X className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
             </button>
           </div>
 
@@ -158,8 +167,8 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
                     className={`text-base ${destError ? "border-destructive focus-visible:ring-destructive/40" : ""}`}
                   />
                   {destError && (
-                    <p className="mt-1.5 text-xs text-destructive flex items-start gap-1">
-                      <span aria-hidden>⚠️</span>
+                    <p role="alert" className="mt-1.5 text-xs text-destructive flex items-start gap-1">
+                      <span aria-hidden="true">⚠️</span>
                       <span>{destError}</span>
                     </p>
                   )}
