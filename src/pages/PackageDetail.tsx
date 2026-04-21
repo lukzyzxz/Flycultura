@@ -116,20 +116,28 @@ const PackageDetail = () => {
 
   const navigate = useNavigate();
 
+  // ---- Pricing model ----
+  // pkg.price = full package price WITH the cheapest flight already included (free upgrade)
+  // If user picks a different flight, they pay only the *difference* vs. cheapest.
+  const flightUpgradeCost =
+    selectedFlight && cheapestFlight && selectedFlight.id !== cheapestFlight.id
+      ? Math.max(0, selectedFlight.price - cheapestFlight.price)
+      : 0;
+  const finalPrice = pkg.price + flightUpgradeCost;
+
   const handleAddToCart = () => {
     if (!user) {
       navigate(`/auth?redirect=/packages/${pkg.id}`);
       return;
     }
     const activeFlight = selectedFlight || cheapestFlight;
-    const totalPrice = activeFlight ? pkg.price + activeFlight.price : pkg.price;
-    const flightInfo = activeFlight ? ` + ${activeFlight.airline}` : "";
+    const flightInfo = activeFlight ? ` ✈ ${activeFlight.airline}` : "";
     const product: CartProduct = {
       id: activeFlight ? `${pkg.id}__flight-${activeFlight.id}` : pkg.id,
       type: "event",
       name: `${locale === "pt" ? pkg.event : pkg.eventEn}${flightInfo}`,
       image: pkg.image,
-      price: totalPrice,
+      price: finalPrice,
       description: `${pkg.location} — ${locale === "pt" ? pkg.date : pkg.dateEn}`,
       meta: { location: pkg.location, date: pkg.date, country: pkg.country },
     };
