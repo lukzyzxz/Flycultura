@@ -37,7 +37,7 @@ const Profile = () => {
   });
 
   const { data: favorites = [] } = useQuery({
-    queryKey: ["favorites", user?.id],
+    queryKey: ["favorites-full", user?.id],
     queryFn: async () => {
       if (!user) return [];
       const { data } = await supabase.from("user_favorites").select("*").eq("user_id", user.id);
