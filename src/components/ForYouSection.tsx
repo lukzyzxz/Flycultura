@@ -108,20 +108,26 @@ const ForYouSection = () => {
                   </Badge>
                 </div>
               </Link>
-              <div className="p-3.5">
+              <div className="p-3 sm:p-3.5">
                 <Link to={`/packages/${pkg.id}`}>
                   <h4 className="font-display font-bold text-card-foreground text-sm mb-0.5 hover:text-primary transition-colors line-clamp-1">
                     {locale === "pt" ? pkg.event : pkg.eventEn}
                   </h4>
                 </Link>
                 <p className="text-xs text-muted-foreground mb-2">{pkg.location}</p>
-                <div className="flex items-center gap-2 mb-2.5">
+                <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0 mb-2.5">
                   <span className="text-base font-bold text-primary">R$ {pkg.price.toLocaleString("pt-BR")}</span>
                   <span className="text-xs text-muted-foreground line-through">R$ {pkg.originalPrice.toLocaleString("pt-BR")}</span>
                 </div>
-                <Button size="sm" className="w-full gap-1.5 text-xs h-8" onClick={() => handleAdd(pkg)}>
-                  <ShoppingCart className="h-3.5 w-3.5" />
-                  {locale === "pt" ? "Adicionar ao Carrinho" : "Add to Cart"}
+                <Button
+                  size="sm"
+                  className="w-full gap-1.5 text-[11px] sm:text-xs h-8 px-2 whitespace-normal leading-tight"
+                  onClick={() => handleAdd(pkg)}
+                >
+                  <ShoppingCart className="h-3.5 w-3.5 shrink-0" />
+                  <span className="truncate">
+                    {locale === "pt" ? "Adicionar" : "Add to Cart"}
+                  </span>
                 </Button>
               </div>
             </motion.div>
