@@ -15,16 +15,20 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 type PaymentMethod = "card" | "pix" | "boleto";
-type CardBrand = "visa" | "mastercard" | "amex" | "elo" | "hipercard" | "unknown";
+type CardBrand = "visa" | "mastercard" | "amex" | "elo" | "hipercard" | "diners" | "discover" | "aura" | "unknown";
 
 // Detect card brand from number
 const detectBrand = (num: string): CardBrand => {
   const n = num.replace(/\D/g, "");
-  if (/^4/.test(n)) return "visa";
-  if (/^(5[1-5]|2[2-7])/.test(n)) return "mastercard";
-  if (/^3[47]/.test(n)) return "amex";
+  // Brazilian-issued brands first (more specific BIN ranges)
   if (/^(4011|4312|4389|4514|5041|5066|5067|509|6277|6362|6363|650|6516|6550)/.test(n)) return "elo";
   if (/^(606282|3841)/.test(n)) return "hipercard";
+  if (/^50/.test(n)) return "aura";
+  if (/^3(0[0-5]|095|6|8|9)/.test(n)) return "diners";
+  if (/^(6011|65|64[4-9]|622)/.test(n)) return "discover";
+  if (/^3[47]/.test(n)) return "amex";
+  if (/^(5[1-5]|2[2-7])/.test(n)) return "mastercard";
+  if (/^4/.test(n)) return "visa";
   return "unknown";
 };
 
@@ -64,6 +68,9 @@ const BrandLogo = ({ brand, active }: { brand: CardBrand; active?: boolean }) =>
     amex: { bg: "bg-[#006FCF]", text: "text-white", label: "AMEX" },
     elo: { bg: "bg-foreground", text: "text-background", label: "ELO" },
     hipercard: { bg: "bg-[#B3131B]", text: "text-white", label: "HIPER" },
+    diners: { bg: "bg-[#0079BE]", text: "text-white", label: "DINERS" },
+    discover: { bg: "bg-[#FF6000]", text: "text-white", label: "DISC" },
+    aura: { bg: "bg-[#1F3A93]", text: "text-white", label: "AURA" },
     unknown: { bg: "bg-muted", text: "text-muted-foreground", label: "····" },
   };
   const s = styles[brand];
