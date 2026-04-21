@@ -64,6 +64,7 @@ const SmartImage = ({
   showSkeleton = true,
   loading,
   priority = false,
+  sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw",
   ...rest
 }: SmartImageProps) => {
   // Dev-time warning: catch missing alt early (WCAG 1.1.1)
@@ -102,6 +103,12 @@ const SmartImage = ({
 
   const effectiveLoading = loading ?? (priority ? "eager" : "lazy");
 
+  const useResponsive = isUnsplash(currentSrc);
+  const responsiveSrcSet = useResponsive ? buildSrcSet(currentSrc) : undefined;
+  const responsiveSrc = useResponsive
+    ? withUnsplashWidth(currentSrc, priority ? 900 : 600)
+    : currentSrc;
+
   return (
     <div className={cn("relative w-full h-full overflow-hidden", wrapperClassName)}>
       {showSkeleton && !loaded && (
@@ -112,7 +119,9 @@ const SmartImage = ({
       )}
       <img
         {...rest}
-        src={currentSrc}
+        src={responsiveSrc}
+        srcSet={responsiveSrcSet}
+        sizes={useResponsive ? sizes : undefined}
         alt={alt}
         loading={effectiveLoading}
         decoding="async"
