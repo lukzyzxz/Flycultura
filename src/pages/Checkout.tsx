@@ -446,7 +446,7 @@ const Checkout = () => {
                       )}
                     </div>
 
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                       <div>
                         <Label htmlFor="expiry">{t("checkout.expiry")}</Label>
                         <Input
@@ -472,7 +472,7 @@ const Checkout = () => {
                           type="password"
                         />
                       </div>
-                      <div>
+                      <div className="col-span-2 sm:col-span-1">
                         <Label htmlFor="cpf">CPF</Label>
                         <Input
                           id="cpf"
