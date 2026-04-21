@@ -627,11 +627,39 @@ const Checkout = () => {
                 </div>
               </div>
 
-              <Button type="submit" size="lg" className="w-full gap-2" disabled={!isValid}>
-                <Lock className="h-4 w-4" />
-                {method === "boleto"
-                  ? t("checkout.boletoGenerate")
-                  : `${t("checkout.confirm")} • R$ ${finalTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+              {/* Terms acceptance */}
+              <div className="flex items-start gap-2 pt-2">
+                <Checkbox
+                  id="accept-terms"
+                  checked={acceptedTerms}
+                  onCheckedChange={(c) => setAcceptedTerms(c === true)}
+                  className="mt-0.5"
+                />
+                <Label htmlFor="accept-terms" className="text-xs sm:text-sm text-muted-foreground leading-snug font-normal cursor-pointer">
+                  {t("checkout.acceptTerms")}{" "}
+                  <Link
+                    to="/terms"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary underline hover:text-primary/80"
+                  >
+                    {t("checkout.termsLink")}
+                  </Link>
+                </Label>
+              </div>
+
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full gap-2 h-auto min-h-12 py-3 whitespace-normal text-sm sm:text-base"
+                disabled={!isValid}
+              >
+                <Lock className="h-4 w-4 shrink-0" />
+                <span className="text-center">
+                  {method === "boleto"
+                    ? t("checkout.boletoGenerate")
+                    : `${t("checkout.confirm")} • R$ ${finalTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                </span>
               </Button>
 
               <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
