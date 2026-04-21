@@ -71,13 +71,13 @@ const Cart = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
-                className="flex gap-4 rounded-xl bg-card card-shadow p-4 hover:card-shadow-hover transition-shadow"
+                className="flex flex-col sm:flex-row gap-4 rounded-xl bg-card card-shadow p-4 hover:card-shadow-hover transition-shadow"
               >
-                <div className="shrink-0 w-28 h-20">
+                <div className="shrink-0 w-full sm:w-28 h-32 sm:h-20">
                   <SmartImage src={item.product.image} alt={item.product.name} category={item.product.type === "event" ? "event" : "deal"} className="w-full h-full object-cover rounded-lg" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-display font-bold text-card-foreground truncate">{item.product.name}</h3>
+                  <h3 className="font-display font-bold text-card-foreground line-clamp-2">{item.product.name}</h3>
                   <p className="text-sm text-muted-foreground">{item.product.description}</p>
                   <div className="flex items-center gap-3 mt-2">
                     <div className="flex items-center gap-1 border border-border rounded-lg">
@@ -92,9 +92,12 @@ const Cart = () => {
                     <button type="button" onClick={() => removeItem(item.product.id)} className="p-1.5 text-destructive hover:bg-destructive/10 rounded-lg transition-colors">
                       <Trash2 className="h-4 w-4" />
                     </button>
+                    <div className="ml-auto sm:hidden text-right">
+                      <span className="font-bold text-primary">R$ {(item.product.price * item.quantity).toLocaleString("pt-BR")}</span>
+                    </div>
                   </div>
                 </div>
-                <div className="text-right shrink-0">
+                <div className="text-right shrink-0 hidden sm:block">
                   <span className="font-bold text-primary">R$ {(item.product.price * item.quantity).toLocaleString("pt-BR")}</span>
                   {item.quantity > 1 && (
                     <p className="text-xs text-muted-foreground">R$ {item.product.price.toLocaleString("pt-BR")} {t("events.perPerson")}</p>
