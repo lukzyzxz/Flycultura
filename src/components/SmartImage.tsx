@@ -18,6 +18,31 @@ const FALLBACKS: Record<SmartImageCategory, string> = {
 
 const LOCAL_FALLBACK = "/placeholder.svg";
 
+/**
+ * For Unsplash URLs we can request multiple sizes cheaply by overriding
+ * the `w` query param. We build a srcset so the browser only downloads
+ * the size that actually fits the layout slot.
+ */
+const UNSPLASH_WIDTHS = [400, 600, 900, 1200] as const;
+
+const isUnsplash = (url: string) =>
+  typeof url === "string" && url.includes("images.unsplash.com");
+
+const withUnsplashWidth = (url: string, w: number) => {
+  try {
+    const u = new URL(url);
+    u.searchParams.set("w", String(w));
+    u.searchParams.set("q", u.searchParams.get("q") ?? "70");
+    u.searchParams.set("auto", "format");
+    return u.toString();
+  } catch {
+    return url;
+  }
+};
+
+const buildSrcSet = (url: string) =>
+  UNSPLASH_WIDTHS.map((w) => `${withUnsplashWidth(url, w)} ${w}w`).join(", ");
+
 interface SmartImageProps extends ImgHTMLAttributes<HTMLImageElement> {
   src: string;
   alt: string;
@@ -26,6 +51,8 @@ interface SmartImageProps extends ImgHTMLAttributes<HTMLImageElement> {
   showSkeleton?: boolean;
   /** When true, eagerly load and prioritize (use for above-the-fold hero images). */
   priority?: boolean;
+  /** Hint for responsive images. Defaults to a sensible card layout sizing. */
+  sizes?: string;
 }
 
 const SmartImage = ({
