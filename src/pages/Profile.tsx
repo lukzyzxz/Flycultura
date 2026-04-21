@@ -251,6 +251,34 @@ const Profile = () => {
                 <div className="flex justify-between"><span className="text-muted-foreground">{locale === "pt" ? "Membro desde" : "Member since"}</span><span className="text-foreground">{new Date(user.created_at).toLocaleDateString(locale === "pt" ? "pt-BR" : "en-US")}</span></div>
               </div>
             </div>
+            <div className="rounded-xl bg-card card-shadow p-6 space-y-4">
+              <div className="flex items-center gap-2">
+                <Plane className="h-4 w-4 text-primary" />
+                <h3 className="font-display font-bold text-card-foreground">
+                  {locale === "pt" ? "Aeroporto de Origem" : "Home Airport"}
+                </h3>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {locale === "pt"
+                  ? "Usado como ponto de partida padrão dos voos nos pacotes."
+                  : "Used as the default departure point for package flights."}
+              </p>
+              <Select
+                value={homeAirport}
+                onValueChange={(v) => { setHomeAirportState(v); setHomeAirport(v); }}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {AIRPORT_OPTIONS.map((a) => (
+                    <SelectItem key={a.code} value={a.code}>
+                      {a.city} ({a.code})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <Button variant="destructive" onClick={handleSignOut} className="w-full gap-2"><LogOut className="h-4 w-4" />{t("nav.signOut")}</Button>
           </div>
         )}
