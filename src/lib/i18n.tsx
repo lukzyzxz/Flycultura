@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
 
+// eslint-disable-next-line react-refresh/only-export-components
+
 export type Locale = "en" | "pt";
 
 const translations = {
@@ -359,7 +361,13 @@ interface I18nContextType {
   t: (key: TranslationKey) => string;
 }
 
-const I18nContext = createContext<I18nContextType | null>(null);
+// Attach context to globalThis so HMR-reloaded modules share the same instance.
+// Without this, editing this file invalidates the context reference and any
+// consumer rendered before HMR re-runs throws "must be used within Provider".
+const GLOBAL_KEY = "__flycultura_i18n_ctx__";
+const I18nContext: React.Context<I18nContextType | null> =
+  (globalThis as any)[GLOBAL_KEY] ??
+  ((globalThis as any)[GLOBAL_KEY] = createContext<I18nContextType | null>(null));
 
 export const I18nProvider = ({ children }: { children: ReactNode }) => {
   const [locale, setLocaleState] = useState<Locale>(
