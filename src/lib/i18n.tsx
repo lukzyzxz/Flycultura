@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
 
+// eslint-disable-next-line react-refresh/only-export-components
+
 export type Locale = "en" | "pt";
 
 const translations = {
