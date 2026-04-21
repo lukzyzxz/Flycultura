@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
 
 export type Locale = "en" | "pt";
 
@@ -365,6 +365,13 @@ export const I18nProvider = ({ children }: { children: ReactNode }) => {
   const [locale, setLocaleState] = useState<Locale>(
     () => (localStorage.getItem("locale") as Locale) || "pt"
   );
+
+  // Keep <html lang> in sync with the active locale (WCAG 3.1.1)
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.documentElement.lang = locale === "pt" ? "pt-BR" : "en";
+    }
+  }, [locale]);
 
   const setLocale = useCallback((l: Locale) => {
     setLocaleState(l);

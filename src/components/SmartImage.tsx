@@ -39,6 +39,15 @@ const SmartImage = ({
   priority = false,
   ...rest
 }: SmartImageProps) => {
+  // Dev-time warning: catch missing alt early (WCAG 1.1.1)
+  if (import.meta.env.DEV && alt === undefined) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      "[SmartImage] Missing `alt` prop. Use alt=\"\" only for purely decorative images.",
+      { src, category },
+    );
+  }
+
   const [currentSrc, setCurrentSrc] = useState(src);
   const [errorStage, setErrorStage] = useState<0 | 1 | 2>(0);
   const [loaded, setLoaded] = useState(false);

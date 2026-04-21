@@ -110,34 +110,52 @@ const HeroSearch = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="max-w-3xl mx-auto"
           >
-            <div className="flex justify-center gap-1 mb-4">
+            <div
+              role="tablist"
+              aria-label={locale === "pt" ? "Tipo de busca" : "Search type"}
+              className="flex justify-center gap-1 mb-4"
+            >
               {tabs.map((tab) => {
                 const Icon = tab.icon;
+                const selected = activeTab === tab.id;
                 return (
                   <button
                     key={tab.id}
+                    id={`tab-${tab.id}`}
+                    role="tab"
+                    type="button"
+                    aria-selected={selected}
+                    aria-controls="search-tabpanel"
+                    tabIndex={selected ? 0 : -1}
                     onClick={() => setActiveTab(tab.id)}
                     className={`flex items-center gap-2 px-4 py-2 rounded-t-lg text-sm font-medium transition-all ${
-                      activeTab === tab.id
+                      selected
                         ? "bg-card text-foreground"
                         : "bg-primary-foreground/10 text-primary-foreground/70 hover:text-primary-foreground"
                     }`}
                   >
-                    <Icon className="h-4 w-4" />
+                    <Icon className="h-4 w-4" aria-hidden="true" />
                     <span className="hidden sm:inline">{tab.label}</span>
+                    <span className="sr-only sm:hidden">{tab.label}</span>
                   </button>
                 );
               })}
             </div>
 
-            <div className="bg-card rounded-xl p-4 md:p-6 card-shadow">
+            <div
+              role="tabpanel"
+              id="search-tabpanel"
+              aria-labelledby={`tab-${activeTab}`}
+              className="bg-card rounded-xl p-4 md:p-6 card-shadow"
+            >
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 <SearchAutocomplete value={from} onChange={setFrom} placeholder={t("hero.from")} />
                 <SearchAutocomplete value={to} onChange={setTo} placeholder={t("hero.to")} />
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" aria-hidden="true" />
                   <Input
                     type="date"
+                    aria-label={locale === "pt" ? "Data de partida" : "Departure date"}
                     className="pl-9"
                     value={date}
                     min={today}
@@ -148,11 +166,17 @@ const HeroSearch = () => {
               </div>
 
               {/* Quick filters — toggle style, don't set destination */}
-              <div className="flex flex-wrap gap-2 mt-3">
+              <div
+                role="group"
+                aria-label={locale === "pt" ? "Filtros rápidos" : "Quick filters"}
+                className="flex flex-wrap gap-2 mt-3"
+              >
                 {quickFilters.map((f) => (
                   <button
                     key={f}
+                    type="button"
                     onClick={() => handleFilterClick(f)}
+                    aria-pressed={activeFilter === f}
                     className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                       activeFilter === f
                         ? "bg-primary text-primary-foreground"
@@ -165,7 +189,7 @@ const HeroSearch = () => {
               </div>
 
               <Button onClick={handleSearch} className="w-full mt-4 h-12 text-base font-semibold gap-2">
-                <Search className="h-5 w-5" />
+                <Search className="h-5 w-5" aria-hidden="true" />
                 {t("hero.searchBtn")}
               </Button>
             </div>

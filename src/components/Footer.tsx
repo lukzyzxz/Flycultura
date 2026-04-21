@@ -96,18 +96,23 @@ const Footer = () => {
             <p className="text-sm text-muted-foreground mb-4">
               {t("footer.newsletterDesc")}
             </p>
-            <form onSubmit={handleSubscribe} className="flex gap-2 max-w-md mx-auto">
+            <form onSubmit={handleSubscribe} className="flex gap-2 max-w-md mx-auto" noValidate>
+              <label htmlFor="newsletter-email" className="sr-only">
+                {t("footer.emailPlaceholder")}
+              </label>
               <Input
+                id="newsletter-email"
                 type="email"
                 placeholder={t("footer.emailPlaceholder")}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="flex-1"
                 required
+                aria-required="true"
               />
-              <Button type="submit" disabled={loading} className="gap-2 shrink-0">
-                <Send className="h-4 w-4" />
-                {t("footer.subscribe")}
+              <Button type="submit" disabled={loading} className="gap-2 shrink-0" aria-label={t("footer.subscribe")}>
+                <Send className="h-4 w-4" aria-hidden="true" />
+                <span>{t("footer.subscribe")}</span>
               </Button>
             </form>
           </div>
@@ -116,7 +121,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <Link to="/" className="flex items-center gap-2 font-display text-lg font-bold mb-3">
-              <Plane className="h-5 w-5 text-primary" />
+              <Plane className="h-5 w-5 text-primary" aria-hidden="true" />
               <span className="text-gradient">FlyCultura</span>
             </Link>
             <p className="text-sm text-muted-foreground">{t("footer.tagline")}</p>
