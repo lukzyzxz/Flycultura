@@ -9,6 +9,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import Navbar from "@/components/Navbar";
 import ScrollToTop from "@/components/ScrollToTop";
+import SkipLink from "@/components/SkipLink";
 // Eagerly load homepage so first paint is fast
 import Index from "./pages/Index";
 
@@ -60,31 +61,34 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <ScrollToTop />
+              <SkipLink />
               <Navbar />
-              <Suspense fallback={<RouteFallback />}>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/results" element={<Results />} />
-                  <Route path="/deals" element={<Deals />} />
-                  <Route path="/packages" element={<EventPackages />} />
-                  <Route path="/packages/:id" element={<PackageDetail />} />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/help" element={<HelpCenter />} />
-                  <Route path="/privacy" element={<Privacy />} />
-                  <Route path="/terms" element={<Terms />} />
-                  <Route path="/blog" element={<Blog />} />
-                  <Route path="/blog/:id" element={<BlogPost />} />
-                  <Route path="/destination/:slug" element={<Destination />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/reset-password" element={<ResetPassword />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/unsubscribe" element={<Unsubscribe />} />
-                  <Route path="/admin/image-log" element={<AdminImageLog />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
+              <main id="main-content" tabIndex={-1} className="focus:outline-none">
+                <Suspense fallback={<RouteFallback />}>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/results" element={<Results />} />
+                    <Route path="/deals" element={<Deals />} />
+                    <Route path="/packages" element={<EventPackages />} />
+                    <Route path="/packages/:id" element={<PackageDetail />} />
+                    <Route path="/cart" element={<Cart />} />
+                    <Route path="/checkout" element={<Checkout />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/help" element={<HelpCenter />} />
+                    <Route path="/privacy" element={<Privacy />} />
+                    <Route path="/terms" element={<Terms />} />
+                    <Route path="/blog" element={<Blog />} />
+                    <Route path="/blog/:id" element={<BlogPost />} />
+                    <Route path="/destination/:slug" element={<Destination />} />
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/unsubscribe" element={<Unsubscribe />} />
+                    <Route path="/admin/image-log" element={<AdminImageLog />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Suspense>
+              </main>
             </BrowserRouter>
           </TooltipProvider>
         </CartProvider>
