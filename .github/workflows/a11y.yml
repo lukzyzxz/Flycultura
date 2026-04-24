@@ -1,0 +1,51 @@
+name: Accessibility audit (axe-core + pa11y)
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  a11y:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install project deps
+        run: npm ci
+
+      - name: Install audit tools
+        run: npm install --no-save @axe-core/cli pa11y puppeteer wait-on
+
+      - name: Build app
+        run: npm run build
+
+      - name: Serve preview
+        run: |
+          npx vite preview --port 4173 &
+          npx wait-on http://localhost:4173 -t 60000
+
+      - name: Run accessibility audit
+        run: node scripts/a11y-audit.mjs
+
+      - name: Upload HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y-report
+          path: a11y-report/
+          retention-days: 30
+
+      - name: Fail on critical violations
+        run: |
+          if [ -f a11y-report/critical.txt ]; then
+            echo "::error::Critical accessibility violations found"
+            cat a11y-report/critical.txt
+            exit 1
+          fi
