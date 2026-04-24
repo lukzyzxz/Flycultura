@@ -164,7 +164,7 @@ const Navbar = () => {
                 onClick={() => setMenuOpen(false)}
                 aria-current={isActive ? "page" : undefined}
                 className={`block px-4 py-2 rounded-lg text-sm font-medium hover:bg-muted ${
-                  isActive ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground"
+                  isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {l.label}
@@ -184,7 +184,7 @@ const Navbar = () => {
               </Button>
             </>
           ) : (
-            <Link to="/auth" onClick={() => setMenuOpen(false)}>
+            <Link to="/auth" onClick={() => setMenuOpen(false)} aria-label={t("nav.signIn")}>
               <Button variant="default" size="sm" className="w-full mt-2">
                 {t("nav.signIn")}
               </Button>
