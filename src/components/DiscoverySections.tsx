@@ -78,10 +78,10 @@ const DiscoverySections = () => {
     >
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <Icon className="h-4 w-4 text-accent" />
+          <Icon aria-hidden="true" className="h-4 w-4 text-accent" />
           <span className="text-xs font-semibold text-accent uppercase tracking-wider">{label}</span>
         </div>
-        <h3 className="font-display text-xl md:text-2xl font-bold text-foreground">{title}</h3>
+        <h2 className="font-display text-xl md:text-2xl font-bold text-foreground">{title}</h2>
       </div>
       <Link to={linkTo}>
         <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground">
@@ -107,9 +107,9 @@ const DiscoverySections = () => {
       </Link>
       <div className="p-3 sm:p-3.5">
         <Link to={`/packages/${pkg.id}`}>
-          <h4 className="font-display font-bold text-card-foreground text-sm mb-0.5 hover:text-primary transition-colors line-clamp-1">
+          <h3 className="font-display font-bold text-card-foreground text-sm mb-0.5 hover:text-primary transition-colors line-clamp-1">
             {locale === "pt" ? pkg.event : pkg.eventEn}
-          </h4>
+          </h3>
         </Link>
         <p className="text-xs text-muted-foreground mb-2">{pkg.location}</p>
         <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0 mb-2.5">
@@ -186,9 +186,9 @@ const DiscoverySections = () => {
                   </Badge>
                 </div>
                 <div className="p-3 sm:p-3.5">
-                  <h4 className="font-display font-bold text-card-foreground text-sm mb-0.5 line-clamp-1">
+                  <h3 className="font-display font-bold text-card-foreground text-sm mb-0.5 line-clamp-1">
                     {locale === "pt" ? deal.title : deal.titleEn}
-                  </h4>
+                  </h3>
                   <p className="text-xs text-muted-foreground mb-2 line-clamp-1">{locale === "pt" ? deal.description : deal.descriptionEn}</p>
                   <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0 mb-2.5">
                     <span className="text-base font-bold text-primary">R$ {deal.price.toLocaleString("pt-BR")}</span>

@@ -384,9 +384,15 @@ const PackageDetail = () => {
                     }
                     toggleFav.mutate();
                   }}
+                  aria-pressed={isFavorite}
+                  aria-label={
+                    isFavorite
+                      ? (locale === "pt" ? "Remover dos favoritos" : "Remove from favorites")
+                      : (locale === "pt" ? "Adicionar aos favoritos" : "Add to favorites")
+                  }
                   className="p-2 rounded-full hover:bg-muted transition-colors"
                 >
-                  <Heart className={`h-5 w-5 ${isFavorite ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
+                  <Heart aria-hidden="true" className={`h-5 w-5 ${isFavorite ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
                 </button>
               </div>
               <div>
