@@ -1,79 +1,68 @@
 
 
-# Auditoria e Correção WCAG 2.1 AA
+# Correções WCAG + Documentação PDF/DOCX para download
 
-## Status atual
+## Onde a documentação ficará disponível
 
-O site **já segue boa parte** das WCAG 2.1 AA: skip link, `<main>` com landmark, `aria-current` no Navbar, padrão combobox no autocomplete, tablist no Hero, `prefers-reduced-motion`, focus-visible global, lang dinâmico no `<html>`, contraste ajustado e botão pausar nos testimonials.
+A documentação **NÃO será publicada no site**. Será gerada como dois arquivos para você baixar diretamente:
 
-Mas uma auditoria nas páginas internas revelou **lacunas pontuais** que reprovam o nível AA. Vou corrigi-las.
+- `FlyCultura-WCAG-2.1-AA.pdf` (formato principal, pronto para impressão/compartilhamento)
+- `FlyCultura-WCAG-2.1-AA.docx` (formato editável Word)
 
-## Problemas a corrigir
+Após eu gerar, ambos aparecerão como **anexos clicáveis aqui no chat** (cards de download). Você também pode acessá-los a qualquer momento clicando no botão **Files** (ícone de pasta) na navegação do editor Lovable — eles ficam armazenados em `/mnt/documents/` e persistem no seu projeto.
 
-### 1. Botões-ícone sem `aria-label` (WCAG 4.1.2)
-Botões de coração, lixeira, +/− quantidade, fechar carrinho não têm rótulo acessível — leitores de tela só falam "botão".
+Nenhuma rota nova, nenhum link no Footer, nenhuma página `/docs` será criada no app.
 
-- `src/pages/EventPackages.tsx` → botão favoritar (Heart)
-- `src/pages/PackageDetail.tsx` → botão favoritar (Heart)
-- `src/pages/Cart.tsx` → botões aumentar/diminuir quantidade, remover item, limpar carrinho
-- `src/pages/Auth.tsx` → toggle mostrar/ocultar senha (já tem em inglês — traduzir para PT também)
+## Correções de código (4 erros do checker WCAG)
 
-### 2. Estados toggle sem `aria-pressed` (WCAG 4.1.2)
-- Botão favoritar em `EventPackages.tsx` e `PackageDetail.tsx` precisa `aria-pressed={isFavorite}`
-- Filtros de categoria em `EventPackages.tsx` precisam `aria-pressed`
+| # | Erro | Arquivo | Correção |
+|---|------|---------|----------|
+| 1 | Botão sem nome acessível (carrinho) | `src/components/Navbar.tsx` | `aria-hidden="true"` no `<Button>` interno do Link `/cart` |
+| 2 | Contraste insuficiente no NavLink ativo | `src/components/Navbar.tsx` | Trocar `bg-primary/10 text-primary` → `bg-primary text-primary-foreground` (≥ 4.5:1) |
+| 3 | Hierarquia de headings | `src/components/Testimonials.tsx` | `<h4>` do nome do depoente → `<h3>` |
+| 4 | Link `/auth` sem texto discernível | `src/components/Navbar.tsx` | `aria-label={t("nav.signIn")}` nos Links `/auth` (desktop + mobile) |
 
-### 3. Select sem rótulo (WCAG 1.3.1, 3.3.2)
-- `<select>` de ordenação em `EventPackages.tsx` não tem `<label>` nem `aria-label`
+Verificação adicional: conferir `--primary` / `--primary-foreground` em `src/index.css` e ajustar para branco puro `0 0% 100%` se o contraste ficar abaixo de 4.5:1.
 
-### 4. Carrossel horizontal sem instrução (WCAG 2.1.1)
-- `RecentlyViewed.tsx` é scroll horizontal sem `aria-label` na região nem indicação para teclado. Adicionar `role="region"` + `aria-label` e garantir que cards são focáveis (Link já é, OK) + `aria-roledescription="carousel"` para contexto.
+## Documentação técnica em PT-BR
 
-### 5. Hierarquia de headings quebrada (WCAG 1.3.1, 2.4.6)
-- `RecentlyViewed`, `ForYouSection`, `DiscoverySections` usam `<h3>` sem `<h2>` antes (saltam de h1 do Hero direto para h3). Promover para `<h2>` e ajustar tamanho via classe.
-- Cards usam `<h4>` dentro de seções com `<h3>` — após promover seções para `<h2>`, cards viram `<h3>`.
+**Geração:** script Node usando `docx` → `.docx`, depois LibreOffice headless → `.pdf`. QA visual página a página antes de entregar.
 
-### 6. Imagens decorativas vs informativas (WCAG 1.1.1)
-- Avatares em `Testimonials.tsx` estão como `alt=""` mas o nome do autor está logo ao lado — OK manter decorativo. ✅ já correto.
-- Verificar `PackageDetail` hero image — confirmar que tem `alt` descritivo.
+**Estrutura (≈ 15-20 páginas):**
 
-### 7. Link "Trocar voo" usa `<a href="#flights-section">` (WCAG 2.4.4)
-- Em `PackageDetail.tsx` o anchor precisa que o destino exista com `id="flights-section"` e seja focável. Verificar e corrigir se faltar.
+1. Capa — FlyCultura · Conformidade WCAG 2.1 nível AA
+2. Sumário executivo — escopo, padrão, status
+3. O que é WCAG 2.1 AA — princípios POUR (Perceptível, Operável, Compreensível, Robusto)
+4. Critérios cumpridos pelo site (com referência ao critério, descrição em PT-BR e arquivo de implementação):
+   - 1.1.1 Conteúdo não-textual
+   - 1.3.1 Informações e relações
+   - 1.4.3 Contraste mínimo
+   - 1.4.4 Redimensionar texto
+   - 2.1.1 / 2.1.2 Teclado e armadilhas
+   - 2.2.2 / 2.3.3 Pausar movimento
+   - 2.4.1 Pular blocos (SkipLink)
+   - 2.4.3 Ordem de foco
+   - 2.4.4 Propósito do link
+   - 2.4.6 Cabeçalhos e rótulos
+   - 2.4.7 Foco visível
+   - 3.1.1 / 3.1.2 Idioma da página
+   - 3.3.1 / 3.3.2 Identificação de erros e rótulos
+   - 4.1.2 Nome, função, valor
+   - 4.1.3 Mensagens de status
+5. Padrões ARIA APG implementados — combobox (autocomplete), tablist (Hero), dialog (modal)
+6. Como cada implementação funciona — explicação curta + trecho de código
+7. Resultado da auditoria — antes/depois dos 4 erros corrigidos
+8. Checklist de manutenção contínua para novas features
+9. Anexos — links para WCAG 2.1, ARIA APG, axe-core
 
-### 8. Toasts sem live region explícita (WCAG 4.1.3)
-- O `Sonner` e `Toaster` do shadcn já trazem `role="status"`/`aria-live` por padrão. ✅ OK.
+**Saída final:**
+- `/mnt/documents/FlyCultura-WCAG-2.1-AA.pdf`
+- `/mnt/documents/FlyCultura-WCAG-2.1-AA.docx`
 
-### 9. Contraste de classes utilitárias hardcoded (WCAG 1.4.3)
-- `text-green-700 dark:text-green-400` em `Cart.tsx` e similares — validar contraste OK contra `bg-green-500/10`. Provavelmente passa, mas trocar por token semântico (`text-success`) se houver, ou manter — anotar como aceitável.
-- `text-orange-500` em `Cart.tsx` (ícone decorativo, OK).
-
-### 10. Modal `TripPlannerModal` (WCAG 2.1.2 Focus Trap)
-- Modal é custom (não usa Radix Dialog). Verificar se tem `role="dialog"`, `aria-modal="true"`, `aria-labelledby`, focus inicial e Escape. Aplicar correções se faltarem.
-
-### 11. Página Auth — labels de senha (WCAG 1.3.1)
-- Toggle de visibilidade da senha tem `aria-label` apenas em inglês. Traduzir conforme `locale`.
-
-## Arquivos a modificar
-
-```text
-src/pages/EventPackages.tsx     - aria-label/aria-pressed nos botões, label no select, h2/h3
-src/pages/PackageDetail.tsx     - aria-label/aria-pressed no favoritar, id da seção flights
-src/pages/Cart.tsx              - aria-label nos botões quantidade/remover/limpar, h2/h3
-src/pages/Auth.tsx              - i18n no aria-label do toggle de senha
-src/components/RecentlyViewed.tsx - role="region", aria-label, h2 ao invés de h3
-src/components/ForYouSection.tsx  - h2 ao invés de h3
-src/components/DiscoverySections.tsx - h2 ao invés de h3
-src/components/TripPlannerModal.tsx - role="dialog", aria-modal, aria-labelledby, Escape
-```
-
-## Detalhes técnicos
-
-- Não vou alterar `index.css`, `App.tsx`, `Navbar.tsx`, `HeroSearch.tsx`, `SearchAutocomplete.tsx`, `Footer.tsx`, `Testimonials.tsx`, `PassengerStepper.tsx`, `SkipLink.tsx` — já estão conformes.
-- Headings: trocar `text-xl md:text-2xl font-bold` em `<h3>` por `<h2>` mantendo classes — visual permanece idêntico.
-- Botões toggle: padrão `aria-pressed={state}` + `aria-label` localizado PT/EN.
-- Modal: envolver com keydown listener para `Escape` e usar `useRef` para focar primeiro input ao abrir.
+Ambos serão anexados na resposta como cards clicáveis para download imediato.
 
 ## Fora de escopo
-- Auditoria automatizada com axe-core (próxima etapa opcional).
-- Reescrever páginas Blog, About, HelpCenter, Privacy, Terms, Profile — são majoritariamente texto estático e já conformes (h1 + main herdados).
-- Mudar paleta de cores (já validada em iteração anterior).
+- Criar página de documentação no site
+- Adicionar link de download no Footer ou em qualquer rota pública
+- Tradução do PDF para inglês (pode ser pedido depois)
 
