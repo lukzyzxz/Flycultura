@@ -52,7 +52,7 @@ const Navbar = () => {
                 aria-current={isActive ? "page" : undefined}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   isActive
-                    ? "bg-primary/10 text-primary"
+                    ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -103,7 +103,7 @@ const Navbar = () => {
                 : locale === "pt" ? "Carrinho vazio" : "Empty cart"
             }
           >
-            <Button variant="ghost" size="icon" className="rounded-full" tabIndex={-1}>
+            <Button variant="ghost" size="icon" className="rounded-full" tabIndex={-1} aria-hidden="true">
               <ShoppingCart className="h-4 w-4" aria-hidden="true" />
             </Button>
             {totalItems > 0 && (
@@ -129,7 +129,7 @@ const Navbar = () => {
               </Button>
             </div>
           ) : (
-            <Link to="/auth">
+            <Link to="/auth" aria-label={t("nav.signIn")}>
               <Button variant="default" size="sm" className="hidden md:inline-flex">
                 {t("nav.signIn")}
               </Button>
@@ -153,7 +153,7 @@ const Navbar = () => {
         </div>
       </div>
 
-      {menuOpen && (
+          {menuOpen && (
         <div id="mobile-menu" className="md:hidden border-t border-border bg-background p-4 space-y-2">
           {links.map((l) => {
             const isActive = location.pathname === l.to;
@@ -164,7 +164,7 @@ const Navbar = () => {
                 onClick={() => setMenuOpen(false)}
                 aria-current={isActive ? "page" : undefined}
                 className={`block px-4 py-2 rounded-lg text-sm font-medium hover:bg-muted ${
-                  isActive ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground"
+                  isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {l.label}
@@ -184,7 +184,7 @@ const Navbar = () => {
               </Button>
             </>
           ) : (
-            <Link to="/auth" onClick={() => setMenuOpen(false)}>
+            <Link to="/auth" onClick={() => setMenuOpen(false)} aria-label={t("nav.signIn")}>
               <Button variant="default" size="sm" className="w-full mt-2">
                 {t("nav.signIn")}
               </Button>

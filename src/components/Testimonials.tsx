@@ -214,7 +214,7 @@ const Testimonials = () => {
                     aria-hidden="true"
                   />
                   <div>
-                    <h4 className="font-display font-bold text-card-foreground text-sm">{t.name}</h4>
+                    <h3 className="font-display font-bold text-card-foreground text-sm">{t.name}</h3>
                     <p className="text-xs text-muted-foreground">{t.location}</p>
                   </div>
                 </div>
