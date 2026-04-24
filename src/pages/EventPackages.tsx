@@ -102,6 +102,8 @@ const EventPackages = () => {
               <button
                 key={c.id}
                 onClick={() => setCategory(c.id)}
+                aria-pressed={category === c.id}
+                aria-label={locale === "pt" ? `Filtrar por ${c.labelPt}` : `Filter by ${c.labelEn}`}
                 className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                   category === c.id
                     ? "bg-primary text-primary-foreground"
@@ -112,15 +114,22 @@ const EventPackages = () => {
               </button>
             ))}
           </div>
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value)}
-            className="ml-auto bg-muted text-foreground text-sm rounded-lg px-3 py-1.5 border border-border"
-          >
-            {sortOptions.map((s) => (
-              <option key={s.id} value={s.id}>{locale === "pt" ? s.labelPt : s.labelEn}</option>
-            ))}
-          </select>
+          <div className="ml-auto flex items-center gap-2">
+            <label htmlFor="sort-packages" className="sr-only">
+              {locale === "pt" ? "Ordenar pacotes" : "Sort packages"}
+            </label>
+            <select
+              id="sort-packages"
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+              aria-label={locale === "pt" ? "Ordenar pacotes" : "Sort packages"}
+              className="bg-muted text-foreground text-sm rounded-lg px-3 py-1.5 border border-border"
+            >
+              {sortOptions.map((s) => (
+                <option key={s.id} value={s.id}>{locale === "pt" ? s.labelPt : s.labelEn}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -203,9 +212,15 @@ const EventPackages = () => {
                         }
                         toggleFav.mutate(pkg.id);
                       }}
+                      aria-pressed={favorites.includes(pkg.id)}
+                      aria-label={
+                        favorites.includes(pkg.id)
+                          ? (locale === "pt" ? "Remover dos favoritos" : "Remove from favorites")
+                          : (locale === "pt" ? "Adicionar aos favoritos" : "Add to favorites")
+                      }
                       className="p-2 rounded-full hover:bg-muted transition-colors"
                     >
-                      <Heart className={`h-5 w-5 ${favorites.includes(pkg.id) ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
+                      <Heart aria-hidden="true" className={`h-5 w-5 ${favorites.includes(pkg.id) ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
                     </button>
                     <Link to={`/packages/${pkg.id}`}>
                       <Button className="gap-2">

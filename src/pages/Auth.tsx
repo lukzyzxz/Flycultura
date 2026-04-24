@@ -28,7 +28,7 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const { signIn, signUp, resetPassword, user, loading: authLoading } = useAuth();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -146,9 +146,14 @@ const Auth = () => {
       onClick={onToggle}
       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
       tabIndex={-1}
-      aria-label={visible ? "Hide password" : "Show password"}
+      aria-label={
+        visible
+          ? (locale === "pt" ? "Ocultar senha" : "Hide password")
+          : (locale === "pt" ? "Mostrar senha" : "Show password")
+      }
+      aria-pressed={visible}
     >
-      {visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+      {visible ? <EyeOff aria-hidden="true" className="h-4 w-4" /> : <Eye aria-hidden="true" className="h-4 w-4" />}
     </button>
   );
 

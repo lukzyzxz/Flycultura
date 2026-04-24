@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Sparkles, MapPin, Calendar, DollarSign, Heart, Loader2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -45,6 +45,8 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState("");
   const [destError, setDestError] = useState("");
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const firstFocusableRef = useRef<HTMLInputElement>(null);
 
   const prefOptions = locale === "pt" ? prefOptionsPt : prefOptionsEn;
 
@@ -98,6 +100,25 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
     setResult("");
     setDestError("");
   };
+
+  // Close on Escape and focus first input on open
+  useEffect(() => {
+    if (!open) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+        reset();
+      }
+    };
+    window.addEventListener("keydown", handleKey);
+    // Focus first interactive element shortly after open
+    const timer = setTimeout(() => firstFocusableRef.current?.focus(), 50);
+    return () => {
+      window.removeEventListener("keydown", handleKey);
+      clearTimeout(timer);
+    };
+  }, [open, onClose]);
 
   if (!open) return null;
 
@@ -157,6 +178,7 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
                     {locale === "pt" ? "Para onde você quer ir?" : "Where do you want to go?"}
                   </label>
                   <Input
+                    ref={firstFocusableRef}
                     placeholder={locale === "pt" ? "Ex: Paris, Tokyo, Rio de Janeiro..." : "E.g.: Paris, Tokyo, Rio de Janeiro..."}
                     value={destination}
                     onChange={(e) => {

@@ -12,7 +12,7 @@ const RecentlyViewed = () => {
   if (items.length === 0) return null;
 
   return (
-    <section className="py-10 md:py-14 bg-muted/30">
+    <section className="py-10 md:py-14 bg-muted/30" aria-labelledby="recently-viewed-heading">
       <div className="container">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -20,13 +20,19 @@ const RecentlyViewed = () => {
           viewport={{ once: true }}
           className="flex items-center gap-2 mb-6"
         >
-          <Clock className="h-4 w-4 text-accent" />
-          <h3 className="font-display text-xl md:text-2xl font-bold text-foreground">
+          <Clock aria-hidden="true" className="h-4 w-4 text-accent" />
+          <h2 id="recently-viewed-heading" className="font-display text-xl md:text-2xl font-bold text-foreground">
             {locale === "pt" ? "Vistos Recentemente" : "Recently Viewed"}
-          </h3>
+          </h2>
         </motion.div>
 
-        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+        <div
+          className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide"
+          role="region"
+          aria-roledescription={locale === "pt" ? "carrossel" : "carousel"}
+          aria-label={locale === "pt" ? "Itens vistos recentemente — use as setas do teclado para navegar" : "Recently viewed items — use arrow keys to scroll"}
+          tabIndex={0}
+        >
           {items.slice(0, 8).map((item, i) => {
             const href = item.type === "destination"
               ? `/destination/${item.slug}`

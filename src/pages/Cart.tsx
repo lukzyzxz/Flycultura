@@ -81,16 +81,31 @@ const Cart = () => {
                   <p className="text-sm text-muted-foreground">{item.product.description}</p>
                   <div className="flex items-center gap-3 mt-2">
                     <div className="flex items-center gap-1 border border-border rounded-lg">
-                      <button type="button" onClick={() => updateQuantity(item.product.id, item.quantity - 1)} className="p-1.5 hover:bg-muted rounded-l-lg transition-colors active:scale-95">
-                        <Minus className="h-3.5 w-3.5" />
+                      <button
+                        type="button"
+                        onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                        aria-label={locale === "pt" ? `Diminuir quantidade de ${item.product.name}` : `Decrease quantity of ${item.product.name}`}
+                        className="p-1.5 hover:bg-muted rounded-l-lg transition-colors active:scale-95"
+                      >
+                        <Minus aria-hidden="true" className="h-3.5 w-3.5" />
                       </button>
-                      <span className="px-3 text-sm font-medium">{item.quantity}</span>
-                      <button type="button" onClick={() => updateQuantity(item.product.id, item.quantity + 1)} className="p-1.5 hover:bg-muted rounded-r-lg transition-colors active:scale-95">
-                        <Plus className="h-3.5 w-3.5" />
+                      <span className="px-3 text-sm font-medium" aria-live="polite" aria-label={locale === "pt" ? `Quantidade: ${item.quantity}` : `Quantity: ${item.quantity}`}>{item.quantity}</span>
+                      <button
+                        type="button"
+                        onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                        aria-label={locale === "pt" ? `Aumentar quantidade de ${item.product.name}` : `Increase quantity of ${item.product.name}`}
+                        className="p-1.5 hover:bg-muted rounded-r-lg transition-colors active:scale-95"
+                      >
+                        <Plus aria-hidden="true" className="h-3.5 w-3.5" />
                       </button>
                     </div>
-                    <button type="button" onClick={() => removeItem(item.product.id)} className="p-1.5 text-destructive hover:bg-destructive/10 rounded-lg transition-colors">
-                      <Trash2 className="h-4 w-4" />
+                    <button
+                      type="button"
+                      onClick={() => removeItem(item.product.id)}
+                      aria-label={locale === "pt" ? `Remover ${item.product.name} do carrinho` : `Remove ${item.product.name} from cart`}
+                      className="p-1.5 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                    >
+                      <Trash2 aria-hidden="true" className="h-4 w-4" />
                     </button>
                     <div className="ml-auto sm:hidden text-right">
                       <span className="font-bold text-primary">R$ {(item.product.price * item.quantity).toLocaleString("pt-BR")}</span>
@@ -152,10 +167,10 @@ const Cart = () => {
             {/* Upsell */}
             {upsell.length > 0 && (
               <div className="mt-8">
-                <h3 className="font-display text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-                  <Tag className="h-4 w-4 text-accent" />
+                <h2 className="font-display text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+                  <Tag aria-hidden="true" className="h-4 w-4 text-accent" />
                   {locale === "pt" ? "Você também pode gostar" : "You might also like"}
-                </h3>
+                </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {upsell.map((pkg) => (
                     <motion.div
@@ -169,7 +184,13 @@ const Cart = () => {
                         <p className="text-xs font-medium text-foreground line-clamp-1">{locale === "pt" ? pkg.event : pkg.eventEn}</p>
                         <p className="text-xs text-primary font-bold">R$ {pkg.price.toLocaleString("pt-BR")}</p>
                       </div>
-                      <Button size="sm" variant="outline" className="shrink-0 h-7 text-xs" onClick={() => handleAddUpsell(pkg)}>+</Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="shrink-0 h-7 text-xs"
+                        onClick={() => handleAddUpsell(pkg)}
+                        aria-label={locale === "pt" ? `Adicionar ${pkg.event} ao carrinho` : `Add ${pkg.eventEn} to cart`}
+                      >+</Button>
                     </motion.div>
                   ))}
                 </div>
@@ -225,7 +246,12 @@ const Cart = () => {
                 <span>{locale === "pt" ? "Pagamento seguro e protegido" : "Secure & protected payment"}</span>
               </div>
 
-              <button type="button" onClick={clearCart} className="w-full text-sm text-muted-foreground hover:text-destructive transition-colors text-center">
+              <button
+                type="button"
+                onClick={clearCart}
+                aria-label={locale === "pt" ? "Esvaziar todo o carrinho" : "Clear entire cart"}
+                className="w-full text-sm text-muted-foreground hover:text-destructive transition-colors text-center"
+              >
                 {t("cart.clearCart")}
               </button>
             </div>
