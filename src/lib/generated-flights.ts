@@ -92,9 +92,21 @@ export function generateFlights(fromCode: string, toCode: string): FlightResult[
     const arrHour = (depHour + durationH) % 24;
     const arrMin = (depMin + durationM) % 60;
 
-    // Price range based on distance
-    const basePrice = Math.round(1500 + baseDuration * 200 + rand() * 1500);
-    const price = stops > 0 ? Math.round(basePrice * 0.75) : basePrice;
+    // Pricing realista BRL (ida e volta, classe econômica) calibrado por mercado:
+    //  • Curta (≤4h, ex.: GRU↔EZE/GIG): R$ 800–2.500
+    //  • Média (4–9h, ex.: GRU↔MIA/MEX/CTG): R$ 2.800–5.500
+    //  • Longa (9–14h, ex.: GRU↔JFK/CDG/LHR/FCO): R$ 4.500–8.500
+    //  • Ultra-longa (>14h, ex.: GRU↔NRT/DXB/SYD/SIN): R$ 6.500–12.500
+    let lo: number, hi: number;
+    if (baseDuration <= 4) { lo = 800;  hi = 2500; }
+    else if (baseDuration <= 9) { lo = 2800; hi = 5500; }
+    else if (baseDuration <= 14) { lo = 4500; hi = 8500; }
+    else { lo = 6500; hi = 12500; }
+    const basePrice = Math.round(lo + rand() * (hi - lo));
+    // Voos com escala costumam ser ~15–25% mais baratos
+    const price = stops > 0
+      ? Math.round(basePrice * (0.78 + rand() * 0.07))
+      : basePrice;
 
     flights.push({
       id: `gen-${from3}-${to3}-${i}`,

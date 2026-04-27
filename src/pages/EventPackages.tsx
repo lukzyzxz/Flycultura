@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import SmartImage from "@/components/SmartImage";
+import { commissionLabel } from "@/lib/pricing";
 
 const categories = [
   { id: "all", labelPt: "Todos", labelEn: "All" },
@@ -201,6 +202,7 @@ const EventPackages = () => {
                       <span className="text-2xl font-bold text-primary">R$ {pkg.price.toLocaleString("pt-BR")}</span>
                       <span className="text-sm text-muted-foreground">{t("events.perPerson")}</span>
                     </div>
+                    <span className="text-[10px] text-muted-foreground/80">{commissionLabel(locale, pkg.price)}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
