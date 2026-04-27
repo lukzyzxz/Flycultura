@@ -15,6 +15,7 @@ import { motion } from "framer-motion";
 import { useI18n } from "@/lib/i18n";
 import { useQuery } from "@tanstack/react-query";
 import SmartImage from "@/components/SmartImage";
+import { commissionLabel } from "@/lib/pricing";
 
 const Results = () => {
   const [searchParams] = useSearchParams();
@@ -272,6 +273,7 @@ const Results = () => {
                         {t("cart.addToCart")}
                       </Button>
                     </div>
+                    <p className="text-[10px] text-muted-foreground/80 mt-1">{commissionLabel(locale, pkg.price)}</p>
                   </div>
                 </motion.div>
               ))}
@@ -316,6 +318,7 @@ const Results = () => {
                         {t("cart.addToCart")}
                       </Button>
                     </div>
+                    <p className="text-[10px] text-muted-foreground/80 mt-1">{commissionLabel(locale, pkg.price)}</p>
                   </div>
                 </motion.div>
               ))}
@@ -376,6 +379,7 @@ const Results = () => {
                   </div>
                   <div className="text-right md:w-1/5">
                     <p className="text-xl font-bold text-primary">R$ {flight.price.toLocaleString("pt-BR")}</p>
+                    <p className="text-[10px] text-muted-foreground/80">{commissionLabel(locale, flight.price)}</p>
                     <Button size="sm" className="mt-1 gap-1" onClick={() => handleAddFlight(flight)}>
                       <ShoppingCart className="h-3.5 w-3.5" />
                       {locale === "pt" ? "Selecionar" : "Select"}
@@ -442,6 +446,7 @@ const Results = () => {
                         )}
                         <span className="text-lg font-bold text-primary">R$ {hotel.pricePerNight.toLocaleString("pt-BR")}</span>
                         <span className="text-xs text-muted-foreground"> /{locale === "pt" ? "noite" : "night"}</span>
+                        <p className="text-[10px] text-muted-foreground/80">{commissionLabel(locale, hotel.pricePerNight)}</p>
                       </div>
                       <Button size="sm" onClick={() => handleAddHotel(hotel)} className="gap-1">
                         <ShoppingCart className="h-3.5 w-3.5" />
@@ -512,6 +517,7 @@ const Results = () => {
                           <p className="text-xs text-muted-foreground line-through">R$ {cruise.originalPrice.toLocaleString("pt-BR")}</p>
                         )}
                         <span className="text-lg font-bold text-primary">R$ {cruise.price.toLocaleString("pt-BR")}</span>
+                        <p className="text-[10px] text-muted-foreground/80">{commissionLabel(locale, cruise.price)}</p>
                       </div>
                       <Button size="sm" onClick={() => handleAddCruise(cruise)} className="gap-1">
                         <ShoppingCart className="h-3.5 w-3.5" />
