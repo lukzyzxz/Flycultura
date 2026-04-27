@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useI18n } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
+import { MAX_DATE, getMinDate, isValidFutureDate, dateErrorMessage, sanitizeNumber, isNumberInRange } from "@/lib/dateLimits";
 
 interface Props {
   open: boolean;
@@ -52,7 +53,7 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
   const dialogRef = useRef<HTMLDivElement>(null);
   const firstFocusableRef = useRef<HTMLInputElement>(null);
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = getMinDate();
   const MIN_BUDGET = 500;
   const MAX_BUDGET = 1_000_000;
   const MAX_DAYS = 30;
@@ -220,14 +221,17 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
                     placeholder={locale === "pt" ? "Ex: 7" : "E.g.: 7"}
                     value={dates}
                     onChange={(e) => {
-                      const v = e.target.value;
+                      const v = sanitizeNumber(e.target.value, 1, MAX_DAYS);
                       setDates(v);
-                      const n = parseInt(v);
-                      if (v && (isNaN(n) || n < 1 || n > MAX_DAYS)) {
+                      if (v && !isNumberInRange(v, 1, MAX_DAYS)) {
                         setDaysError(locale === "pt" ? "Informe entre 1 e 30 dias." : "Enter between 1 and 30 days.");
                       } else {
                         setDaysError("");
                       }
+                    }}
+                    inputMode="numeric"
+                    onKeyDown={(e) => {
+                      if (["e", "E", "+", "-", ".", ","].includes(e.key)) e.preventDefault();
                     }}
                     aria-invalid={!!daysError}
                     className={daysError ? "border-destructive focus-visible:ring-destructive/40" : ""}
@@ -244,12 +248,13 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
                   <Input
                     type="date"
                     min={today}
+                    max={MAX_DATE}
                     value={startDate}
                     onChange={(e) => {
                       const v = e.target.value;
                       setStartDate(v);
-                      if (v && v < today) {
-                        setDateError(locale === "pt" ? "Não é possível escolher uma data passada." : "You can't pick a past date.");
+                      if (v && !isValidFutureDate(v)) {
+                        setDateError(dateErrorMessage(locale));
                       } else {
                         setDateError("");
                       }
@@ -269,9 +274,8 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
                     !startDate ||
                     !!daysError ||
                     !!dateError ||
-                    parseInt(dates) < 1 ||
-                    parseInt(dates) > MAX_DAYS ||
-                    startDate < today
+                    !isNumberInRange(dates, 1, MAX_DAYS) ||
+                    !isValidFutureDate(startDate)
                   }
                   onClick={() => setStep(1)}
                 >
@@ -291,17 +295,15 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
                       : "What's your total budget? (R$ 500 to R$ 1,000,000)"}
                   </label>
                   <Input
-                    type="number"
-                    min={MIN_BUDGET}
-                    max={MAX_BUDGET}
-                    step={100}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     placeholder={locale === "pt" ? "Ex: 5000" : "E.g.: 5000"}
                     value={budget}
                     onChange={(e) => {
-                      const v = e.target.value;
+                      const v = sanitizeNumber(e.target.value, MIN_BUDGET, MAX_BUDGET);
                       setBudget(v);
-                      const n = parseInt(v);
-                      if (v && (isNaN(n) || n < MIN_BUDGET || n > MAX_BUDGET)) {
+                      if (v && !isNumberInRange(v, MIN_BUDGET, MAX_BUDGET)) {
                         setBudgetError(
                           locale === "pt"
                             ? "Orçamento entre R$ 500 e R$ 1.000.000."
@@ -327,8 +329,7 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
                     disabled={
                       !budget ||
                       !!budgetError ||
-                      parseInt(budget) < MIN_BUDGET ||
-                      parseInt(budget) > MAX_BUDGET
+                      !isNumberInRange(budget, MIN_BUDGET, MAX_BUDGET)
                     }
                     onClick={() => setStep(2)}
                   >
