@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { MapPin, Calendar, Sparkles, User, ShoppingCart, Loader2, Check, Compass } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { sanitizeNumber, isNumberInRange } from "@/lib/dateLimits";
 
 const GUIDE_PRICE_PER_DAY = 350;
 
@@ -20,10 +21,25 @@ const TravelGuide = () => {
   const { toast } = useToast();
 
   const [destination, setDestination] = useState("");
-  const [days, setDays] = useState(3);
+  const [daysStr, setDaysStr] = useState("3");
+  const [daysError, setDaysError] = useState("");
+  const days = Math.max(1, Math.min(30, parseInt(daysStr) || 1));
   const [interests, setInterests] = useState("");
   const [itinerary, setItinerary] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const onDaysChange = (raw: string) => {
+    const v = sanitizeNumber(raw, 1, 30);
+    setDaysStr(v);
+    if (v && !isNumberInRange(v, 1, 30)) {
+      setDaysError(locale === "pt" ? "Informe entre 1 e 30 dias." : "Enter between 1 and 30 days.");
+    } else {
+      setDaysError("");
+    }
+  };
+  const blockNumberKeys = (e: React.KeyboardEvent) => {
+    if (["e", "E", "+", "-", ".", ","].includes(e.key)) e.preventDefault();
+  };
 
   const handleGeneratePlan = async () => {
     if (!destination) return;
