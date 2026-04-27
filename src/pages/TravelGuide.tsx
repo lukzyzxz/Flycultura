@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { MapPin, Calendar, Sparkles, User, ShoppingCart, Loader2, Check, Compass } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { sanitizeNumber, isNumberInRange } from "@/lib/dateLimits";
 
 const GUIDE_PRICE_PER_DAY = 350;
 
@@ -20,10 +21,25 @@ const TravelGuide = () => {
   const { toast } = useToast();
 
   const [destination, setDestination] = useState("");
-  const [days, setDays] = useState(3);
+  const [daysStr, setDaysStr] = useState("3");
+  const [daysError, setDaysError] = useState("");
+  const days = Math.max(1, Math.min(30, parseInt(daysStr) || 1));
   const [interests, setInterests] = useState("");
   const [itinerary, setItinerary] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const onDaysChange = (raw: string) => {
+    const v = sanitizeNumber(raw, 1, 30);
+    setDaysStr(v);
+    if (v && !isNumberInRange(v, 1, 30)) {
+      setDaysError(locale === "pt" ? "Informe entre 1 e 30 dias." : "Enter between 1 and 30 days.");
+    } else {
+      setDaysError("");
+    }
+  };
+  const blockNumberKeys = (e: React.KeyboardEvent) => {
+    if (["e", "E", "+", "-", ".", ","].includes(e.key)) e.preventDefault();
+  };
 
   const handleGeneratePlan = async () => {
     if (!destination) return;
@@ -113,11 +129,15 @@ const TravelGuide = () => {
                     type="number"
                     min={1}
                     max={30}
-                    value={days}
-                    onChange={(e) => setDays(Math.max(1, Math.min(30, Number(e.target.value))))}
-                    className="pl-9"
+                    value={daysStr}
+                    onChange={(e) => onDaysChange(e.target.value)}
+                    onKeyDown={blockNumberKeys}
+                    inputMode="numeric"
+                    aria-invalid={!!daysError}
+                    className={`pl-9 ${daysError ? "border-destructive focus-visible:ring-destructive/40" : ""}`}
                   />
                 </div>
+                {daysError && <p role="alert" className="mt-1.5 text-xs text-destructive">{daysError}</p>}
               </div>
             </div>
 
@@ -167,9 +187,14 @@ const TravelGuide = () => {
                   type="number"
                   min={1}
                   max={30}
-                  value={days}
-                  onChange={(e) => setDays(Math.max(1, Math.min(30, Number(e.target.value))))}
+                  value={daysStr}
+                  onChange={(e) => onDaysChange(e.target.value)}
+                  onKeyDown={blockNumberKeys}
+                  inputMode="numeric"
+                  aria-invalid={!!daysError}
+                  className={daysError ? "border-destructive focus-visible:ring-destructive/40" : ""}
                 />
+                {daysError && <p role="alert" className="mt-1.5 text-xs text-destructive">{daysError}</p>}
               </div>
               <div>
                 <Label>{t("guide.interests")}</Label>

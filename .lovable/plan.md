@@ -1,68 +1,48 @@
+# Validações de datas, origem padrão e inputs blindados
 
+## Objetivo
+Garantir que toda data pedida no app seja válida (entre hoje e 31/12/2050), pré-preencher a origem com o aeroporto padrão da conta (permitindo trocar), corrigir o campo de orçamento que aceita notação científica ("e") e impedir que o usuário digite valores fora da faixa nos campos numéricos — sempre exibindo mensagem de erro clara.
 
-# Correções WCAG + Documentação PDF/DOCX para download
+## Mudanças
 
-## Onde a documentação ficará disponível
+### 1. Helper central de validação de datas — `src/lib/dateLimits.ts` (novo)
+- Exporta `MIN_DATE` (hoje, formato `YYYY-MM-DD`) e `MAX_DATE` (`2050-12-31`).
+- `clampDate(value)` retorna a data válida ou string vazia.
+- `isValidFutureDate(value)` retorna `boolean`.
+- `dateErrorMessage(locale)` retorna a mensagem padrão bilíngue ("Escolha uma data entre hoje e 31/12/2050").
 
-A documentação **NÃO será publicada no site**. Será gerada como dois arquivos para você baixar diretamente:
+### 2. `HeroSearch.tsx` (segunda imagem do usuário)
+- **Origem pré-preenchida:** `useState(() => getAirportLabel(getHomeAirport()))` em `from`. Escutar `home-airport-changed` para re-sincronizar.
+- **Trocar origem:** o `SearchAutocomplete` continua editável — o usuário pode apagar/digitar outra cidade. Adicionar pequeno botão "↺" ao lado para restaurar a origem padrão.
+- **Data:** aplicar `min={MIN_DATE}` e `max={MAX_DATE}`. Em `onChange`, se valor inválido, mostrar erro inline (texto destrutivo abaixo do campo) e bloquear `handleSearch`. Toast continua como fallback.
+- Aria-invalid + mensagens inline em PT/EN.
 
-- `FlyCultura-WCAG-2.1-AA.pdf` (formato principal, pronto para impressão/compartilhamento)
-- `FlyCultura-WCAG-2.1-AA.docx` (formato editável Word)
+### 3. `TripPlannerModal.tsx` (primeira imagem — ano "222222")
+- Campo de data: `max={MAX_DATE}` além do `min={today}` já existente.
+- Validar via `clampDate`: se o usuário digitar ano > 2050 ou < ano atual, exibir erro "Escolha uma data entre hoje e 31/12/2050".
+- **Orçamento:** usar `<Input type="text" inputMode="numeric" pattern="[0-9]*">` em vez de `type="number"` para eliminar o "e" (notação científica) e setas. Sanitizar `onChange` removendo tudo que não for dígito; aplicar clamp 500–1.000.000 com erro inline.
+- **Dias:** mesma blindagem — sanitizar para dígitos, clamp 1–30, erro inline se fora da faixa.
+- Manter botão "Próximo" desabilitado enquanto houver erro.
 
-Após eu gerar, ambos aparecerão como **anexos clicáveis aqui no chat** (cards de download). Você também pode acessá-los a qualquer momento clicando no botão **Files** (ícone de pasta) na navegação do editor Lovable — eles ficam armazenados em `/mnt/documents/` e persistem no seu projeto.
+### 4. `TravelGuide.tsx`
+- Trocar `Number(e.target.value)` cru pela mesma blindagem (inputMode numérico, sanitização, clamp 1–30, erro inline em PT/EN).
+- Adicionar autocomplete (`SearchAutocomplete`) ou pelo menos pré-preencher destino com cidade padrão da conta como sugestão.
 
-Nenhuma rota nova, nenhum link no Footer, nenhuma página `/docs` será criada no app.
+### 5. Padrão de erro
+Todos os campos validados seguem o mesmo padrão já usado no `TripPlannerModal`:
+```
+<Input aria-invalid={!!error} className={error ? "border-destructive ..." : ""} />
+{error && <p role="alert" className="mt-1.5 text-xs text-destructive">{error}</p>}
+```
 
-## Correções de código (4 erros do checker WCAG)
+## Detalhes técnicos
+- `MAX_DATE = "2050-12-31"` codificado constante (sem timezone surpresas).
+- `type="text" inputMode="numeric"` é a forma padrão de evitar `1e10`/`-`/`+` em inputs numéricos do navegador, mantendo teclado numérico no mobile.
+- Nenhuma mudança de schema do banco; tudo client-side.
+- i18n: todas as novas strings adicionadas em PT e EN inline (mesmo padrão dos arquivos atuais).
 
-| # | Erro | Arquivo | Correção |
-|---|------|---------|----------|
-| 1 | Botão sem nome acessível (carrinho) | `src/components/Navbar.tsx` | `aria-hidden="true"` no `<Button>` interno do Link `/cart` |
-| 2 | Contraste insuficiente no NavLink ativo | `src/components/Navbar.tsx` | Trocar `bg-primary/10 text-primary` → `bg-primary text-primary-foreground` (≥ 4.5:1) |
-| 3 | Hierarquia de headings | `src/components/Testimonials.tsx` | `<h4>` do nome do depoente → `<h3>` |
-| 4 | Link `/auth` sem texto discernível | `src/components/Navbar.tsx` | `aria-label={t("nav.signIn")}` nos Links `/auth` (desktop + mobile) |
-
-Verificação adicional: conferir `--primary` / `--primary-foreground` em `src/index.css` e ajustar para branco puro `0 0% 100%` se o contraste ficar abaixo de 4.5:1.
-
-## Documentação técnica em PT-BR
-
-**Geração:** script Node usando `docx` → `.docx`, depois LibreOffice headless → `.pdf`. QA visual página a página antes de entregar.
-
-**Estrutura (≈ 15-20 páginas):**
-
-1. Capa — FlyCultura · Conformidade WCAG 2.1 nível AA
-2. Sumário executivo — escopo, padrão, status
-3. O que é WCAG 2.1 AA — princípios POUR (Perceptível, Operável, Compreensível, Robusto)
-4. Critérios cumpridos pelo site (com referência ao critério, descrição em PT-BR e arquivo de implementação):
-   - 1.1.1 Conteúdo não-textual
-   - 1.3.1 Informações e relações
-   - 1.4.3 Contraste mínimo
-   - 1.4.4 Redimensionar texto
-   - 2.1.1 / 2.1.2 Teclado e armadilhas
-   - 2.2.2 / 2.3.3 Pausar movimento
-   - 2.4.1 Pular blocos (SkipLink)
-   - 2.4.3 Ordem de foco
-   - 2.4.4 Propósito do link
-   - 2.4.6 Cabeçalhos e rótulos
-   - 2.4.7 Foco visível
-   - 3.1.1 / 3.1.2 Idioma da página
-   - 3.3.1 / 3.3.2 Identificação de erros e rótulos
-   - 4.1.2 Nome, função, valor
-   - 4.1.3 Mensagens de status
-5. Padrões ARIA APG implementados — combobox (autocomplete), tablist (Hero), dialog (modal)
-6. Como cada implementação funciona — explicação curta + trecho de código
-7. Resultado da auditoria — antes/depois dos 4 erros corrigidos
-8. Checklist de manutenção contínua para novas features
-9. Anexos — links para WCAG 2.1, ARIA APG, axe-core
-
-**Saída final:**
-- `/mnt/documents/FlyCultura-WCAG-2.1-AA.pdf`
-- `/mnt/documents/FlyCultura-WCAG-2.1-AA.docx`
-
-Ambos serão anexados na resposta como cards clicáveis para download imediato.
-
-## Fora de escopo
-- Criar página de documentação no site
-- Adicionar link de download no Footer ou em qualquer rota pública
-- Tradução do PDF para inglês (pode ser pedido depois)
-
+## Arquivos
+- novo: `src/lib/dateLimits.ts`
+- editar: `src/components/HeroSearch.tsx`
+- editar: `src/components/TripPlannerModal.tsx`
+- editar: `src/pages/TravelGuide.tsx`

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plane, Hotel, Package, Ship, Search, Calendar, Sparkles } from "lucide-react";
+import { Plane, Hotel, Package, Ship, Search, Calendar, Sparkles, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
@@ -9,12 +9,16 @@ import { useToast } from "@/hooks/use-toast";
 import SearchAutocomplete from "@/components/SearchAutocomplete";
 import TripPlannerModal from "@/components/TripPlannerModal";
 import PassengerStepper from "@/components/PassengerStepper";
+import { getHomeAirport, getAirportLabel } from "@/lib/userOrigin";
+import { MAX_DATE, getMinDate, isValidFutureDate, dateErrorMessage } from "@/lib/dateLimits";
 
 const HeroSearch = () => {
   const [activeTab, setActiveTab] = useState("flights");
-  const [from, setFrom] = useState("");
+  const defaultOrigin = () => getAirportLabel(getHomeAirport());
+  const [from, setFrom] = useState<string>(defaultOrigin);
   const [to, setTo] = useState("");
   const [date, setDate] = useState("");
+  const [dateError, setDateError] = useState("");
   const [adults, setAdults] = useState(1);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [plannerOpen, setPlannerOpen] = useState(false);
@@ -22,7 +26,14 @@ const HeroSearch = () => {
   const { t, locale } = useI18n();
   const { toast } = useToast();
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = getMinDate();
+
+  // Re-sync default origin when the user changes their home airport elsewhere.
+  useEffect(() => {
+    const onChange = () => setFrom(defaultOrigin());
+    window.addEventListener("home-airport-changed", onChange);
+    return () => window.removeEventListener("home-airport-changed", onChange);
+  }, []);
 
   const tabs = [
     { id: "flights", label: t("hero.flights"), icon: Plane },
@@ -36,14 +47,11 @@ const HeroSearch = () => {
     : ["Budget", "Luxury", "Adventure", "Family", "Beach", "Cultural"];
 
   const handleSearch = () => {
-    // Validate date is not in the past
-    if (date && date < today) {
+    // Validate date: must be today..2050
+    if (date && !isValidFutureDate(date)) {
       toast({
         title: locale === "pt" ? "Data inválida" : "Invalid date",
-        description:
-          locale === "pt"
-            ? "Selecione uma data igual ou posterior a hoje."
-            : "Please pick a date today or later.",
+        description: dateErrorMessage(locale),
         variant: "destructive",
       });
       return;
@@ -156,14 +164,39 @@ const HeroSearch = () => {
                   <Input
                     type="date"
                     aria-label={locale === "pt" ? "Data de partida" : "Departure date"}
-                    className="pl-9"
+                    aria-invalid={!!dateError}
+                    className={`pl-9 ${dateError ? "border-destructive focus-visible:ring-destructive/40" : ""}`}
                     value={date}
                     min={today}
-                    onChange={(e) => setDate(e.target.value)}
+                    max={MAX_DATE}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setDate(v);
+                      if (v && !isValidFutureDate(v)) {
+                        setDateError(dateErrorMessage(locale));
+                      } else {
+                        setDateError("");
+                      }
+                    }}
                   />
                 </div>
                 <PassengerStepper value={adults} onChange={setAdults} />
               </div>
+              {dateError && (
+                <p role="alert" className="mt-2 text-xs text-destructive">{dateError}</p>
+              )}
+
+              {/* Restore default origin */}
+              {from !== defaultOrigin() && (
+                <button
+                  type="button"
+                  onClick={() => setFrom(defaultOrigin())}
+                  className="mt-2 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+                >
+                  <RotateCcw className="h-3 w-3" aria-hidden="true" />
+                  {locale === "pt" ? "Restaurar origem padrão" : "Restore default origin"}
+                </button>
+              )}
 
               {/* Quick filters — toggle style, don't set destination */}
               <div
@@ -188,7 +221,11 @@ const HeroSearch = () => {
                 ))}
               </div>
 
-              <Button onClick={handleSearch} className="w-full mt-4 h-12 text-base font-semibold gap-2">
+              <Button
+                onClick={handleSearch}
+                disabled={!!dateError}
+                className="w-full mt-4 h-12 text-base font-semibold gap-2"
+              >
                 <Search className="h-5 w-5" aria-hidden="true" />
                 {t("hero.searchBtn")}
               </Button>
