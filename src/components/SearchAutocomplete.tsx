@@ -3,6 +3,7 @@ import { MapPin, AlertTriangle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { destinations } from "@/lib/data";
 import { eventPackages } from "@/lib/events-data";
+import { worldCities } from "@/lib/world-cities";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -37,6 +38,9 @@ const SearchAutocomplete = ({ value, onChange, placeholder }: Props) => {
         ...p.tags,
       );
     });
+    worldCities.forEach((c) => {
+      terms.push(c.name.toLowerCase(), c.country.toLowerCase(), ...(c.aliases || []));
+    });
     return terms;
   }, []);
 
@@ -68,7 +72,26 @@ const SearchAutocomplete = ({ value, onChange, placeholder }: Props) => {
       .slice(0, 3)
       .map((p) => ({ label: locale === "pt" ? p.event : p.eventEn, sub: p.location }));
 
-    const combined = [...destSugg, ...eventSugg].slice(0, 6);
+    // Cidades mundiais como fallback genérico (origem/destino global)
+    const citySugg = worldCities
+      .filter((c) =>
+        c.name.toLowerCase().includes(q) ||
+        c.country.toLowerCase().includes(q) ||
+        (c.aliases || []).some((a) => a.includes(q)),
+      )
+      .slice(0, 5)
+      .map((c) => ({ label: c.name, sub: c.country }));
+
+    // Dedup por label
+    const seen = new Set<string>();
+    const combined = [...destSugg, ...eventSugg, ...citySugg]
+      .filter((s) => {
+        const k = s.label.toLowerCase();
+        if (seen.has(k)) return false;
+        seen.add(k);
+        return true;
+      })
+      .slice(0, 8);
     setSuggestions(combined);
     setOpen(combined.length > 0);
     setActiveIndex(combined.length > 0 ? 0 : -1);

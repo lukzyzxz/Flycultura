@@ -39,14 +39,23 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
   const [step, setStep] = useState(0);
   const [destination, setDestination] = useState("");
   const [dates, setDates] = useState("");
+  const [startDate, setStartDate] = useState("");
   const [budget, setBudget] = useState("");
   const [preferences, setPreferences] = useState<string[]>([]);
   const [customInterest, setCustomInterest] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState("");
   const [destError, setDestError] = useState("");
+  const [daysError, setDaysError] = useState("");
+  const [dateError, setDateError] = useState("");
+  const [budgetError, setBudgetError] = useState("");
   const dialogRef = useRef<HTMLDivElement>(null);
   const firstFocusableRef = useRef<HTMLInputElement>(null);
+
+  const today = new Date().toISOString().split("T")[0];
+  const MIN_BUDGET = 500;
+  const MAX_BUDGET = 1_000_000;
+  const MAX_DAYS = 30;
 
   const prefOptions = locale === "pt" ? prefOptionsPt : prefOptionsEn;
 
@@ -67,7 +76,7 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
     setDestError("");
     try {
       const { data, error } = await supabase.functions.invoke("generate-itinerary", {
-        body: { destination, days: parseInt(dates) || 7, interests: preferences.join(", "), budget, locale },
+        body: { destination, days: parseInt(dates) || 7, startDate, interests: preferences.join(", "), budget, locale },
       });
 
       if (error) throw error;
@@ -94,11 +103,15 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
     setStep(0);
     setDestination("");
     setDates("");
+    setStartDate("");
     setBudget("");
     setPreferences([]);
     setCustomInterest("");
     setResult("");
     setDestError("");
+    setDaysError("");
+    setDateError("");
+    setBudgetError("");
   };
 
   // Close on Escape and focus first input on open
@@ -198,7 +211,7 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
                 <div>
                   <label className="text-sm font-medium text-foreground mb-2 block">
                     <Calendar className="h-4 w-4 inline mr-1" />
-                    {locale === "pt" ? "Quantos dias?" : "How many days?"}
+                    {locale === "pt" ? "Quantos dias? (máx. 30)" : "How many days? (max 30)"}
                   </label>
                   <Input
                     type="number"
@@ -206,10 +219,62 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
                     max={30}
                     placeholder={locale === "pt" ? "Ex: 7" : "E.g.: 7"}
                     value={dates}
-                    onChange={(e) => setDates(e.target.value)}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setDates(v);
+                      const n = parseInt(v);
+                      if (v && (isNaN(n) || n < 1 || n > MAX_DAYS)) {
+                        setDaysError(locale === "pt" ? "Informe entre 1 e 30 dias." : "Enter between 1 and 30 days.");
+                      } else {
+                        setDaysError("");
+                      }
+                    }}
+                    aria-invalid={!!daysError}
+                    className={daysError ? "border-destructive focus-visible:ring-destructive/40" : ""}
                   />
+                  {daysError && (
+                    <p role="alert" className="mt-1.5 text-xs text-destructive">{daysError}</p>
+                  )}
                 </div>
-                <Button className="w-full" disabled={!destination || !dates} onClick={() => setStep(1)}>
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-2 block">
+                    <Calendar className="h-4 w-4 inline mr-1" />
+                    {locale === "pt" ? "Data de início" : "Start date"}
+                  </label>
+                  <Input
+                    type="date"
+                    min={today}
+                    value={startDate}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setStartDate(v);
+                      if (v && v < today) {
+                        setDateError(locale === "pt" ? "Não é possível escolher uma data passada." : "You can't pick a past date.");
+                      } else {
+                        setDateError("");
+                      }
+                    }}
+                    aria-invalid={!!dateError}
+                    className={dateError ? "border-destructive focus-visible:ring-destructive/40" : ""}
+                  />
+                  {dateError && (
+                    <p role="alert" className="mt-1.5 text-xs text-destructive">{dateError}</p>
+                  )}
+                </div>
+                <Button
+                  className="w-full"
+                  disabled={
+                    !destination ||
+                    !dates ||
+                    !startDate ||
+                    !!daysError ||
+                    !!dateError ||
+                    parseInt(dates) < 1 ||
+                    parseInt(dates) > MAX_DAYS ||
+                    startDate < today
+                  }
+                  onClick={() => setStep(1)}
+                >
                   {locale === "pt" ? "Próximo" : "Next"}
                 </Button>
               </motion.div>
@@ -221,21 +286,52 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
                 <div>
                   <label className="text-sm font-medium text-foreground mb-2 block">
                     <DollarSign className="h-4 w-4 inline mr-1" />
-                    {locale === "pt" ? "Qual seu orçamento total? (R$)" : "What's your total budget? (R$)"}
+                    {locale === "pt"
+                      ? "Qual seu orçamento total? (R$ 500 a R$ 1.000.000)"
+                      : "What's your total budget? (R$ 500 to R$ 1,000,000)"}
                   </label>
                   <Input
                     type="number"
-                    min={500}
+                    min={MIN_BUDGET}
+                    max={MAX_BUDGET}
+                    step={100}
                     placeholder={locale === "pt" ? "Ex: 5000" : "E.g.: 5000"}
                     value={budget}
-                    onChange={(e) => setBudget(e.target.value)}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setBudget(v);
+                      const n = parseInt(v);
+                      if (v && (isNaN(n) || n < MIN_BUDGET || n > MAX_BUDGET)) {
+                        setBudgetError(
+                          locale === "pt"
+                            ? "Orçamento entre R$ 500 e R$ 1.000.000."
+                            : "Budget between R$ 500 and R$ 1,000,000.",
+                        );
+                      } else {
+                        setBudgetError("");
+                      }
+                    }}
+                    aria-invalid={!!budgetError}
+                    className={budgetError ? "border-destructive focus-visible:ring-destructive/40" : ""}
                   />
+                  {budgetError && (
+                    <p role="alert" className="mt-1.5 text-xs text-destructive">{budgetError}</p>
+                  )}
                 </div>
                 <div className="flex gap-2">
                   <Button variant="outline" onClick={() => setStep(0)} className="flex-1">
                     {locale === "pt" ? "Voltar" : "Back"}
                   </Button>
-                  <Button className="flex-1" disabled={!budget} onClick={() => setStep(2)}>
+                  <Button
+                    className="flex-1"
+                    disabled={
+                      !budget ||
+                      !!budgetError ||
+                      parseInt(budget) < MIN_BUDGET ||
+                      parseInt(budget) > MAX_BUDGET
+                    }
+                    onClick={() => setStep(2)}
+                  >
                     {locale === "pt" ? "Próximo" : "Next"}
                   </Button>
                 </div>
