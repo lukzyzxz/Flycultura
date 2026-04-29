@@ -12,6 +12,12 @@ import wcTorontoImg from "@/assets/events/wc-toronto.png";
 import wcNyGroupImg from "@/assets/events/wc-ny-group.png";
 import wcMexicoImg from "@/assets/events/wc-mexico.png";
 import wcMiamiImg from "@/assets/events/wc-miami.png";
+import elClasicoImg from "@/assets/events/el-clasico.png";
+import madCoolImg from "@/assets/events/mad-cool.png";
+import webSummitImg from "@/assets/events/web-summit.png";
+import romeMarathonImg from "@/assets/events/rome-marathon.png";
+import berlinMarathonImg from "@/assets/events/berlin-marathon.png";
+import kingsDayImg from "@/assets/events/kings-day.png";
 
 export interface EventPackage {
   id: string;
@@ -824,7 +830,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "ES",
     date: "Outubro 2026",
     dateEn: "October 2026",
-    image: "https://images.unsplash.com/photo-1583779457094-ab6f77f7bf57?w=800&h=500&fit=crop",
+    image: elClasicoImg,
     price: 18790,
     originalPrice: 25490,
     badge: "⚽ Futebol",
@@ -853,7 +859,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "ES",
     date: "Julho 2026",
     dateEn: "July 2026",
-    image: "https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=800&h=500&fit=crop",
+    image: madCoolImg,
     price: 16990,
     originalPrice: 22490,
     badge: "🎵 Festival",
@@ -882,7 +888,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "PT",
     date: "Novembro 2026",
     dateEn: "November 2026",
-    image: "https://images.unsplash.com/photo-1588535561786-5b4b6b2d4a52?w=800&h=500&fit=crop",
+    image: webSummitImg,
     price: 14490,
     originalPrice: 19490,
     badge: "💻 Tech",
@@ -911,7 +917,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "IT",
     date: "Março 2027",
     dateEn: "March 2027",
-    image: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800&h=500&fit=crop",
+    image: romeMarathonImg,
     price: 17890,
     originalPrice: 23990,
     badge: "🏃 Esportes",
@@ -940,7 +946,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "DE",
     date: "Setembro 2026",
     dateEn: "September 2026",
-    image: "https://images.unsplash.com/photo-1587330979470-3016b6702d89?w=800&h=500&fit=crop",
+    image: berlinMarathonImg,
     price: 19490,
     originalPrice: 26490,
     badge: "🏃 Esportes",
@@ -969,7 +975,7 @@ export const eventPackages: EventPackage[] = [
     countryCode: "NL",
     date: "Abril 2027",
     dateEn: "April 2027",
-    image: "https://images.unsplash.com/photo-1534351590666-13e3e96c5017?w=800&h=500&fit=crop",
+    image: kingsDayImg,
     price: 15890,
     originalPrice: 21490,
     badge: "🎉 Cultural",
