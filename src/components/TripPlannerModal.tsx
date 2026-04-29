@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useI18n } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
-import { MAX_DATE, getMinDate, isValidFutureDate, dateErrorMessage, sanitizeNumber, isNumberInRange } from "@/lib/dateLimits";
+import { MAX_DATE, getMinDate, isValidFutureDate, dateInvalidReason, dateHelpText, sanitizeNumber, isNumberInRange } from "@/lib/dateLimits";
 
 interface Props {
   open: boolean;
@@ -253,17 +253,20 @@ const TripPlannerModal = ({ open, onClose }: Props) => {
                     onChange={(e) => {
                       const v = e.target.value;
                       setStartDate(v);
-                      if (v && !isValidFutureDate(v)) {
-                        setDateError(dateErrorMessage(locale));
-                      } else {
-                        setDateError("");
-                      }
+                      setDateError(dateInvalidReason(v, locale));
                     }}
                     aria-invalid={!!dateError}
+                    aria-describedby="planner-date-help"
                     className={dateError ? "border-destructive focus-visible:ring-destructive/40" : ""}
                   />
+                  <p id="planner-date-help" className="mt-1.5 text-[11px] text-muted-foreground">
+                    {dateHelpText(locale)}
+                  </p>
                   {dateError && (
-                    <p role="alert" className="mt-1.5 text-xs text-destructive">{dateError}</p>
+                    <p role="alert" className="mt-1 text-xs text-destructive flex items-start gap-1">
+                      <span aria-hidden="true">⚠️</span>
+                      <span>{dateError}</span>
+                    </p>
                   )}
                 </div>
                 <Button
