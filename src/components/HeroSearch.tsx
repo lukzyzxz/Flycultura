@@ -235,10 +235,22 @@ const HeroSearch = () => {
               )}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 <div>
-                  <SearchAutocomplete value={from} onChange={setFrom} placeholder={t("hero.from")} />
+                  <SearchAutocomplete
+                    value={from}
+                    onChange={setFrom}
+                    placeholder={t("hero.from")}
+                    excludeValue={to}
+                    excludeLabel={locale === "pt" ? "destino" : "destination"}
+                  />
                 </div>
                 <div>
-                  <SearchAutocomplete value={to} onChange={setTo} placeholder={t("hero.to")} />
+                  <SearchAutocomplete
+                    value={to}
+                    onChange={setTo}
+                    placeholder={t("hero.to")}
+                    excludeValue={from}
+                    excludeLabel={locale === "pt" ? "origem" : "origin"}
+                  />
                 </div>
                 <div className="relative">
                   <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" aria-hidden="true" />
