@@ -38,18 +38,24 @@ const Results = () => {
   // Only consider upcoming packages
   const upcomingPackages = eventPackages.filter((p) => isEventUpcoming(p));
 
-  // Filter matching event packages based on search
+  // Filter matching event packages — STRICT: must match the package's city (location),
+  // OR the user typed the exact event name. We no longer match by country/tags so a
+  // search for "Miami" doesn't surface Los Angeles or generic "USA" packages.
   const matchingPackages = upcomingPackages.filter((pkg) => {
     if (!query) return false;
-    const searchTerms = [
-      pkg.location.toLowerCase(),
-      pkg.country.toLowerCase(),
-      pkg.countryEn.toLowerCase(),
-      pkg.event.toLowerCase(),
-      pkg.eventEn.toLowerCase(),
-      ...pkg.tags,
-    ];
-    return searchTerms.some((term) => term.includes(query) || query.includes(term));
+    // Split multi-city locations like "New York / New Jersey" or "Tóquio / Kyoto"
+    const cityTokens = pkg.location
+      .toLowerCase()
+      .split(/[\/,]/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const cityMatch = cityTokens.some(
+      (city) => city.includes(query) || query.includes(city),
+    );
+    const eventMatch =
+      pkg.event.toLowerCase().includes(query) ||
+      pkg.eventEn.toLowerCase().includes(query);
+    return cityMatch || eventMatch;
   });
 
   // Featured upcoming packages used as fallback when nothing matches
