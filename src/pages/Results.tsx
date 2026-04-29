@@ -1,5 +1,5 @@
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
-import { Star, ArrowLeft, Plane, Hotel as HotelIcon, Loader2, ShoppingCart, SearchX, Ship, MapPin, Calendar } from "lucide-react";
+import { Star, ArrowLeft, Plane, Hotel as HotelIcon, Loader2, ShoppingCart, SearchX, Ship, MapPin, Calendar, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Footer from "@/components/Footer";
@@ -113,13 +113,16 @@ const Results = () => {
   const fromCode = resolveAirportCode(from, "GRU.AIRPORT");
   const toCode = resolveAirportCode(to, "JFK.AIRPORT");
 
-  // Prevent same origin/destination
-  const safeToCode = toCode === fromCode ? "JFK.AIRPORT" : toCode;
+  // Detect same origin/destination (by raw text or resolved airport code)
+  const normTxt = (s: string) => s.trim().toLowerCase().replace(/\s+/g, " ");
+  const sameOriginDest =
+    (!!from && !!to && normTxt(from) === normTxt(to)) || toCode === fromCode;
+  const safeToCode = sameOriginDest ? "JFK.AIRPORT" : toCode;
 
   const flightsQuery = useQuery({
     queryKey: ["flights", fromCode, safeToCode],
     queryFn: () => searchFlights({ from: fromCode, to: safeToCode }),
-    enabled: type === "flights" && fromCode !== safeToCode,
+    enabled: type === "flights" && !sameOriginDest,
     staleTime: 5 * 60 * 1000,
   });
 
@@ -213,6 +216,34 @@ const Results = () => {
       </div>
 
       <div className="container py-10">
+        {/* Same origin/destination warning */}
+        {sameOriginDest && (
+          <div
+            role="alert"
+            className="mb-6 flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4"
+          >
+            <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" aria-hidden="true" />
+            <div className="flex-1">
+              <p className="font-medium text-foreground">
+                {locale === "pt"
+                  ? "Origem e destino são iguais."
+                  : "Origin and destination are the same."}
+              </p>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                {locale === "pt"
+                  ? "Escolha cidades diferentes para ver resultados de voos."
+                  : "Pick different cities to see flight results."}
+              </p>
+              <Button asChild variant="outline" size="sm" className="mt-3">
+                <Link to="/">
+                  <ArrowLeft className="h-3.5 w-3.5 mr-1" />
+                  {locale === "pt" ? "Refazer busca" : "Edit search"}
+                </Link>
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Not found block — shown when query has zero matches */}
         {noMatchAtAll && (
           <div className="mb-10">

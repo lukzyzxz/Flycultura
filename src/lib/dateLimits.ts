@@ -25,6 +25,35 @@ export function dateErrorMessage(locale: string): string {
     : "Pick a date between today and 12/31/2050.";
 }
 
+/** Returns a precise reason why a date is invalid, or "" if valid. */
+export function dateInvalidReason(value: string, locale: string): string {
+  if (!value) return "";
+  const min = getMinDate();
+  // Detect malformed (year < 1000 or > 9999 etc.)
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return locale === "pt"
+      ? "Formato de data inválido."
+      : "Invalid date format.";
+  }
+  if (value < min) {
+    return locale === "pt"
+      ? "Não é possível escolher uma data passada."
+      : "You can't pick a past date.";
+  }
+  if (value > MAX_DATE) {
+    return locale === "pt"
+      ? "A data máxima permitida é 31/12/2050."
+      : "The latest allowed date is 12/31/2050.";
+  }
+  return "";
+}
+
+export function dateHelpText(locale: string): string {
+  return locale === "pt"
+    ? "Datas válidas: de hoje até 31/12/2050."
+    : "Valid dates: today through 12/31/2050.";
+}
+
 /** Sanitize a free numeric input to digits only and clamp to [min,max]. */
 export function sanitizeNumber(raw: string, min: number, max: number): string {
   const digits = raw.replace(/\D/g, "");
