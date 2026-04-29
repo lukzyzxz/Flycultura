@@ -10,7 +10,26 @@ export function getMinDate(): string {
 export function isValidFutureDate(value: string): boolean {
   if (!value) return false;
   const min = getMinDate();
+  if (!isRealCalendarDate(value)) return false;
   return value >= min && value <= MAX_DATE;
+}
+
+/**
+ * Returns true only if value is a real calendar date in YYYY-MM-DD format.
+ * Rejects impossible dates like 2026-02-30, 2026-13-01, 2026-04-31, etc.
+ */
+export function isRealCalendarDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const [y, m, d] = value.split("-").map(Number);
+  if (m < 1 || m > 12) return false;
+  if (d < 1 || d > 31) return false;
+  // Build date in UTC and verify the parts round-trip (catches Feb 30, Apr 31, etc.)
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  return (
+    dt.getUTCFullYear() === y &&
+    dt.getUTCMonth() === m - 1 &&
+    dt.getUTCDate() === d
+  );
 }
 
 /** Returns the value if valid, or empty string. */
@@ -34,6 +53,11 @@ export function dateInvalidReason(value: string, locale: string): string {
     return locale === "pt"
       ? "Formato de data inválido."
       : "Invalid date format.";
+  }
+  if (!isRealCalendarDate(value)) {
+    return locale === "pt"
+      ? "Esta data não existe no calendário (ex.: 30/02)."
+      : "This date does not exist on the calendar (e.g. Feb 30).";
   }
   if (value < min) {
     return locale === "pt"
