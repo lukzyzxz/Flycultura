@@ -68,9 +68,13 @@ const HeroSearch = () => {
     : ["Budget", "Luxury", "Adventure", "Family", "Beach", "Cultural"];
 
   const handleSearch = () => {
-    // Validate date: must be today..2050
-    if (date && !isValidFutureDate(date)) {
-      const reason = dateInvalidReason(date, locale);
+    // Date is REQUIRED and must be a real, future calendar date (≤ 2050).
+    if (!date || !isValidFutureDate(date)) {
+      const reason = !date
+        ? (locale === "pt"
+            ? "Selecione uma data válida para buscar."
+            : "Pick a valid date to search.")
+        : dateInvalidReason(date, locale);
       setDateError(reason);
       toast({
         title: locale === "pt" ? "Data inválida" : "Invalid date",
