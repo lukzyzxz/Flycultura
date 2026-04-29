@@ -390,14 +390,14 @@ const Results = () => {
           </div>
         )}
 
-        {isLoading && (
+        {isLoading && !hasDateError && (
           <div className="flex flex-col items-center justify-center py-20 gap-4">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
             <p className="text-muted-foreground">{locale === "pt" ? "Buscando os melhores preços..." : "Searching best prices..."}</p>
           </div>
         )}
 
-        {isError && (
+        {isError && !hasDateError && (
           <div className="text-center py-20">
             <p className="text-destructive mb-4">{locale === "pt" ? "Erro ao buscar resultados. Tente novamente." : "Error fetching results. Try again."}</p>
             <Button onClick={() => flightsQuery.refetch()}>
