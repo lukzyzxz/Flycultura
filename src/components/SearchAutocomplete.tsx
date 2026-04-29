@@ -11,9 +11,13 @@ interface Props {
   value: string;
   onChange: (val: string) => void;
   placeholder: string;
+  /** Value to exclude from suggestions and trigger immediate "same as other field" error. */
+  excludeValue?: string;
+  /** Optional accessible name for the conflicting field (e.g. "origin", "destination"). */
+  excludeLabel?: string;
 }
 
-const SearchAutocomplete = ({ value, onChange, placeholder }: Props) => {
+const SearchAutocomplete = ({ value, onChange, placeholder, excludeValue, excludeLabel }: Props) => {
   const [open, setOpen] = useState(false);
   const [touched, setTouched] = useState(false);
   const [suggestions, setSuggestions] = useState<{ label: string; sub: string }[]>([]);
@@ -21,6 +25,11 @@ const SearchAutocomplete = ({ value, onChange, placeholder }: Props) => {
   const ref = useRef<HTMLDivElement>(null);
   const { locale } = useI18n();
   const listboxId = useId();
+
+  const norm = (s: string) => s.trim().toLowerCase().replace(/\s+/g, " ");
+  const excludeNorm = excludeValue ? norm(excludeValue) : "";
+  const isSameAsExclude =
+    !!excludeNorm && !!value && norm(value) === excludeNorm;
 
   // Pre-build the searchable index of all known terms (for unknown-input detection)
   const knownTerms = useMemo(() => {
@@ -79,7 +88,7 @@ const SearchAutocomplete = ({ value, onChange, placeholder }: Props) => {
         c.country.toLowerCase().includes(q) ||
         (c.aliases || []).some((a) => a.includes(q)),
       )
-      .slice(0, 5)
+      .slice(0, 8)
       .map((c) => ({ label: c.name, sub: c.country }));
 
     // Dedup por label
@@ -91,11 +100,13 @@ const SearchAutocomplete = ({ value, onChange, placeholder }: Props) => {
         seen.add(k);
         return true;
       })
-      .slice(0, 8);
+      // Remove the value already selected in the paired field
+      .filter((s) => !excludeNorm || norm(s.label) !== excludeNorm)
+      .slice(0, 10);
     setSuggestions(combined);
     setOpen(combined.length > 0);
     setActiveIndex(combined.length > 0 ? 0 : -1);
-  }, [value, locale]);
+  }, [value, locale, excludeNorm]);
 
   // Show warning when user has typed a term we can't find anywhere
   const isUnknown =
@@ -104,6 +115,12 @@ const SearchAutocomplete = ({ value, onChange, placeholder }: Props) => {
     !knownTerms.some((term) => term.includes(value.toLowerCase()) || value.toLowerCase().includes(term));
 
   const selectSuggestion = (s: { label: string; sub: string }) => {
+    // Block selecting the same value as the paired field
+    if (excludeNorm && norm(s.label) === excludeNorm) {
+      setOpen(false);
+      setTouched(true);
+      return;
+    }
     onChange(s.label);
     setOpen(false);
     setTouched(true);
@@ -151,7 +168,11 @@ const SearchAutocomplete = ({ value, onChange, placeholder }: Props) => {
         aria-hidden="true"
         className={cn(
           "absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 z-10 transition-colors",
-          isUnknown ? "text-warning" : "text-muted-foreground",
+          isSameAsExclude
+            ? "text-destructive"
+            : isUnknown
+              ? "text-warning"
+              : "text-muted-foreground",
         )}
       />
       <Input
@@ -167,19 +188,33 @@ const SearchAutocomplete = ({ value, onChange, placeholder }: Props) => {
         aria-controls={listboxId}
         aria-autocomplete="list"
         aria-activedescendant={activeOptionId}
-        aria-invalid={isUnknown || undefined}
+        aria-invalid={isSameAsExclude || isUnknown || undefined}
         className={cn(
           "pl-9",
+          isSameAsExclude && "border-destructive focus-visible:ring-destructive/40 pr-9",
           isUnknown && "border-warning focus-visible:ring-warning/40 pr-9",
         )}
       />
-      {isUnknown && (
+      {isSameAsExclude ? (
+        <AlertTriangle
+          aria-hidden="true"
+          className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-destructive z-10"
+        />
+      ) : isUnknown && (
         <AlertTriangle
           aria-hidden="true"
           className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-warning z-10"
         />
       )}
-      {isUnknown && !open && (
+      {isSameAsExclude && (
+        <p role="alert" className="mt-1 text-xs text-destructive flex items-center gap-1">
+          <AlertTriangle className="h-3 w-3" aria-hidden="true" />
+          {locale === "pt"
+            ? `Igual ao campo ${excludeLabel || "outro"}. Escolha outra cidade.`
+            : `Same as ${excludeLabel || "other"} field. Pick another city.`}
+        </p>
+      )}
+      {!isSameAsExclude && isUnknown && !open && (
         <p role="alert" className="mt-1 text-xs text-warning flex items-center gap-1">
           <AlertTriangle className="h-3 w-3" aria-hidden="true" />
           {locale === "pt"
