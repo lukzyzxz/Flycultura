@@ -16,6 +16,7 @@ import { useI18n } from "@/lib/i18n";
 import { useQuery } from "@tanstack/react-query";
 import SmartImage from "@/components/SmartImage";
 import { commissionLabel } from "@/lib/pricing";
+import { dateInvalidReason, isValidFutureDate } from "@/lib/dateLimits";
 
 const Results = () => {
   const [searchParams] = useSearchParams();
@@ -27,7 +28,12 @@ const Results = () => {
   const type = searchParams.get("type") || "flights";
   const from = searchParams.get("from") || "";
   const to = searchParams.get("to") || "";
+  const dateParam = searchParams.get("date") || "";
   const query = to.toLowerCase().trim();
+
+  // Hard date gate — block API/data calls for ALL search types when date is bad.
+  const dateError = dateParam ? dateInvalidReason(dateParam, locale) : "";
+  const hasDateError = !!dateError || (!!dateParam && !isValidFutureDate(dateParam));
 
   // Only consider upcoming packages
   const upcomingPackages = eventPackages.filter((p) => isEventUpcoming(p));
@@ -122,15 +128,15 @@ const Results = () => {
   const flightsQuery = useQuery({
     queryKey: ["flights", fromCode, safeToCode],
     queryFn: () => searchFlights({ from: fromCode, to: safeToCode }),
-    enabled: type === "flights" && !sameOriginDest,
+    enabled: type === "flights" && !sameOriginDest && !hasDateError,
     staleTime: 5 * 60 * 1000,
   });
 
   // Hotels — local catalog filtered by destination query (only cities with packages)
-  const hotelResults: Hotel[] = type === "hotels" ? searchHotelsByQuery(to) : [];
+  const hotelResults: Hotel[] = type === "hotels" && !hasDateError ? searchHotelsByQuery(to) : [];
 
   // Cruises — local catalog filtered by destination query
-  const cruiseResults: Cruise[] = type === "cruises" ? searchCruises(to) : [];
+  const cruiseResults: Cruise[] = type === "cruises" && !hasDateError ? searchCruises(to) : [];
 
   const isLoading = type === "flights" && flightsQuery.isLoading;
   const isError = type === "flights" && flightsQuery.isError;
@@ -216,8 +222,35 @@ const Results = () => {
       </div>
 
       <div className="container py-10">
+        {/* Hard date gate — applies to ALL search types */}
+        {hasDateError && (
+          <div
+            role="alert"
+            className="mb-6 flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4"
+          >
+            <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" aria-hidden="true" />
+            <div className="flex-1">
+              <p className="font-medium text-foreground">
+                {locale === "pt" ? "Data inválida" : "Invalid date"}
+              </p>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                {dateError ||
+                  (locale === "pt"
+                    ? "Escolha uma data válida entre hoje e 31/12/2050."
+                    : "Pick a valid date between today and 12/31/2050.")}
+              </p>
+              <Button asChild variant="outline" size="sm" className="mt-3">
+                <Link to="/">
+                  <ArrowLeft className="h-3.5 w-3.5 mr-1" />
+                  {locale === "pt" ? "Refazer busca" : "Edit search"}
+                </Link>
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Same origin/destination warning */}
-        {sameOriginDest && (
+        {sameOriginDest && !hasDateError && (
           <div
             role="alert"
             className="mb-6 flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4"
@@ -245,7 +278,7 @@ const Results = () => {
         )}
 
         {/* Not found block — shown when query has zero matches */}
-        {noMatchAtAll && (
+        {noMatchAtAll && !hasDateError && (
           <div className="mb-10">
             <div className="rounded-xl border border-dashed border-border bg-muted/30 p-8 text-center">
               <SearchX className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
@@ -313,7 +346,7 @@ const Results = () => {
         )}
 
         {/* Matching Event Packages */}
-        {matchingPackages.length > 0 && (
+        {matchingPackages.length > 0 && !hasDateError && (
           <div className="mb-10">
             <h2 className="font-display text-xl font-bold text-foreground mb-4">
               {locale === "pt" ? "📦 Pacotes de Eventos Relacionados" : "📦 Related Event Packages"}
@@ -357,14 +390,14 @@ const Results = () => {
           </div>
         )}
 
-        {isLoading && (
+        {isLoading && !hasDateError && (
           <div className="flex flex-col items-center justify-center py-20 gap-4">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
             <p className="text-muted-foreground">{locale === "pt" ? "Buscando os melhores preços..." : "Searching best prices..."}</p>
           </div>
         )}
 
-        {isError && (
+        {isError && !hasDateError && (
           <div className="text-center py-20">
             <p className="text-destructive mb-4">{locale === "pt" ? "Erro ao buscar resultados. Tente novamente." : "Error fetching results. Try again."}</p>
             <Button onClick={() => flightsQuery.refetch()}>
@@ -374,7 +407,7 @@ const Results = () => {
         )}
 
         {/* Flight results */}
-        {type === "flights" && !isLoading && !isError && (
+        {type === "flights" && !isLoading && !isError && !hasDateError && (
           <div className="space-y-4">
             {(flightsQuery.data?.length ?? 0) > 0 ? (
               flightsQuery.data!.map((flight, i) => (
@@ -425,7 +458,7 @@ const Results = () => {
         )}
 
         {/* Hotel results — local catalog (cities with packages) */}
-        {type === "hotels" && (
+        {type === "hotels" && !hasDateError && (
           <>
             <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
               <HotelIcon className="h-4 w-4" />
@@ -492,7 +525,7 @@ const Results = () => {
         )}
 
         {/* Cruise results — local catalog with real cruise photos */}
-        {type === "cruises" && (
+        {type === "cruises" && !hasDateError && (
           <>
             <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
               <Ship className="h-4 w-4" />
@@ -563,12 +596,12 @@ const Results = () => {
         )}
 
         {/* Fallback for packages only */}
-        {type === "packages" && matchingPackages.length === 0 && (
+        {type === "packages" && matchingPackages.length === 0 && !hasDateError && (
           <FallbackDestinations matchingDestinations={matchingDestinations} />
         )}
 
         {/* Matching Destinations */}
-        {matchingDestinations.length > 0 && (type === "packages" || type === "cruises") && (
+        {matchingDestinations.length > 0 && (type === "packages" || type === "cruises") && !hasDateError && (
           <div className="mt-10">
             <h2 className="font-display text-xl font-bold text-foreground mb-4">
               {locale === "pt" ? "🌍 Destinos Encontrados" : "🌍 Destinations Found"}
