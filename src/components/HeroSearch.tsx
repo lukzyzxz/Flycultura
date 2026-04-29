@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plane, Hotel, Package, Ship, Search, Calendar, Sparkles, RotateCcw } from "lucide-react";
+import { Plane, Hotel, Package, Ship, Search, Calendar, Sparkles, RotateCcw, History, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
@@ -10,18 +10,22 @@ import SearchAutocomplete from "@/components/SearchAutocomplete";
 import TripPlannerModal from "@/components/TripPlannerModal";
 import PassengerStepper from "@/components/PassengerStepper";
 import { getHomeAirport, getAirportLabel } from "@/lib/userOrigin";
-import { MAX_DATE, getMinDate, isValidFutureDate, dateErrorMessage } from "@/lib/dateLimits";
+import { MAX_DATE, getMinDate, isValidFutureDate, dateInvalidReason, dateHelpText } from "@/lib/dateLimits";
+import { saveLastSearch, getLastSearch, clearLastSearch, LastSearch } from "@/lib/searchHistory";
 
 const HeroSearch = () => {
-  const [activeTab, setActiveTab] = useState("flights");
+  const last = getLastSearch();
+  const [activeTab, setActiveTab] = useState(last?.type || "flights");
   const defaultOrigin = () => getAirportLabel(getHomeAirport());
-  const [from, setFrom] = useState<string>(defaultOrigin);
-  const [to, setTo] = useState("");
-  const [date, setDate] = useState("");
+  const [from, setFrom] = useState<string>(last?.from || defaultOrigin());
+  const [to, setTo] = useState(last?.to || "");
+  const [date, setDate] = useState(last?.date || "");
   const [dateError, setDateError] = useState("");
-  const [adults, setAdults] = useState(1);
-  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [sameError, setSameError] = useState("");
+  const [adults, setAdults] = useState(last?.adults || 1);
+  const [activeFilter, setActiveFilter] = useState<string | null>(last?.filter || null);
   const [plannerOpen, setPlannerOpen] = useState(false);
+  const [restoredBanner, setRestoredBanner] = useState<LastSearch | null>(last);
   const navigate = useNavigate();
   const { t, locale } = useI18n();
   const { toast } = useToast();
@@ -34,6 +38,23 @@ const HeroSearch = () => {
     window.addEventListener("home-airport-changed", onChange);
     return () => window.removeEventListener("home-airport-changed", onChange);
   }, []);
+
+  // Compare from/to (case + spacing insensitive)
+  const norm = (s: string) => s.trim().toLowerCase().replace(/\s+/g, " ");
+  const isSameOriginDest = !!from && !!to && norm(from) === norm(to);
+
+  // Live "same location" error
+  useEffect(() => {
+    if (isSameOriginDest) {
+      setSameError(
+        locale === "pt"
+          ? "Origem e destino não podem ser iguais."
+          : "Origin and destination can't be the same.",
+      );
+    } else {
+      setSameError("");
+    }
+  }, [isSameOriginDest, locale]);
 
   const tabs = [
     { id: "flights", label: t("hero.flights"), icon: Plane },
@@ -49,13 +70,34 @@ const HeroSearch = () => {
   const handleSearch = () => {
     // Validate date: must be today..2050
     if (date && !isValidFutureDate(date)) {
+      const reason = dateInvalidReason(date, locale);
+      setDateError(reason);
       toast({
         title: locale === "pt" ? "Data inválida" : "Invalid date",
-        description: dateErrorMessage(locale),
+        description: reason,
         variant: "destructive",
       });
       return;
     }
+    if (isSameOriginDest) {
+      toast({
+        title: locale === "pt" ? "Origem e destino iguais" : "Same origin and destination",
+        description: locale === "pt"
+          ? "Escolha cidades diferentes para origem e destino."
+          : "Pick different cities for origin and destination.",
+        variant: "destructive",
+      });
+      return;
+    }
+    // Persist last search
+    saveLastSearch({
+      type: activeTab,
+      from,
+      to,
+      date,
+      adults,
+      filter: activeFilter,
+    });
     const filterParam = activeFilter ? `&filter=${activeFilter}` : "";
     const dateParam = date ? `&date=${date}` : "";
     navigate(
@@ -69,6 +111,17 @@ const HeroSearch = () => {
     } else {
       setActiveFilter(f);
     }
+  };
+
+  const dismissRestored = () => setRestoredBanner(null);
+  const clearRestored = () => {
+    clearLastSearch();
+    setRestoredBanner(null);
+    setFrom(defaultOrigin());
+    setTo("");
+    setDate("");
+    setAdults(1);
+    setActiveFilter(null);
   };
 
   return (
@@ -156,15 +209,44 @@ const HeroSearch = () => {
               aria-labelledby={`tab-${activeTab}`}
               className="bg-card rounded-xl p-4 md:p-6 card-shadow"
             >
+              {restoredBanner && (
+                <div className="mb-3 flex items-center gap-2 rounded-md bg-primary/5 border border-primary/20 px-3 py-2 text-xs text-foreground">
+                  <History className="h-3.5 w-3.5 text-primary shrink-0" aria-hidden="true" />
+                  <span className="flex-1">
+                    {locale === "pt"
+                      ? "Restauramos sua última busca."
+                      : "We restored your last search."}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={clearRestored}
+                    className="text-muted-foreground hover:text-destructive font-medium"
+                  >
+                    {locale === "pt" ? "Limpar" : "Clear"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={dismissRestored}
+                    className="text-muted-foreground hover:text-foreground font-medium"
+                  >
+                    {locale === "pt" ? "Ok" : "Ok"}
+                  </button>
+                </div>
+              )}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                <SearchAutocomplete value={from} onChange={setFrom} placeholder={t("hero.from")} />
-                <SearchAutocomplete value={to} onChange={setTo} placeholder={t("hero.to")} />
+                <div>
+                  <SearchAutocomplete value={from} onChange={setFrom} placeholder={t("hero.from")} />
+                </div>
+                <div>
+                  <SearchAutocomplete value={to} onChange={setTo} placeholder={t("hero.to")} />
+                </div>
                 <div className="relative">
                   <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" aria-hidden="true" />
                   <Input
                     type="date"
                     aria-label={locale === "pt" ? "Data de partida" : "Departure date"}
                     aria-invalid={!!dateError}
+                    aria-describedby="hero-date-help"
                     className={`pl-9 ${dateError ? "border-destructive focus-visible:ring-destructive/40" : ""}`}
                     value={date}
                     min={today}
@@ -172,18 +254,28 @@ const HeroSearch = () => {
                     onChange={(e) => {
                       const v = e.target.value;
                       setDate(v);
-                      if (v && !isValidFutureDate(v)) {
-                        setDateError(dateErrorMessage(locale));
-                      } else {
-                        setDateError("");
-                      }
+                      setDateError(dateInvalidReason(v, locale));
                     }}
                   />
                 </div>
                 <PassengerStepper value={adults} onChange={setAdults} />
               </div>
+              {/* Always-visible date hint + dynamic error */}
+              <p id="hero-date-help" className="mt-2 flex items-center gap-1 text-[11px] text-muted-foreground">
+                <Info className="h-3 w-3" aria-hidden="true" />
+                {dateHelpText(locale)}
+              </p>
               {dateError && (
-                <p role="alert" className="mt-2 text-xs text-destructive">{dateError}</p>
+                <p role="alert" className="mt-1 text-xs text-destructive flex items-start gap-1">
+                  <span aria-hidden="true">⚠️</span>
+                  <span>{dateError}</span>
+                </p>
+              )}
+              {sameError && (
+                <p role="alert" className="mt-1 text-xs text-destructive flex items-start gap-1">
+                  <span aria-hidden="true">⚠️</span>
+                  <span>{sameError}</span>
+                </p>
               )}
 
               {/* Restore default origin */}
@@ -223,7 +315,7 @@ const HeroSearch = () => {
 
               <Button
                 onClick={handleSearch}
-                disabled={!!dateError}
+                disabled={!!dateError || !!sameError}
                 className="w-full mt-4 h-12 text-base font-semibold gap-2"
               >
                 <Search className="h-5 w-5" aria-hidden="true" />
