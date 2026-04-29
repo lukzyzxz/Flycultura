@@ -260,6 +260,7 @@ const HeroSearch = () => {
                   <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" aria-hidden="true" />
                   <Input
                     type="date"
+                    required
                     aria-label={locale === "pt" ? "Data de partida" : "Departure date"}
                     aria-invalid={!!dateError}
                     aria-describedby="hero-date-help"
@@ -270,7 +271,29 @@ const HeroSearch = () => {
                     onChange={(e) => {
                       const v = e.target.value;
                       setDate(v);
-                      setDateError(dateInvalidReason(v, locale));
+                      // If the browser cleared the value (user typed something
+                      // like 30/02 that doesn't exist), surface a clear error.
+                      if (!v) {
+                        setDateError(
+                          locale === "pt"
+                            ? "Data inválida ou inexistente. Selecione uma data válida."
+                            : "Invalid or non-existent date. Pick a valid date.",
+                        );
+                      } else {
+                        setDateError(dateInvalidReason(v, locale));
+                      }
+                    }}
+                    onBlur={(e) => {
+                      // Catch native :invalid state (e.g., typed value that the
+                      // browser couldn't parse and silently rejected).
+                      const el = e.currentTarget;
+                      if (!el.value || !el.checkValidity()) {
+                        setDateError(
+                          locale === "pt"
+                            ? "Selecione uma data válida para buscar voos."
+                            : "Pick a valid date to search flights.",
+                        );
+                      }
                     }}
                   />
                 </div>
@@ -331,7 +354,7 @@ const HeroSearch = () => {
 
               <Button
                 onClick={handleSearch}
-                disabled={!!dateError || !!sameError}
+                disabled={!date || !isValidFutureDate(date) || !!dateError || !!sameError}
                 className="w-full mt-4 h-12 text-base font-semibold gap-2"
               >
                 <Search className="h-5 w-5" aria-hidden="true" />
