@@ -278,7 +278,7 @@ const Results = () => {
         )}
 
         {/* Not found block — shown when query has zero matches */}
-        {noMatchAtAll && (
+        {noMatchAtAll && !hasDateError && (
           <div className="mb-10">
             <div className="rounded-xl border border-dashed border-border bg-muted/30 p-8 text-center">
               <SearchX className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
@@ -346,7 +346,7 @@ const Results = () => {
         )}
 
         {/* Matching Event Packages */}
-        {matchingPackages.length > 0 && (
+        {matchingPackages.length > 0 && !hasDateError && (
           <div className="mb-10">
             <h2 className="font-display text-xl font-bold text-foreground mb-4">
               {locale === "pt" ? "📦 Pacotes de Eventos Relacionados" : "📦 Related Event Packages"}
@@ -407,7 +407,7 @@ const Results = () => {
         )}
 
         {/* Flight results */}
-        {type === "flights" && !isLoading && !isError && (
+        {type === "flights" && !isLoading && !isError && !hasDateError && (
           <div className="space-y-4">
             {(flightsQuery.data?.length ?? 0) > 0 ? (
               flightsQuery.data!.map((flight, i) => (
@@ -458,7 +458,7 @@ const Results = () => {
         )}
 
         {/* Hotel results — local catalog (cities with packages) */}
-        {type === "hotels" && (
+        {type === "hotels" && !hasDateError && (
           <>
             <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
               <HotelIcon className="h-4 w-4" />
@@ -525,7 +525,7 @@ const Results = () => {
         )}
 
         {/* Cruise results — local catalog with real cruise photos */}
-        {type === "cruises" && (
+        {type === "cruises" && !hasDateError && (
           <>
             <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
               <Ship className="h-4 w-4" />
@@ -596,12 +596,12 @@ const Results = () => {
         )}
 
         {/* Fallback for packages only */}
-        {type === "packages" && matchingPackages.length === 0 && (
+        {type === "packages" && matchingPackages.length === 0 && !hasDateError && (
           <FallbackDestinations matchingDestinations={matchingDestinations} />
         )}
 
         {/* Matching Destinations */}
-        {matchingDestinations.length > 0 && (type === "packages" || type === "cruises") && (
+        {matchingDestinations.length > 0 && (type === "packages" || type === "cruises") && !hasDateError && (
           <div className="mt-10">
             <h2 className="font-display text-xl font-bold text-foreground mb-4">
               {locale === "pt" ? "🌍 Destinos Encontrados" : "🌍 Destinations Found"}
