@@ -12,6 +12,12 @@ import wcTorontoImg from "@/assets/events/wc-toronto.png";
 import wcNyGroupImg from "@/assets/events/wc-ny-group.png";
 import wcMexicoImg from "@/assets/events/wc-mexico.png";
 import wcMiamiImg from "@/assets/events/wc-miami.png";
+import elClasicoImg from "@/assets/events/el-clasico.png";
+import madCoolImg from "@/assets/events/mad-cool.png";
+import webSummitImg from "@/assets/events/web-summit.png";
+import romeMarathonImg from "@/assets/events/rome-marathon.png";
+import berlinMarathonImg from "@/assets/events/berlin-marathon.png";
+import kingsDayImg from "@/assets/events/kings-day.png";
 
 export interface EventPackage {
   id: string;
