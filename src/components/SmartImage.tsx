@@ -66,10 +66,17 @@ for (const [path, url] of Object.entries(localVariantModules)) {
   (localVariantBySize[baseName] ||= {})[w] = url;
 }
 
+// Sort base names by length DESC so longest match wins (e.g. "wc-ny-group" beats "wc").
+const KNOWN_BASES = Object.keys(localVariantBySize).sort((a, b) => b.length - a.length);
+
 const getLocalBaseName = (url: string): string | null => {
-  const m = url.match(/\/assets\/events\/([^/]+?)(?:-(?:480|800|1280))?\.[a-z0-9]+\.webp$/i)
-    || url.match(/\/assets\/events\/([^/]+?)(?:-(?:480|800|1280))?\.webp$/i);
-  return m ? m[1] : null;
+  // Vite production filenames: <base>-<HASH>.webp or <base>-<width>-<HASH>.webp
+  // Dev / source filenames: <base>.webp or <base>-<width>.webp
+  const file = (url.split("/").pop() || "").replace(/\.webp$/i, "");
+  for (const base of KNOWN_BASES) {
+    if (file === base || file.startsWith(base + "-")) return base;
+  }
+  return null;
 };
 
 const buildLocalSrcSet = (url: string): string | undefined => {
