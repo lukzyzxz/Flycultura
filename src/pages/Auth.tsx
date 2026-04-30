@@ -1,7 +1,7 @@
 // Auth page — sign in, sign up, password reset and Google OAuth
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plane, Mail, Lock, User, Eye, EyeOff } from "lucide-react";
+import { Plane, Mail, Lock, User, Eye, EyeOff, MapPin } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,6 +12,8 @@ import { useI18n } from "@/lib/i18n";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { lovable } from "@/integrations/lovable/index";
+import { supabase } from "@/integrations/supabase/client";
+import { AIRPORT_OPTIONS, setHomeAirport } from "@/lib/userOrigin";
 import {
   Form,
   FormControl,
@@ -32,10 +34,26 @@ const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Auto-redirect once authenticated (covers OAuth callback + email/password success)
+  // Auto-redirect once authenticated (covers OAuth callback + email/password success).
+  // Also pull the user's saved home_airport from their profile so the hero search
+  // can pre-fill the "From" field with their preferred airport.
   useEffect(() => {
     console.log("[Auth page] state:", { authLoading, hasUser: !!user, email: user?.email });
     if (user) {
+      (async () => {
+        try {
+          const { data } = await supabase
+            .from("profiles")
+            .select("home_airport")
+            .eq("user_id", user.id)
+            .maybeSingle();
+          if (data?.home_airport) {
+            setHomeAirport(data.home_airport);
+          }
+        } catch (e) {
+          console.warn("[Auth page] could not load home_airport:", e);
+        }
+      })();
       const redirectTo = new URLSearchParams(window.location.search).get("redirect") || "/";
       console.log("[Auth page] redirecting to:", redirectTo);
       navigate(redirectTo, { replace: true });
@@ -48,6 +66,7 @@ const Auth = () => {
       password: z.string().optional(),
       fullName: z.string().optional(),
       confirmPassword: z.string().optional(),
+      homeAirport: z.string().optional(),
     });
 
     if (mode === "reset") return base;
@@ -63,6 +82,11 @@ const Auth = () => {
         fullName: z.string().min(1, t("auth.errorNameRequired")),
         password: z.string().min(1, t("auth.errorPasswordRequired")).min(6, t("auth.errorPasswordMin")),
         confirmPassword: z.string().min(1, t("auth.errorPasswordRequired")),
+        homeAirport: z
+          .string()
+          .min(1, locale === "pt"
+            ? "Selecione seu aeroporto mais próximo"
+            : "Select your nearest airport"),
       })
       .refine((data) => data.password === data.confirmPassword, {
         message: t("auth.errorPasswordsMismatch"),
@@ -70,16 +94,16 @@ const Auth = () => {
       });
   };
 
-  const form = useForm<{ email: string; password: string; fullName: string; confirmPassword: string }>({
+  const form = useForm<{ email: string; password: string; fullName: string; confirmPassword: string; homeAirport: string }>({
     resolver: zodResolver(getSchema()),
-    defaultValues: { email: "", password: "", fullName: "", confirmPassword: "" },
+    defaultValues: { email: "", password: "", fullName: "", confirmPassword: "", homeAirport: "" },
     mode: "onTouched",
   });
 
   const switchMode = (newMode: Mode) => {
     setMode(newMode);
     form.clearErrors();
-    form.reset({ email: form.getValues("email"), password: "", fullName: "", confirmPassword: "" });
+    form.reset({ email: form.getValues("email"), password: "", fullName: "", confirmPassword: "", homeAirport: "" });
   };
 
   const onSubmit = async (values: any) => {
@@ -93,6 +117,25 @@ const Auth = () => {
       } else if (mode === "signup") {
         const { error } = await signUp(values.email, values.password, values.fullName);
         if (error) throw error;
+        // Persist chosen home airport locally so it's used immediately on next login,
+        // and try to write it to the profile (will succeed once the user confirms email
+        // and a profile row exists).
+        if (values.homeAirport) {
+          setHomeAirport(values.homeAirport);
+          try {
+            const { data: { user: newUser } } = await supabase.auth.getUser();
+            if (newUser) {
+              await supabase
+                .from("profiles")
+                .upsert(
+                  { user_id: newUser.id, home_airport: values.homeAirport },
+                  { onConflict: "user_id" },
+                );
+            }
+          } catch (e) {
+            console.warn("[Auth page] could not save home_airport to profile:", e);
+          }
+        }
         toast({ title: t("auth.signUpSuccess") });
         switchMode("signin");
       } else {
