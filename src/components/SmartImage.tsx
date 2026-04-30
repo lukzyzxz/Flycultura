@@ -45,6 +45,51 @@ const withUnsplashWidth = (url: string, w: number) => {
 const buildSrcSet = (url: string) =>
   UNSPLASH_WIDTHS.map((w) => `${withUnsplashWidth(url, w)} ${w}w`).join(", ");
 
+/**
+ * Map of locally-bundled responsive variants for /src/assets/events/*.webp.
+ * For each base file (e.g. `el-clasico.webp`) we look up `el-clasico-480.webp`,
+ * `el-clasico-800.webp`, `el-clasico-1280.webp` and build a srcSet so mobile
+ * devices download a tiny ~480w file instead of the full image.
+ */
+const LOCAL_VARIANT_WIDTHS = [480, 800, 1280] as const;
+const localVariantModules = import.meta.glob(
+  "/src/assets/events/*-{480,800,1280}.webp",
+  { eager: true, query: "?url", import: "default" },
+) as Record<string, string>;
+
+const localVariantBySize: Record<string, Record<number, string>> = {};
+for (const [path, url] of Object.entries(localVariantModules)) {
+  const match = path.match(/\/([^/]+?)-(480|800|1280)\.webp$/);
+  if (!match) continue;
+  const baseName = match[1];
+  const w = Number(match[2]);
+  (localVariantBySize[baseName] ||= {})[w] = url;
+}
+
+// Sort base names by length DESC so longest match wins (e.g. "wc-ny-group" beats "wc").
+const KNOWN_BASES = Object.keys(localVariantBySize).sort((a, b) => b.length - a.length);
+
+const getLocalBaseName = (url: string): string | null => {
+  // Vite production filenames: <base>-<HASH>.webp or <base>-<width>-<HASH>.webp
+  // Dev / source filenames: <base>.webp or <base>-<width>.webp
+  const file = (url.split("/").pop() || "").replace(/\.webp$/i, "");
+  for (const base of KNOWN_BASES) {
+    if (file === base || file.startsWith(base + "-")) return base;
+  }
+  return null;
+};
+
+const buildLocalSrcSet = (url: string): string | undefined => {
+  const base = getLocalBaseName(url);
+  if (!base) return undefined;
+  const variants = localVariantBySize[base];
+  if (!variants) return undefined;
+  const parts = LOCAL_VARIANT_WIDTHS
+    .map((w) => (variants[w] ? `${variants[w]} ${w}w` : null))
+    .filter(Boolean) as string[];
+  return parts.length >= 2 ? parts.join(", ") : undefined;
+};
+
 interface SmartImageProps extends ImgHTMLAttributes<HTMLImageElement> {
   src: string;
   alt: string;
@@ -119,6 +164,11 @@ const SmartImage = ({
     ? withUnsplashWidth(currentSrc, priority ? 900 : 400)
     : currentSrc;
 
+  // Local /src/assets/events responsive variants
+  const localSrcSet = !useResponsive ? buildLocalSrcSet(currentSrc) : undefined;
+  const finalSrcSet = responsiveSrcSet ?? localSrcSet;
+  const finalSizes = (responsiveSrcSet || localSrcSet) ? sizes : undefined;
+
   return (
     <div className={cn("relative w-full h-full overflow-hidden", wrapperClassName)}>
       {showSkeleton && !loaded && (
@@ -130,8 +180,8 @@ const SmartImage = ({
       <img
         {...rest}
         src={responsiveSrc}
-        srcSet={responsiveSrcSet}
-        sizes={useResponsive ? sizes : undefined}
+        srcSet={finalSrcSet}
+        sizes={finalSizes}
         alt={alt}
         loading={effectiveLoading}
         decoding="async"

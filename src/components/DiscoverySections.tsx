@@ -101,7 +101,7 @@ const DiscoverySections = () => {
     >
       <Link to={`/packages/${pkg.id}`}>
         <div className="relative aspect-[16/10] overflow-hidden bg-muted">
-          <SmartImage src={pkg.image} alt={locale === "pt" ? pkg.event : pkg.eventEn} category="event" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          <SmartImage src={pkg.image} alt={locale === "pt" ? pkg.event : pkg.eventEn} category="event" sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 30vw" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
           <Badge className="absolute top-2.5 left-2.5 bg-accent text-accent-foreground border-0 text-xs">{pkg.badge}</Badge>
         </div>
       </Link>
@@ -180,7 +180,7 @@ const DiscoverySections = () => {
                 className="group rounded-xl overflow-hidden bg-card card-shadow hover:card-shadow-hover transition-all hover:-translate-y-1"
               >
                 <div className="relative aspect-[16/10] overflow-hidden bg-muted">
-                  <SmartImage src={deal.image} alt={locale === "pt" ? deal.title : deal.titleEn} category="deal" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <SmartImage src={deal.image} alt={locale === "pt" ? deal.title : deal.titleEn} category="deal" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   <Badge className="absolute top-2.5 left-2.5 bg-accent text-accent-foreground border-0 text-xs">
                     {Math.round((1 - deal.price / deal.originalPrice) * 100)}% {t("deals.off")}
                   </Badge>
