@@ -82,6 +82,16 @@ const Profile = () => {
   ];
   const unlockedCount = achievements.filter((a) => a.unlocked).length;
 
+  const formatBRL = (v: number) =>
+    `R$ ${Number(v).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  const itemTypeLabel = (type: string) => {
+    if (locale === "pt") {
+      return type === "event" ? "Pacote" : type === "deal" ? "Oferta" : type === "guide" ? "Guia" : type === "flight" ? "Voo" : type === "hotel" ? "Hotel" : "Item";
+    }
+    return type === "event" ? "Package" : type === "deal" ? "Deal" : type === "guide" ? "Guide" : type === "flight" ? "Flight" : type === "hotel" ? "Hotel" : "Item";
+  };
+
   const tabs = [
     { id: "orders" as const, label: locale === "pt" ? "Pedidos" : "Orders", icon: ShoppingBag },
     { id: "favorites" as const, label: locale === "pt" ? "Favoritos" : "Favorites", icon: Heart },
@@ -188,17 +198,37 @@ const Profile = () => {
             ) : (
               orders.map((order, i) => (
                 <motion.div key={order.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="rounded-xl bg-card card-shadow p-5">
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center justify-between mb-4 pb-3 border-b border-border">
                     <div>
-                      <p className="text-sm text-muted-foreground">{new Date(order.created_at).toLocaleDateString(locale === "pt" ? "pt-BR" : "en-US")}</p>
-                      <p className="text-xs text-muted-foreground font-mono">#{order.id.slice(0, 8)}</p>
+                      <p className="text-sm font-medium text-foreground">
+                        {new Date(order.created_at).toLocaleDateString(locale === "pt" ? "pt-BR" : "en-US", { day: "2-digit", month: "2-digit", year: "numeric" })}
+                      </p>
+                      <p className="text-xs text-muted-foreground font-mono mt-0.5">#{order.id.slice(0, 8).toUpperCase()}</p>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <Badge variant={order.status === "completed" ? "default" : "secondary"}>
-                        {order.status === "completed" ? (locale === "pt" ? "Concluído" : "Completed") : order.status === "pending" ? (locale === "pt" ? "Pendente" : "Pending") : order.status}
-                      </Badge>
-                      <span className="font-bold text-primary">R$ {Number(order.total_price).toLocaleString("pt-BR")}</span>
-                    </div>
+                    <Badge variant={order.status === "completed" ? "default" : "secondary"}>
+                      {order.status === "completed" ? (locale === "pt" ? "Concluído" : "Completed") : order.status === "pending" ? (locale === "pt" ? "Pendente" : "Pending") : order.status}
+                    </Badge>
+                  </div>
+
+                  <div className="space-y-2 mb-4">
+                    {(Array.isArray(order.items) ? order.items : []).map((item: any, idx: number) => (
+                      <div key={idx} className="flex items-start justify-between gap-3 text-sm">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-foreground line-clamp-2">{item.name || (locale === "pt" ? "Item sem nome" : "Unnamed item")}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {itemTypeLabel(item.type || "")} · {locale === "pt" ? "Qtd" : "Qty"}: {item.quantity || 1}
+                          </p>
+                        </div>
+                        <span className="text-foreground font-medium whitespace-nowrap tabular-nums">
+                          {formatBRL((Number(item.price) || 0) * (Number(item.quantity) || 1))}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center justify-between pt-3 border-t border-border">
+                    <span className="text-sm font-medium text-muted-foreground">{locale === "pt" ? "Total" : "Total"}</span>
+                    <span className="font-bold text-primary text-lg tabular-nums">{formatBRL(Number(order.total_price))}</span>
                   </div>
                 </motion.div>
               ))
@@ -231,7 +261,7 @@ const Profile = () => {
                         <MapPin className="h-3 w-3" /> {pkg.location}
                         <Calendar className="h-3 w-3 ml-2" /> {locale === "pt" ? pkg.date : pkg.dateEn}
                       </p>
-                      <p className="text-lg font-bold text-primary mt-2">R$ {pkg.price.toLocaleString("pt-BR")}</p>
+                      <p className="text-lg font-bold text-primary mt-2 tabular-nums">{formatBRL(pkg.price)}</p>
                     </div>
                   </motion.div>
                 ))}
