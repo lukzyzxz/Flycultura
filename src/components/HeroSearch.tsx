@@ -472,29 +472,6 @@ const HeroSearch = () => {
               </>
               )}
 
-              {/* Quick filters — toggle style, don't set destination */}
-              <div
-                role="group"
-                aria-label={locale === "pt" ? "Filtros rápidos" : "Quick filters"}
-                className="flex flex-wrap gap-2 mt-3"
-              >
-                {quickFilters.map((f) => (
-                  <button
-                    key={f}
-                    type="button"
-                    onClick={() => handleFilterClick(f)}
-                    aria-pressed={activeFilter === f}
-                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                      activeFilter === f
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary"
-                    }`}
-                  >
-                    {f}
-                  </button>
-                ))}
-              </div>
-
               <Button
                 onClick={handleSearch}
                 disabled={activeTab === "cruises" ? cruiseStops.length === 0 : (
