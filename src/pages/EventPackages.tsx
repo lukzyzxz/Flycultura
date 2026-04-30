@@ -148,6 +148,7 @@ const EventPackages = () => {
                     src={pkg.image}
                     alt={locale === "pt" ? pkg.event : pkg.eventEn}
                     category="event"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   <Badge className="absolute top-3 left-3 bg-accent text-accent-foreground border-0 text-sm">
