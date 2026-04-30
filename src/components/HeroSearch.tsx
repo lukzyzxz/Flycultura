@@ -12,6 +12,9 @@ import PassengerStepper from "@/components/PassengerStepper";
 import { getHomeAirport, getAirportLabel } from "@/lib/userOrigin";
 import { MAX_DATE, getMinDate, isValidFutureDate, dateInvalidReason, dateHelpText } from "@/lib/dateLimits";
 import { saveLastSearch, getLastSearch, clearLastSearch, LastSearch } from "@/lib/searchHistory";
+import { Badge } from "@/components/ui/badge";
+import { X, Plus, AlertTriangle } from "lucide-react";
+import { getAllCruiseStops } from "@/lib/cruises-data";
 
 const HeroSearch = () => {
   const last = getLastSearch();
@@ -32,6 +35,44 @@ const HeroSearch = () => {
   const navigate = useNavigate();
   const { t, locale } = useI18n();
   const { toast } = useToast();
+
+  // ---- Cruises: multi-stop input state ----
+  const [cruiseStops, setCruiseStops] = useState<string[]>([]);
+  const [cruiseStopInput, setCruiseStopInput] = useState("");
+  const knownCruiseStops = getAllCruiseStops();
+  const isStopKnown = (s: string) => {
+    const q = s.toLowerCase().trim();
+    if (!q) return false;
+    return knownCruiseStops.some((term) => term.includes(q) || q.includes(term));
+  };
+  const addCruiseStop = (raw: string) => {
+    const v = raw.trim();
+    if (!v) return;
+    if (cruiseStops.some((s) => s.toLowerCase() === v.toLowerCase())) {
+      setCruiseStopInput("");
+      return;
+    }
+    setCruiseStops((prev) => [...prev, v]);
+    setCruiseStopInput("");
+  };
+  const removeCruiseStop = (idx: number) =>
+    setCruiseStops((prev) => prev.filter((_, i) => i !== idx));
+
+  const handleCruiseSearch = () => {
+    if (cruiseStops.length === 0) {
+      toast({
+        title: locale === "pt" ? "Adicione ao menos um local" : "Add at least one stop",
+        description: locale === "pt"
+          ? "Informe os destinos por onde você quer que o cruzeiro passe."
+          : "Enter the places you want the cruise to visit.",
+        variant: "destructive",
+      });
+      return;
+    }
+    navigate(
+      `/results?type=cruises&stops=${encodeURIComponent(cruiseStops.join("|"))}`,
+    );
+  };
 
   const today = getMinDate();
 
@@ -71,6 +112,10 @@ const HeroSearch = () => {
     : ["Budget", "Luxury", "Adventure", "Family", "Beach", "Cultural"];
 
   const handleSearch = () => {
+    if (activeTab === "cruises") {
+      handleCruiseSearch();
+      return;
+    }
     // All fields must be filled before searching.
     if (!from.trim() || !to.trim() || !date || !adults) {
       toast({
