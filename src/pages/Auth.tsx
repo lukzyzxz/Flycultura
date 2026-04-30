@@ -302,6 +302,34 @@ const Auth = () => {
                 )} />
               )}
 
+              {mode === "signup" && (
+                <FormField control={form.control} name="homeAirport" render={({ field, fieldState }) => (
+                  <FormItem>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-10" />
+                      <FormControl>
+                        <select
+                          {...field}
+                          aria-invalid={!!fieldState.error}
+                          aria-label={locale === "pt" ? "Aeroporto mais próximo" : "Nearest airport"}
+                          className={`flex h-10 w-full rounded-md border border-input bg-background pl-9 pr-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${fieldState.error ? "border-destructive" : ""}`}
+                        >
+                          <option value="">
+                            {locale === "pt" ? "Selecione seu aeroporto mais próximo" : "Select your nearest airport"}
+                          </option>
+                          {AIRPORT_OPTIONS.map((a) => (
+                            <option key={a.code} value={a.code}>
+                              {a.city} ({a.code})
+                            </option>
+                          ))}
+                        </select>
+                      </FormControl>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+              )}
+
               <Button type="submit" className="w-full h-11 font-semibold" disabled={loading}>
                 {loading ? "..." : mode === "reset" ? t("auth.sendReset") : mode === "signup" ? t("auth.signUpBtn") : t("auth.signInBtn")}
               </Button>
