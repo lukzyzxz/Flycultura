@@ -12,6 +12,9 @@ import PassengerStepper from "@/components/PassengerStepper";
 import { getHomeAirport, getAirportLabel } from "@/lib/userOrigin";
 import { MAX_DATE, getMinDate, isValidFutureDate, dateInvalidReason, dateHelpText } from "@/lib/dateLimits";
 import { saveLastSearch, getLastSearch, clearLastSearch, LastSearch } from "@/lib/searchHistory";
+import { Badge } from "@/components/ui/badge";
+import { X, Plus, AlertTriangle } from "lucide-react";
+import { getAllCruiseStops } from "@/lib/cruises-data";
 
 const HeroSearch = () => {
   const last = getLastSearch();
@@ -32,6 +35,44 @@ const HeroSearch = () => {
   const navigate = useNavigate();
   const { t, locale } = useI18n();
   const { toast } = useToast();
+
+  // ---- Cruises: multi-stop input state ----
+  const [cruiseStops, setCruiseStops] = useState<string[]>([]);
+  const [cruiseStopInput, setCruiseStopInput] = useState("");
+  const knownCruiseStops = getAllCruiseStops();
+  const isStopKnown = (s: string) => {
+    const q = s.toLowerCase().trim();
+    if (!q) return false;
+    return knownCruiseStops.some((term) => term.includes(q) || q.includes(term));
+  };
+  const addCruiseStop = (raw: string) => {
+    const v = raw.trim();
+    if (!v) return;
+    if (cruiseStops.some((s) => s.toLowerCase() === v.toLowerCase())) {
+      setCruiseStopInput("");
+      return;
+    }
+    setCruiseStops((prev) => [...prev, v]);
+    setCruiseStopInput("");
+  };
+  const removeCruiseStop = (idx: number) =>
+    setCruiseStops((prev) => prev.filter((_, i) => i !== idx));
+
+  const handleCruiseSearch = () => {
+    if (cruiseStops.length === 0) {
+      toast({
+        title: locale === "pt" ? "Adicione ao menos um local" : "Add at least one stop",
+        description: locale === "pt"
+          ? "Informe os destinos por onde você quer que o cruzeiro passe."
+          : "Enter the places you want the cruise to visit.",
+        variant: "destructive",
+      });
+      return;
+    }
+    navigate(
+      `/results?type=cruises&stops=${encodeURIComponent(cruiseStops.join("|"))}`,
+    );
+  };
 
   const today = getMinDate();
 
@@ -71,6 +112,10 @@ const HeroSearch = () => {
     : ["Budget", "Luxury", "Adventure", "Family", "Beach", "Cultural"];
 
   const handleSearch = () => {
+    if (activeTab === "cruises") {
+      handleCruiseSearch();
+      return;
+    }
     // All fields must be filled before searching.
     if (!from.trim() || !to.trim() || !date || !adults) {
       toast({
@@ -251,6 +296,85 @@ const HeroSearch = () => {
                   </button>
                 </div>
               )}
+              {activeTab === "cruises" ? (
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                      {locale === "pt"
+                        ? "Locais por onde o cruzeiro deve passar"
+                        : "Places the cruise should visit"}
+                    </label>
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Ship className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                        <Input
+                          value={cruiseStopInput}
+                          onChange={(e) => setCruiseStopInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === ",") {
+                              e.preventDefault();
+                              addCruiseStop(cruiseStopInput);
+                            } else if (e.key === "Backspace" && !cruiseStopInput && cruiseStops.length > 0) {
+                              removeCruiseStop(cruiseStops.length - 1);
+                            }
+                          }}
+                          placeholder={locale === "pt"
+                            ? "Ex.: Barcelona, Roma, Ibiza..."
+                            : "e.g. Barcelona, Rome, Ibiza..."}
+                          className="pl-9"
+                          aria-label={locale === "pt" ? "Adicionar local" : "Add stop"}
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={() => addCruiseStop(cruiseStopInput)}
+                        disabled={!cruiseStopInput.trim()}
+                        className="gap-1 shrink-0"
+                      >
+                        <Plus className="h-4 w-4" aria-hidden="true" />
+                        {locale === "pt" ? "Adicionar" : "Add"}
+                      </Button>
+                    </div>
+                    <p className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
+                      <Info className="h-3 w-3" aria-hidden="true" />
+                      {locale === "pt"
+                        ? "Pressione Enter ou vírgula para adicionar. Mostraremos cruzeiros que passam por TODOS os locais."
+                        : "Press Enter or comma to add. We'll show cruises that visit ALL listed stops."}
+                    </p>
+                  </div>
+                  {cruiseStops.length > 0 && (
+                    <div className="flex flex-wrap gap-2" aria-live="polite">
+                      {cruiseStops.map((s, i) => {
+                        const known = isStopKnown(s);
+                        return (
+                          <Badge
+                            key={`${s}-${i}`}
+                            variant={known ? "secondary" : "destructive"}
+                            className="gap-1 pl-3 pr-1 py-1 text-xs"
+                            title={!known
+                              ? (locale === "pt"
+                                  ? "Não temos esse local em nossos cruzeiros."
+                                  : "We don't have this stop in our cruises.")
+                              : undefined}
+                          >
+                            {!known && <AlertTriangle className="h-3 w-3" aria-hidden="true" />}
+                            {s}
+                            <button
+                              type="button"
+                              onClick={() => removeCruiseStop(i)}
+                              aria-label={locale === "pt" ? `Remover ${s}` : `Remove ${s}`}
+                              className="ml-1 rounded-full p-0.5 hover:bg-background/30"
+                            >
+                              <X className="h-3 w-3" aria-hidden="true" />
+                            </button>
+                          </Badge>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 <div>
                   <SearchAutocomplete
@@ -313,7 +437,10 @@ const HeroSearch = () => {
                 </div>
                 <PassengerStepper value={adults} onChange={setAdults} />
               </div>
+              )}
               {/* Always-visible date hint + dynamic error */}
+              {activeTab !== "cruises" && (
+              <>
               <p id="hero-date-help" className="mt-2 flex items-center gap-1 text-[11px] text-muted-foreground">
                 <Info className="h-3 w-3" aria-hidden="true" />
                 {dateHelpText(locale)}
@@ -342,6 +469,8 @@ const HeroSearch = () => {
                   {locale === "pt" ? "Restaurar origem padrão" : "Restore default origin"}
                 </button>
               )}
+              </>
+              )}
 
               {/* Quick filters — toggle style, don't set destination */}
               <div
@@ -368,7 +497,7 @@ const HeroSearch = () => {
 
               <Button
                 onClick={handleSearch}
-                disabled={
+                disabled={activeTab === "cruises" ? cruiseStops.length === 0 : (
                   !from.trim() ||
                   !to.trim() ||
                   !date ||
@@ -376,7 +505,7 @@ const HeroSearch = () => {
                   !adults ||
                   !!dateError ||
                   !!sameError
-                }
+                )}
                 className="w-full mt-4 h-12 text-base font-semibold gap-2"
               >
                 <Search className="h-5 w-5" aria-hidden="true" />

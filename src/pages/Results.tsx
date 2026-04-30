@@ -7,7 +7,7 @@ import { destinations } from "@/lib/data";
 import { eventPackages, isEventUpcoming } from "@/lib/events-data";
 import { searchFlights, FlightResult } from "@/lib/api";
 import { searchHotelsByQuery, Hotel } from "@/lib/hotels-data";
-import { searchCruises, Cruise } from "@/lib/cruises-data";
+import { searchCruises, searchCruisesByStops, Cruise } from "@/lib/cruises-data";
 import { useCart, CartProduct } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -29,6 +29,10 @@ const Results = () => {
   const from = searchParams.get("from") || "";
   const to = searchParams.get("to") || "";
   const dateParam = searchParams.get("date") || "";
+  const stopsParam = searchParams.get("stops") || "";
+  const cruiseStops = stopsParam
+    ? stopsParam.split("|").map((s) => s.trim()).filter(Boolean)
+    : [];
   const query = to.toLowerCase().trim();
 
   // Hard date gate — block API/data calls for ALL search types when date is bad.
@@ -141,8 +145,16 @@ const Results = () => {
   // Hotels — local catalog filtered by destination query (only cities with packages)
   const hotelResults: Hotel[] = type === "hotels" && !hasDateError ? searchHotelsByQuery(to) : [];
 
-  // Cruises — local catalog filtered by destination query
-  const cruiseResults: Cruise[] = type === "cruises" && !hasDateError ? searchCruises(to) : [];
+  // Cruises — multi-stop search: show cruises that pass through ALL chosen stops.
+  const cruiseSearch =
+    type === "cruises"
+      ? cruiseStops.length > 0
+        ? searchCruisesByStops(cruiseStops)
+        : { matched: searchCruises(to), unknownStops: [], knownStops: [], fallback: searchCruises("") }
+      : null;
+  const cruiseResults: Cruise[] = cruiseSearch?.matched ?? [];
+  const cruiseUnknownStops = cruiseSearch?.unknownStops ?? [];
+  const cruiseFallback = cruiseSearch?.fallback ?? [];
 
   const isLoading = type === "flights" && flightsQuery.isLoading;
   const isError = type === "flights" && flightsQuery.isError;
@@ -531,18 +543,45 @@ const Results = () => {
         )}
 
         {/* Cruise results — local catalog with real cruise photos */}
-        {type === "cruises" && !hasDateError && (
+        {type === "cruises" && (
           <>
+            {cruiseUnknownStops.length > 0 && (
+              <div
+                role="alert"
+                className="mb-4 flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+              >
+                <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" aria-hidden="true" />
+                <div>
+                  <p className="font-medium">
+                    {locale === "pt"
+                      ? "Não temos cruzeiros para alguns destinos:"
+                      : "We don't have cruises for some stops:"}
+                  </p>
+                  <p className="mt-0.5">
+                    {cruiseUnknownStops.join(", ")}
+                  </p>
+                </div>
+              </div>
+            )}
             <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
               <Ship className="h-4 w-4" />
               <span>
                 {cruiseResults.length}{" "}
                 {locale === "pt" ? "cruzeiros disponíveis" : "cruises available"}
-                {to && ` ${locale === "pt" ? "para" : "for"} "${to}"`}
+                {cruiseStops.length > 0
+                  ? ` ${locale === "pt" ? "passando por" : "visiting"} ${cruiseStops.join(" • ")}`
+                  : to && ` ${locale === "pt" ? "para" : "for"} "${to}"`}
               </span>
             </div>
+            {cruiseResults.length === 0 && cruiseFallback.length > 0 && (
+              <div className="mb-6 rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+                {locale === "pt"
+                  ? "Nenhum cruzeiro passa por todos os locais informados. Veja abaixo todas as opções disponíveis."
+                  : "No cruise visits all the stops you listed. Browse all available options below."}
+              </div>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {cruiseResults.map((cruise, i) => (
+              {(cruiseResults.length > 0 ? cruiseResults : cruiseFallback).map((cruise, i) => (
                 <motion.div
                   key={cruise.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -607,7 +646,7 @@ const Results = () => {
         )}
 
         {/* Matching Destinations */}
-        {matchingDestinations.length > 0 && (type === "packages" || type === "cruises") && !hasDateError && (
+        {matchingDestinations.length > 0 && type === "packages" && !hasDateError && (
           <div className="mt-10">
             <h2 className="font-display text-xl font-bold text-foreground mb-4">
               {locale === "pt" ? "🌍 Destinos Encontrados" : "🌍 Destinations Found"}

@@ -205,3 +205,65 @@ export function searchCruises(query: string): Cruise[] {
   // If no match, still return all cruises so user can see options
   return filtered.length > 0 ? filtered : cruises;
 }
+
+/**
+ * Build a normalized list of all stops/regions any cruise touches.
+ * Used to detect "unknown" user-entered stops.
+ */
+export function getAllCruiseStops(): string[] {
+  const set = new Set<string>();
+  cruises.forEach((c) => {
+    [...c.itinerary, ...c.itineraryEn, c.departurePort, c.departurePortEn, c.region]
+      .forEach((s) => set.add(s.toLowerCase().trim()));
+  });
+  return Array.from(set);
+}
+
+const stopMatchesCruise = (stop: string, c: Cruise): boolean => {
+  const s = stop.toLowerCase().trim();
+  if (!s) return false;
+  const haystack = [
+    ...c.itinerary.map((i) => i.toLowerCase()),
+    ...c.itineraryEn.map((i) => i.toLowerCase()),
+    c.departurePort.toLowerCase(),
+    c.departurePortEn.toLowerCase(),
+    c.region.toLowerCase(),
+    ...c.tags,
+  ];
+  return haystack.some((term) => term.includes(s) || s.includes(term));
+};
+
+export interface CruiseStopSearchResult {
+  matched: Cruise[];
+  unknownStops: string[];
+  knownStops: string[];
+  fallback: Cruise[];
+}
+
+/**
+ * Find cruises that pass through ALL the requested stops.
+ * Stops we can't recognize anywhere in the catalog are returned as `unknownStops`
+ * and the matching is done with the remaining `knownStops`.
+ * `fallback` is always the full catalog (used when nothing matches).
+ */
+export function searchCruisesByStops(stops: string[]): CruiseStopSearchResult {
+  const cleaned = stops.map((s) => s.trim()).filter(Boolean);
+  if (cleaned.length === 0) {
+    return { matched: cruises, unknownStops: [], knownStops: [], fallback: cruises };
+  }
+
+  const unknownStops: string[] = [];
+  const knownStops: string[] = [];
+  cleaned.forEach((stop) => {
+    const exists = cruises.some((c) => stopMatchesCruise(stop, c));
+    if (exists) knownStops.push(stop);
+    else unknownStops.push(stop);
+  });
+
+  const matched =
+    knownStops.length > 0
+      ? cruises.filter((c) => knownStops.every((s) => stopMatchesCruise(s, c)))
+      : [];
+
+  return { matched, unknownStops, knownStops, fallback: cruises };
+}
