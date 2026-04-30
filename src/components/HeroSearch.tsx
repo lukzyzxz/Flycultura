@@ -331,8 +331,8 @@ const HeroSearch = () => {
                 </p>
               )}
 
-              {/* Restore default origin */}
-              {from !== defaultOrigin() && (
+              {/* Restore default origin (only if a default exists) */}
+              {defaultOrigin() && from !== defaultOrigin() && (
                 <button
                   type="button"
                   onClick={() => setFrom(defaultOrigin())}
