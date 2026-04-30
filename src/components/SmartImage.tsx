@@ -78,15 +78,23 @@ const SmartImage = ({
     );
   }
 
-  const [currentSrc, setCurrentSrc] = useState(src);
-  const [errorStage, setErrorStage] = useState<0 | 1 | 2>(0);
+  // Guard against missing/invalid src (e.g. broken import) — start at fallback immediately.
+  const isValidSrc = typeof src === "string" && src.trim().length > 0;
+  const initialSrc = isValidSrc ? src : FALLBACKS[category];
+  const [currentSrc, setCurrentSrc] = useState(initialSrc);
+  const [errorStage, setErrorStage] = useState<0 | 1 | 2>(isValidSrc ? 0 : 1);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    setCurrentSrc(src);
-    setErrorStage(0);
+    const valid = typeof src === "string" && src.trim().length > 0;
+    setCurrentSrc(valid ? src : FALLBACKS[category]);
+    setErrorStage(valid ? 0 : 1);
     setLoaded(false);
-  }, [src]);
+    if (!valid && import.meta.env.DEV) {
+      // eslint-disable-next-line no-console
+      console.warn("[SmartImage] Empty/invalid src — using fallback.", { category, alt });
+    }
+  }, [src, category, alt]);
 
   const handleError = () => {
     if (errorStage === 0) {
