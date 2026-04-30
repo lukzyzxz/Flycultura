@@ -43,12 +43,14 @@ const Footer = () => {
     ? [
         { label: "Central de Ajuda", to: "/help" },
         { label: "Contato", to: "/help" },
+        { label: "Instalar app", to: "/install" },
         { label: "Privacidade", to: "/privacy" },
         { label: "Termos", to: "/terms" },
       ]
     : [
         { label: "Help Center", to: "/help" },
         { label: "Contact", to: "/help" },
+        { label: "Install app", to: "/install" },
         { label: "Privacy", to: "/privacy" },
         { label: "Terms", to: "/terms" },
       ];

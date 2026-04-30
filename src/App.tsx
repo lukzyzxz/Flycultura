@@ -34,6 +34,7 @@ const Profile = lazy(() => import("./pages/Profile"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const AdminImageLog = lazy(() => import("./pages/AdminImageLog"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const Install = lazy(() => import("./pages/Install"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -87,6 +88,7 @@ const App = () => (
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/unsubscribe" element={<Unsubscribe />} />
                     <Route path="/admin/image-log" element={<AdminImageLog />} />
+                    <Route path="/install" element={<Install />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>

@@ -1,0 +1,17 @@
+{
+  "name": "FlyCultura - Travel & Cultural Experiences",
+  "short_name": "FlyCultura",
+  "description": "Compare flights, hotels, packages and cruises. Discover cultural events around the world.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0F172A",
+  "theme_color": "#3B82F6",
+  "lang": "pt-BR",
+  "categories": ["travel", "lifestyle"],
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
