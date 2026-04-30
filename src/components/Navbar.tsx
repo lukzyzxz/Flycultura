@@ -6,6 +6,7 @@ import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import InstallButton from "@/components/InstallButton";
+import flyculturaLogo from "@/assets/flycultura-logo.png";
 
 const Navbar = () => {
   const [dark, setDark] = useState(() => localStorage.getItem("theme") === "dark");
@@ -39,7 +40,7 @@ const Navbar = () => {
     >
       <div className="container relative flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center gap-2 font-display text-xl font-bold">
-          <Plane className="h-6 w-6 text-primary" aria-hidden="true" />
+          <img src={flyculturaLogo} alt="FlyCultura" className="h-8 w-8 rounded-lg object-cover" />
           <span className="text-gradient">FlyCultura</span>
         </Link>
 
