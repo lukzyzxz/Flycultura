@@ -10,6 +10,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import Navbar from "@/components/Navbar";
 import ScrollToTop from "@/components/ScrollToTop";
 import SkipLink from "@/components/SkipLink";
+import CompleteProfileModal from "@/components/CompleteProfileModal";
 // Eagerly load homepage so first paint is fast
 import Index from "./pages/Index";
 
@@ -63,6 +64,7 @@ const App = () => (
               <ScrollToTop />
               <SkipLink />
               <Navbar />
+              <CompleteProfileModal />
               <main id="main-content" tabIndex={-1} className="focus:outline-none">
                 <Suspense fallback={<RouteFallback />}>
                   <Routes>
