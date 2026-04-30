@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { setHomeAirport, clearHomeAirport } from "@/lib/userOrigin";
 
 interface AuthContextType {
   user: User | null;
@@ -55,6 +56,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(newSession);
       setUser(newSession?.user ?? null);
       setLoading(false);
+
+      // Keep the locally-stored home airport in sync with the user's profile.
+      // Defer DB calls to avoid running them inside the auth callback.
+      if (event === "SIGNED_IN" && newSession?.user) {
+        const uid = newSession.user.id;
+        setTimeout(async () => {
+          try {
+            const { data } = await supabase
+              .from("profiles")
+              .select("home_airport")
+              .eq("user_id", uid)
+              .maybeSingle();
+            if (data?.home_airport) setHomeAirport(data.home_airport);
+          } catch (e) {
+            console.warn("[AuthCtx] could not load home_airport:", e);
+          }
+        }, 0);
+      }
+      if (event === "SIGNED_OUT") {
+        clearHomeAirport();
+      }
     });
 
     // 2. THEN check for existing session (and process query-token callbacks)
