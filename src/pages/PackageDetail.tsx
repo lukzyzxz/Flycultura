@@ -165,7 +165,14 @@ const PackageDetail = () => {
     <div className="min-h-screen">
       {/* Hero */}
       <div className="relative h-[50vh] min-h-[400px] overflow-hidden bg-muted">
-        <SmartImage src={pkg.image} alt={eventName} category="event" className="w-full h-full object-cover" />
+        <SmartImage
+          src={pkg.image}
+          alt={eventName}
+          category="event"
+          priority
+          sizes="(max-width: 1024px) 100vw, 1280px"
+          className="w-full h-full object-cover"
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12">
           <div className="container">
