@@ -7,7 +7,7 @@ import { destinations } from "@/lib/data";
 import { eventPackages, isEventUpcoming } from "@/lib/events-data";
 import { searchFlights, FlightResult } from "@/lib/api";
 import { searchHotelsByQuery, Hotel } from "@/lib/hotels-data";
-import { searchCruises, Cruise } from "@/lib/cruises-data";
+import { searchCruises, searchCruisesByStops, Cruise } from "@/lib/cruises-data";
 import { useCart, CartProduct } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -29,6 +29,10 @@ const Results = () => {
   const from = searchParams.get("from") || "";
   const to = searchParams.get("to") || "";
   const dateParam = searchParams.get("date") || "";
+  const stopsParam = searchParams.get("stops") || "";
+  const cruiseStops = stopsParam
+    ? stopsParam.split("|").map((s) => s.trim()).filter(Boolean)
+    : [];
   const query = to.toLowerCase().trim();
 
   // Hard date gate — block API/data calls for ALL search types when date is bad.
@@ -141,8 +145,16 @@ const Results = () => {
   // Hotels — local catalog filtered by destination query (only cities with packages)
   const hotelResults: Hotel[] = type === "hotels" && !hasDateError ? searchHotelsByQuery(to) : [];
 
-  // Cruises — local catalog filtered by destination query
-  const cruiseResults: Cruise[] = type === "cruises" && !hasDateError ? searchCruises(to) : [];
+  // Cruises — multi-stop search: show cruises that pass through ALL chosen stops.
+  const cruiseSearch =
+    type === "cruises"
+      ? cruiseStops.length > 0
+        ? searchCruisesByStops(cruiseStops)
+        : { matched: searchCruises(to), unknownStops: [], knownStops: [], fallback: searchCruises("") }
+      : null;
+  const cruiseResults: Cruise[] = cruiseSearch?.matched ?? [];
+  const cruiseUnknownStops = cruiseSearch?.unknownStops ?? [];
+  const cruiseFallback = cruiseSearch?.fallback ?? [];
 
   const isLoading = type === "flights" && flightsQuery.isLoading;
   const isError = type === "flights" && flightsQuery.isError;
