@@ -543,18 +543,45 @@ const Results = () => {
         )}
 
         {/* Cruise results — local catalog with real cruise photos */}
-        {type === "cruises" && !hasDateError && (
+        {type === "cruises" && (
           <>
+            {cruiseUnknownStops.length > 0 && (
+              <div
+                role="alert"
+                className="mb-4 flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+              >
+                <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" aria-hidden="true" />
+                <div>
+                  <p className="font-medium">
+                    {locale === "pt"
+                      ? "Não temos cruzeiros para alguns destinos:"
+                      : "We don't have cruises for some stops:"}
+                  </p>
+                  <p className="mt-0.5">
+                    {cruiseUnknownStops.join(", ")}
+                  </p>
+                </div>
+              </div>
+            )}
             <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
               <Ship className="h-4 w-4" />
               <span>
                 {cruiseResults.length}{" "}
                 {locale === "pt" ? "cruzeiros disponíveis" : "cruises available"}
-                {to && ` ${locale === "pt" ? "para" : "for"} "${to}"`}
+                {cruiseStops.length > 0
+                  ? ` ${locale === "pt" ? "passando por" : "visiting"} ${cruiseStops.join(" • ")}`
+                  : to && ` ${locale === "pt" ? "para" : "for"} "${to}"`}
               </span>
             </div>
+            {cruiseResults.length === 0 && cruiseFallback.length > 0 && (
+              <div className="mb-6 rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+                {locale === "pt"
+                  ? "Nenhum cruzeiro passa por todos os locais informados. Veja abaixo todas as opções disponíveis."
+                  : "No cruise visits all the stops you listed. Browse all available options below."}
+              </div>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {cruiseResults.map((cruise, i) => (
+              {(cruiseResults.length > 0 ? cruiseResults : cruiseFallback).map((cruise, i) => (
                 <motion.div
                   key={cruise.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -619,7 +646,7 @@ const Results = () => {
         )}
 
         {/* Matching Destinations */}
-        {matchingDestinations.length > 0 && (type === "packages" || type === "cruises") && !hasDateError && (
+        {matchingDestinations.length > 0 && type === "packages" && !hasDateError && (
           <div className="mt-10">
             <h2 className="font-display text-xl font-bold text-foreground mb-4">
               {locale === "pt" ? "🌍 Destinos Encontrados" : "🌍 Destinations Found"}
