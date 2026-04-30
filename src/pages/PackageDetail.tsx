@@ -32,11 +32,11 @@ const PackageDetail = () => {
   const queryClient = useQueryClient();
   const { addItem: addRecent } = useRecentlyViewed();
   const [selectedFlight, setSelectedFlight] = useState<FlightResult | null>(null);
-  const [originCode, setOriginCode] = useState<string>(() => getHomeAirport());
+  const [originCode, setOriginCode] = useState<string>(() => getHomeAirport() ?? "GRU");
 
   // Sync if user updates home airport elsewhere
   useEffect(() => {
-    const onChange = () => setOriginCode(getHomeAirport());
+    const onChange = () => setOriginCode(getHomeAirport() ?? "GRU");
     window.addEventListener("home-airport-changed", onChange);
     return () => window.removeEventListener("home-airport-changed", onChange);
   }, []);

@@ -23,7 +23,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"orders" | "favorites" | "settings">("orders");
   const { items: recentItems } = useRecentlyViewed();
-  const [homeAirport, setHomeAirportState] = useState<string>(() => getHomeAirport());
+  const [homeAirport, setHomeAirportState] = useState<string>(() => getHomeAirport() ?? "");
 
   useEffect(() => {
     if (!loading && !user) navigate("/auth");
