@@ -16,7 +16,10 @@ import { saveLastSearch, getLastSearch, clearLastSearch, LastSearch } from "@/li
 const HeroSearch = () => {
   const last = getLastSearch();
   const [activeTab, setActiveTab] = useState(last?.type || "flights");
-  const defaultOrigin = () => getAirportLabel(getHomeAirport());
+  const defaultOrigin = () => {
+    const code = getHomeAirport();
+    return code ? getAirportLabel(code) : "";
+  };
   const [from, setFrom] = useState<string>(last?.from || defaultOrigin());
   const [to, setTo] = useState(last?.to || "");
   const [date, setDate] = useState(last?.date || "");
@@ -68,6 +71,17 @@ const HeroSearch = () => {
     : ["Budget", "Luxury", "Adventure", "Family", "Beach", "Cultural"];
 
   const handleSearch = () => {
+    // All fields must be filled before searching.
+    if (!from.trim() || !to.trim() || !date || !adults) {
+      toast({
+        title: locale === "pt" ? "Preencha todos os campos" : "Fill in all fields",
+        description: locale === "pt"
+          ? "Origem, destino, data e passageiros são obrigatórios."
+          : "Origin, destination, date and passengers are required.",
+        variant: "destructive",
+      });
+      return;
+    }
     // Date is REQUIRED and must be a real, future calendar date (≤ 2050).
     if (!date || !isValidFutureDate(date)) {
       const reason = !date
@@ -354,7 +368,15 @@ const HeroSearch = () => {
 
               <Button
                 onClick={handleSearch}
-                disabled={!date || !isValidFutureDate(date) || !!dateError || !!sameError}
+                disabled={
+                  !from.trim() ||
+                  !to.trim() ||
+                  !date ||
+                  !isValidFutureDate(date) ||
+                  !adults ||
+                  !!dateError ||
+                  !!sameError
+                }
                 className="w-full mt-4 h-12 text-base font-semibold gap-2"
               >
                 <Search className="h-5 w-5" aria-hidden="true" />
