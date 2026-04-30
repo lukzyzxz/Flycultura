@@ -63,25 +63,27 @@ const Navbar = () => {
           })}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
+          {/* Language toggle — desktop only, moved to hamburger on mobile */}
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setLocale(locale === "en" ? "pt" : "en")}
-            className="rounded-full text-xs font-bold"
+            className="hidden md:inline-flex rounded-full text-xs font-bold"
             title={locale === "en" ? "Mudar para Português" : "Switch to English"}
             aria-label={locale === "en" ? "Mudar idioma para Português" : "Switch language to English"}
           >
             <Globe className="h-4 w-4" aria-hidden="true" />
           </Button>
-          <span className="text-xs font-semibold text-muted-foreground uppercase" aria-hidden="true">
+          <span className="hidden md:inline text-xs font-semibold text-muted-foreground uppercase" aria-hidden="true">
             {locale}
           </span>
+          {/* Theme toggle — desktop only */}
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setDark(!dark)}
-            className="rounded-full"
+            className="hidden md:inline-flex rounded-full"
             aria-label={
               dark
                 ? locale === "pt" ? "Ativar modo claro" : "Switch to light mode"
@@ -107,7 +109,7 @@ const Navbar = () => {
                 : locale === "pt" ? "Carrinho vazio" : "Empty cart"
             }
           >
-            <Button variant="ghost" size="icon" className="rounded-full" tabIndex={-1} aria-hidden="true">
+            <Button variant="ghost" size="icon" className="rounded-full h-9 w-9" tabIndex={-1} aria-hidden="true">
               <ShoppingCart className="h-4 w-4" aria-hidden="true" />
             </Button>
             {totalItems > 0 && (
