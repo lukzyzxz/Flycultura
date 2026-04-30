@@ -1,4 +1,5 @@
 // Real cruise data with photos of actual cruise ships / cruise scenes
+import { getCruiseImage, auditCruiseGalleries } from "./cruise-images";
 export interface Cruise {
   id: string;
   name: string;
