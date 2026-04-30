@@ -180,6 +180,37 @@ const Navbar = () => {
           <Link to="/cart" onClick={() => setMenuOpen(false)} className="block px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted">
             {t("nav.cart")} {totalItems > 0 && `(${totalItems})`}
           </Link>
+          <div className="flex items-center gap-2 px-2 pt-2 border-t border-border mt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setLocale(locale === "en" ? "pt" : "en")}
+              className="flex-1 gap-2"
+              aria-label={locale === "en" ? "Mudar idioma para Português" : "Switch language to English"}
+            >
+              <Globe className="h-4 w-4" aria-hidden="true" />
+              <span className="text-xs font-bold uppercase">{locale}</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setDark(!dark)}
+              className="flex-1 gap-2"
+              aria-label={
+                dark
+                  ? locale === "pt" ? "Ativar modo claro" : "Switch to light mode"
+                  : locale === "pt" ? "Ativar modo escuro" : "Switch to dark mode"
+              }
+              aria-pressed={dark}
+            >
+              {dark ? <Sun className="h-4 w-4" aria-hidden="true" /> : <Moon className="h-4 w-4" aria-hidden="true" />}
+              <span className="text-xs">
+                {dark
+                  ? locale === "pt" ? "Claro" : "Light"
+                  : locale === "pt" ? "Escuro" : "Dark"}
+              </span>
+            </Button>
+          </div>
           {user ? (
             <>
               <Link to="/profile" onClick={() => setMenuOpen(false)} className="block px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted">
