@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
+import InstallButton from "@/components/InstallButton";
 
 const Navbar = () => {
   const [dark, setDark] = useState(() => localStorage.getItem("theme") === "dark");
@@ -90,6 +91,9 @@ const Navbar = () => {
           >
             {dark ? <Sun className="h-4 w-4" aria-hidden="true" /> : <Moon className="h-4 w-4" aria-hidden="true" />}
           </Button>
+
+          {/* Install app */}
+          <InstallButton />
 
           {/* Cart */}
           <Link
