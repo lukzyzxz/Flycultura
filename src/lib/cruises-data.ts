@@ -1,4 +1,5 @@
 // Real cruise data with photos of actual cruise ships / cruise scenes
+import { getCruiseImage, auditCruiseGalleries } from "./cruise-images";
 export interface Cruise {
   id: string;
   name: string;
@@ -21,7 +22,7 @@ export interface Cruise {
 }
 
 // All images are real cruise ships / cruise port photos from Unsplash
-export const cruises: Cruise[] = [
+const cruisesRaw: Cruise[] = [
   {
     id: "caribbean-royal-7n",
     name: "Caribe Encantado",
@@ -403,6 +404,23 @@ export const cruises: Cruise[] = [
     region: "cape town",
   },
 ];
+
+/**
+ * Final exported catalog: every cruise's `image` is rebound to its curated
+ * local gallery photo so we never serve broken/divergent stock images.
+ */
+export const cruises: Cruise[] = cruisesRaw.map((c) => ({
+  ...c,
+  image: getCruiseImage(c.id),
+}));
+
+if (import.meta.env.DEV) {
+  const audit = auditCruiseGalleries(cruisesRaw.map((c) => c.id));
+  if (audit.missing.length || audit.invalidKeys.length) {
+    // eslint-disable-next-line no-console
+    console.warn("[cruises-data] Gallery audit issues:", audit);
+  }
+}
 
 export function searchCruises(query: string): Cruise[] {
   if (!query || query.trim().length === 0) return cruises;
