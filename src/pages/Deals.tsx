@@ -1,8 +1,9 @@
 import Footer from "@/components/Footer";
 import { deals } from "@/lib/data";
+import { cruises } from "@/lib/cruises-data";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Sparkles } from "lucide-react";
+import { ShoppingCart, Sparkles, Ship } from "lucide-react";
 import { motion } from "framer-motion";
 import { useI18n } from "@/lib/i18n";
 import { useCart, CartProduct } from "@/contexts/CartContext";
@@ -22,6 +23,19 @@ const Deals = () => {
       image: deal.image,
       price: deal.price,
       description: locale === "pt" ? deal.description : deal.descriptionEn,
+    };
+    addItem(product);
+    toast({ title: t("cart.added"), description: product.name });
+  };
+
+  const handleAddCruise = (c: typeof cruises[0]) => {
+    const product: CartProduct = {
+      id: `cruise-${c.id}`,
+      type: "deal",
+      name: locale === "pt" ? c.name : c.nameEn,
+      image: c.image,
+      price: c.price,
+      description: `${c.cruiseLine} • ${c.ship} • ${c.duration} ${locale === "pt" ? "noites" : "nights"}`,
     };
     addItem(product);
     toast({ title: t("cart.added"), description: product.name });
@@ -67,6 +81,64 @@ const Deals = () => {
                   </Badge>
                 </div>
                 <Button className="w-full gap-2" onClick={() => handleAddToCart(deal)}>
+                  <ShoppingCart className="h-4 w-4" />
+                  {t("deals.addToCart")}
+                </Button>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      {/* Cruise Deals */}
+      <div className="container py-10 border-t border-border/40">
+        <div className="flex items-center gap-2 mb-2">
+          <Ship className="h-5 w-5 text-accent" />
+          <span className="text-xs font-semibold text-accent uppercase tracking-wider">
+            {locale === "pt" ? "Cruzeiros" : "Cruises"}
+          </span>
+        </div>
+        <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-6">
+          {locale === "pt" ? "Ofertas de Cruzeiros" : "Cruise Deals"}
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {cruises.map((c, i) => (
+            <motion.div
+              key={c.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.04 }}
+              className="group rounded-xl overflow-hidden bg-card card-shadow hover:card-shadow-hover transition-shadow"
+            >
+              <div className="relative aspect-[3/2] overflow-hidden">
+                <SmartImage
+                  src={c.image}
+                  alt={locale === "pt" ? c.name : c.nameEn}
+                  category="deal"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <Badge className="absolute top-3 left-3 bg-accent text-accent-foreground border-0 gap-1">
+                  <Ship className="h-3 w-3" /> {c.cruiseLine}
+                </Badge>
+              </div>
+              <div className="p-4">
+                <h3 className="font-display font-bold text-card-foreground mb-1">
+                  {locale === "pt" ? c.name : c.nameEn}
+                </h3>
+                <p className="text-sm text-muted-foreground mb-1">
+                  {c.ship} • {c.duration} {locale === "pt" ? "noites" : "nights"}
+                </p>
+                <p className="text-xs text-muted-foreground mb-3 line-clamp-1">
+                  {(locale === "pt" ? c.itinerary : c.itineraryEn).join(" → ")}
+                </p>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-lg font-bold text-primary">R$ {c.price.toLocaleString("pt-BR")}</span>
+                  <span className="text-sm text-muted-foreground line-through">R$ {c.originalPrice.toLocaleString("pt-BR")}</span>
+                  <Badge variant="secondary" className="ml-auto">
+                    {Math.round((1 - c.price / c.originalPrice) * 100)}% {t("deals.off")}
+                  </Badge>
+                </div>
+                <Button className="w-full gap-2" onClick={() => handleAddCruise(c)}>
                   <ShoppingCart className="h-4 w-4" />
                   {t("deals.addToCart")}
                 </Button>
