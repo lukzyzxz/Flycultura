@@ -433,7 +433,10 @@ const I18nContext: React.Context<I18nContextType | null> =
 
 export const I18nProvider = ({ children }: { children: ReactNode }) => {
   const [locale, setLocaleState] = useState<Locale>(
-    () => (localStorage.getItem("locale") as Locale) || "pt"
+    () => {
+      const savedLocale = localStorage.getItem("locale") as Locale | null;
+      return savedLocale === "en" ? "en" : "pt";
+    }
   );
 
   // Keep <html lang> in sync with the active locale (WCAG 3.1.1)
