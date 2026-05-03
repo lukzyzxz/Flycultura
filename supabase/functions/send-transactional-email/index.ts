@@ -72,6 +72,8 @@ Deno.serve(async (req) => {
     })
   }
 
+  const authenticatedEmail = (claimsData.claims as any).email as string | undefined
+
   // Parse request body
   let templateName: string
   let recipientEmail: string
@@ -126,7 +128,38 @@ Deno.serve(async (req) => {
   // Resolve effective recipient: template-level `to` takes precedence over
   // the caller-provided recipientEmail. This allows notification templates
   // to always send to a fixed address (e.g., site owner from env var).
-  const effectiveRecipient = template.to || recipientEmail
+  // SECURITY: When no fixed template recipient exists, we force the recipient
+  // to the authenticated user's own email to prevent abuse of the email
+  // infrastructure to send messages to arbitrary addresses.
+  let effectiveRecipient: string | undefined
+  if (template.to) {
+    effectiveRecipient = template.to
+  } else {
+    if (!authenticatedEmail) {
+      return new Response(
+        JSON.stringify({ error: 'Authenticated user has no email on file' }),
+        {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      )
+    }
+    if (
+      recipientEmail &&
+      recipientEmail.toLowerCase() !== authenticatedEmail.toLowerCase()
+    ) {
+      return new Response(
+        JSON.stringify({
+          error: 'Recipient must match the authenticated user\'s email',
+        }),
+        {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      )
+    }
+    effectiveRecipient = authenticatedEmail
+  }
 
   if (!effectiveRecipient) {
     return new Response(
