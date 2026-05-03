@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { ArrowLeft, Trash2, RefreshCw, ImageOff, Lock } from "lucide-react";
+import { Link, Navigate } from "react-router-dom";
+import { ArrowLeft, Trash2, RefreshCw, ImageOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -18,36 +17,17 @@ import {
   type ImageErrorEntry,
 } from "@/lib/imageErrorLog";
 import Footer from "@/components/Footer";
-
-const ADMIN_PASSWORD = "flycultura2026";
-const SESSION_KEY = "flycultura.adminUnlocked";
+import { useAuth } from "@/contexts/AuthContext";
 
 const AdminImageLog = () => {
-  const [unlocked, setUnlocked] = useState(false);
-  const [pwd, setPwd] = useState("");
-  const [error, setError] = useState(false);
+  const { user, loading } = useAuth();
   const [entries, setEntries] = useState<ImageErrorEntry[]>([]);
 
   const refresh = () => setEntries(getImageErrorLog());
 
   useEffect(() => {
-    if (sessionStorage.getItem(SESSION_KEY) === "1") {
-      setUnlocked(true);
-      refresh();
-    }
-  }, []);
-
-  const handleUnlock = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (pwd === ADMIN_PASSWORD) {
-      sessionStorage.setItem(SESSION_KEY, "1");
-      setUnlocked(true);
-      setError(false);
-      refresh();
-    } else {
-      setError(true);
-    }
-  };
+    if (user) refresh();
+  }, [user]);
 
   const handleClear = () => {
     clearImageErrorLog();
@@ -57,47 +37,16 @@ const AdminImageLog = () => {
   const fmtDate = (ts: number) =>
     new Date(ts).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "medium" });
 
-  if (!unlocked) {
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-muted/30 px-4">
-        <form
-          onSubmit={handleUnlock}
-          className="w-full max-w-sm bg-card rounded-xl border border-border p-6 card-shadow space-y-4"
-        >
-          <div className="flex items-center gap-2 text-foreground">
-            <Lock className="h-5 w-5 text-primary" />
-            <h1 className="font-display text-lg font-bold">Admin — Image Log</h1>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Esta área é restrita. Digite a senha para continuar.
-          </p>
-          <div>
-            <Input
-              type="password"
-              placeholder="Senha"
-              value={pwd}
-              onChange={(e) => {
-                setPwd(e.target.value);
-                if (error) setError(false);
-              }}
-              autoFocus
-              aria-invalid={error || undefined}
-              className={error ? "border-destructive focus-visible:ring-destructive/40" : ""}
-            />
-            {error && (
-              <p className="text-xs text-destructive mt-1">Senha incorreta.</p>
-            )}
-          </div>
-          <Button type="submit" className="w-full">Entrar</Button>
-          <Link
-            to="/"
-            className="block text-center text-xs text-muted-foreground hover:text-foreground"
-          >
-            ← Voltar à home
-          </Link>
-        </form>
+      <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">
+        Carregando…
       </div>
     );
+  }
+
+  if (!user) {
+    return <Navigate to="/auth" replace />;
   }
 
   return (
