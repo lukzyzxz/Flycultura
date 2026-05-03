@@ -18,6 +18,7 @@ import webSummitImg from "@/assets/events/web-summit.webp";
 import romeMarathonImg from "@/assets/events/rome-marathon.webp";
 import berlinMarathonImg from "@/assets/events/berlin-marathon.webp";
 import kingsDayImg from "@/assets/events/kings-day.webp";
+import motogpBrasilImg from "@/assets/event-motogp-brasil.jpg";
 
 export interface EventPackage {
   id: string;
