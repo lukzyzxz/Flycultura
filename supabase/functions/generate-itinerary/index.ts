@@ -160,6 +160,7 @@ Include: detailed day-by-day itinerary, cost estimates (flights, accommodation, 
 
     if (!response.ok) {
       const err = await response.text();
+      console.error(`AI API error [${response.status}]:`, err);
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
           status: 429,
@@ -172,7 +173,7 @@ Include: detailed day-by-day itinerary, cost estimates (flights, accommodation, 
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      throw new Error(`AI API error: ${err}`);
+      throw new Error("AI_API_ERROR");
     }
 
     const data = await response.json();
@@ -182,7 +183,8 @@ Include: detailed day-by-day itinerary, cost estimates (flights, accommodation, 
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error("Error generating itinerary:", error);
+    return new Response(JSON.stringify({ error: "Itinerary generation failed. Please try again." }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

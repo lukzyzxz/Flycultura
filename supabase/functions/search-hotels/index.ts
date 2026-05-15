@@ -59,7 +59,11 @@ serve(async (req) => {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(`Booking API error [${response.status}]: ${JSON.stringify(data)}`);
+      console.error(`Booking API error [${response.status}]:`, data);
+      return new Response(JSON.stringify({ error: "Hotel search failed. Please try again." }), {
+        status: 502,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     return new Response(JSON.stringify(data), {
@@ -67,8 +71,7 @@ serve(async (req) => {
     });
   } catch (error: unknown) {
     console.error("Error searching hotels:", error);
-    const msg = error instanceof Error ? error.message : "Unknown error";
-    return new Response(JSON.stringify({ error: msg }), {
+    return new Response(JSON.stringify({ error: "Hotel search failed. Please try again." }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
